@@ -24,14 +24,22 @@ describe('formatPercent', () => {
 })
 
 describe('daysUntil', () => {
-  it('returns a positive number of days for a future date', () => {
-    const future = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000)
-    expect(daysUntil(future)).toBe(5)
+  it('returns the ceiling number of days until a future date', () => {
+    const ref = new Date('2026-01-01T00:00:00.000Z')
+    const future = new Date('2026-01-06T00:00:00.000Z')
+    expect(daysUntil(future, ref)).toBe(5)
   })
 
   it('returns a negative number of days for a past date', () => {
-    const past = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000)
-    expect(daysUntil(past)).toBe(-3)
+    const ref = new Date('2026-01-04T00:00:00.000Z')
+    const past = new Date('2026-01-01T00:00:00.000Z')
+    expect(daysUntil(past, ref)).toBe(-3)
+  })
+
+  it('uses the current time when no referenceDate is supplied', () => {
+    const ref = new Date()
+    const future = new Date(ref.getTime() + 2 * 24 * 60 * 60 * 1000)
+    expect(daysUntil(future)).toBe(2)
   })
 })
 

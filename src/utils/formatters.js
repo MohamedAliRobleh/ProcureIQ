@@ -25,9 +25,9 @@ export function formatPercent(value, decimals = 0) {
   return `${value.toFixed(decimals)}%`
 }
 
-export function daysUntil(date) {
-  const ms = new Date(date).getTime() - Date.now()
-  return Math.round(ms / (1000 * 60 * 60 * 24))
+export function daysUntil(date, referenceDate = new Date()) {
+  const ms = new Date(date).getTime() - new Date(referenceDate).getTime()
+  return Math.ceil(ms / (1000 * 60 * 60 * 24))
 }
 
 export function timeAgo(date) {

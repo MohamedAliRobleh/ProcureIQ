@@ -1,3 +1,5 @@
+import { daysUntil } from './formatters'
+
 export function getAverageRiskScore(riskAssessments) {
   if (riskAssessments.length === 0) return 0
   const total = riskAssessments.reduce((sum, r) => sum + r.score, 0)
@@ -28,14 +30,11 @@ export function getTotalSpendYTD(spendRecords, referenceDate = new Date()) {
 }
 
 export function getExpiringContracts(contracts, referenceDate = new Date()) {
-  const dayMs = 1000 * 60 * 60 * 24
-  const daysUntil = (date) => Math.ceil((new Date(date).getTime() - referenceDate.getTime()) / dayMs)
   const active = contracts.filter((c) => c.status === 'active')
-
   return {
-    within30: active.filter((c) => { const d = daysUntil(c.endDate); return d >= 0 && d <= 30 }),
-    within60: active.filter((c) => { const d = daysUntil(c.endDate); return d > 30 && d <= 60 }),
-    within90: active.filter((c) => { const d = daysUntil(c.endDate); return d > 60 && d <= 90 }),
+    within30: active.filter((c) => { const d = daysUntil(c.endDate, referenceDate); return d >= 0 && d <= 30 }),
+    within60: active.filter((c) => { const d = daysUntil(c.endDate, referenceDate); return d > 30 && d <= 60 }),
+    within90: active.filter((c) => { const d = daysUntil(c.endDate, referenceDate); return d > 60 && d <= 90 }),
   }
 }
 
