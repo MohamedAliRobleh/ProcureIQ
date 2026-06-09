@@ -87,28 +87,26 @@ export default function Risk() {
 
       <h2 className="mb-3 text-sm font-semibold text-text-primary">Supplier Risk Assessments</h2>
 
-      {!isLoading && (
-        <div className="mb-4 flex flex-wrap gap-3">
-          <input
-            type="text"
-            placeholder="Search suppliers..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent-blue focus:outline-none"
-          />
-          <select
-            value={level}
-            onChange={(e) => setLevel(e.target.value)}
-            className="rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-primary focus:border-accent-blue focus:outline-none"
-          >
-            <option value="">All Levels</option>
-            <option value="low">low</option>
-            <option value="medium">medium</option>
-            <option value="high">high</option>
-            <option value="critical">critical</option>
-          </select>
-        </div>
-      )}
+      <div className="mb-4 flex flex-wrap gap-3">
+        <input
+          type="text"
+          placeholder="Search suppliers..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent-blue focus:outline-none"
+        />
+        <select
+          value={level}
+          onChange={(e) => setLevel(e.target.value)}
+          className="rounded-lg border border-border bg-bg-card px-3 py-2 text-sm text-text-primary focus:border-accent-blue focus:outline-none"
+        >
+          <option value="">All Levels</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="critical">Critical</option>
+        </select>
+      </div>
 
       <DataTable
         columns={columns}
