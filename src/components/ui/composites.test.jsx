@@ -67,4 +67,16 @@ describe('DataTable', () => {
     expect(screen.getByText('ATLAS')).toBeInTheDocument()
     expect(screen.getByText('Germany')).toBeInTheDocument()
   })
+
+  it('uses rowKey function to generate row keys when provided', () => {
+    render(
+      <DataTable
+        columns={[{ key: 'name', header: 'Name' }]}
+        data={[{ name: 'Atlas' }, { name: 'Nordic' }]}
+        rowKey={(row) => row.name}
+      />
+    )
+    expect(screen.getByText('Atlas')).toBeInTheDocument()
+    expect(screen.getByText('Nordic')).toBeInTheDocument()
+  })
 })

@@ -1,7 +1,7 @@
 import { cn } from '../../utils/cn'
 import LoadingSpinner from './LoadingSpinner'
 
-export default function DataTable({ columns, data, isLoading, emptyMessage = 'No records found' }) {
+export default function DataTable({ columns, data, isLoading, emptyMessage = 'No records found', rowKey }) {
   if (isLoading) return <LoadingSpinner className="py-12" />
 
   if (!data || data.length === 0) {
@@ -21,7 +21,7 @@ export default function DataTable({ columns, data, isLoading, emptyMessage = 'No
         <tbody>
           {data.map((row, i) => (
             <tr
-              key={row.id ?? i}
+              key={rowKey ? rowKey(row) : (row.id ?? i)}
               className={cn('border-b border-border/60 transition-colors hover:bg-bg-hover', i % 2 === 1 && 'bg-bg-secondary/40')}
             >
               {columns.map((col) => (
