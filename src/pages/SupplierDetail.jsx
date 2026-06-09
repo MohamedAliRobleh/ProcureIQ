@@ -7,18 +7,12 @@ import Button from '../components/ui/Button'
 import SupplierModal from '../components/ui/SupplierModal'
 import PageHeader from '../components/layout/PageHeader'
 import { useSupplierContext } from '../context/SupplierContext'
-import { formatDate } from '../utils/formatters'
+import { formatDate, riskColor } from '../utils/formatters'
 import { cn } from '../utils/cn'
 
 const TABS = ['Overview', 'Contracts', 'Risk', 'ESG', 'Spend']
 const TAB_PHASE = { Contracts: 'Phase 3', Risk: 'Phase 3', ESG: 'Phase 4', Spend: 'Phase 4' }
 const STATUS_BADGE = { active: 'green', pending: 'amber', suspended: 'red' }
-
-function riskColor(score) {
-  if (score <= 33) return 'text-accent-green'
-  if (score <= 66) return 'text-accent-amber'
-  return 'text-accent-red'
-}
 
 export default function SupplierDetail() {
   const { id } = useParams()

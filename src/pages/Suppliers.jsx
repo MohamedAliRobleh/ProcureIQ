@@ -9,6 +9,7 @@ import SupplierModal from '../components/ui/SupplierModal'
 import { useSupplierContext } from '../context/SupplierContext'
 import { filterSuppliers, sortSuppliers } from '../utils/supplierSelectors'
 import { cn } from '../utils/cn'
+import { riskColor } from '../utils/formatters'
 
 const CATEGORIES = [
   'Raw Materials', 'Manufacturing', 'IT Services', 'Logistics',
@@ -16,12 +17,6 @@ const CATEGORIES = [
 ]
 
 const STATUS_BADGE = { active: 'green', pending: 'amber', suspended: 'red' }
-
-function riskColor(score) {
-  if (score <= 33) return 'text-accent-green'
-  if (score <= 66) return 'text-accent-amber'
-  return 'text-accent-red'
-}
 
 export default function Suppliers() {
   const { suppliers, addSupplier, updateSupplier } = useSupplierContext()

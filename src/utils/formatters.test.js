@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatCurrency, formatDate, formatPercent, daysUntil, timeAgo } from './formatters'
+import { formatCurrency, formatDate, formatPercent, daysUntil, timeAgo, riskColor, formatCompactCurrency } from './formatters'
 
 describe('formatCurrency', () => {
   it('formats USD with no decimals', () => {
@@ -51,5 +51,32 @@ describe('timeAgo', () => {
 
   it('renders "just now" for the current moment', () => {
     expect(timeAgo(new Date())).toBe('just now')
+  })
+})
+
+describe('riskColor', () => {
+  it('returns green for scores ≤33', () => {
+    expect(riskColor(0)).toBe('text-accent-green')
+    expect(riskColor(33)).toBe('text-accent-green')
+  })
+  it('returns amber for scores 34–66', () => {
+    expect(riskColor(34)).toBe('text-accent-amber')
+    expect(riskColor(66)).toBe('text-accent-amber')
+  })
+  it('returns red for scores >66', () => {
+    expect(riskColor(67)).toBe('text-accent-red')
+    expect(riskColor(100)).toBe('text-accent-red')
+  })
+})
+
+describe('formatCompactCurrency', () => {
+  it('formats millions as $X.XM', () => {
+    expect(formatCompactCurrency(4200000)).toBe('$4.2M')
+  })
+  it('formats thousands as $XXXk', () => {
+    expect(formatCompactCurrency(637000)).toBe('$637k')
+  })
+  it('formats small amounts as $X', () => {
+    expect(formatCompactCurrency(500)).toBe('$500')
   })
 })

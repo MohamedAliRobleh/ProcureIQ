@@ -40,3 +40,15 @@ export function timeAgo(date) {
   if (minutes > 0) return `${minutes}m ago`
   return 'just now'
 }
+
+export function formatCompactCurrency(amount) {
+  if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(1)}M`
+  if (amount >= 1_000) return `$${Math.round(amount / 1_000)}k`
+  return `$${amount}`
+}
+
+export function riskColor(score) {
+  if (score <= 33) return 'text-accent-green'
+  if (score <= 66) return 'text-accent-amber'
+  return 'text-accent-red'
+}
