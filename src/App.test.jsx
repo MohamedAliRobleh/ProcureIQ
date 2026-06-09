@@ -25,6 +25,13 @@ describe('App', () => {
     expect(screen.getByPlaceholderText('Search contracts...')).toBeInTheDocument()
   })
 
+  it('renders the Risk dashboard page at /risk', async () => {
+    window.history.pushState({}, '', '/risk')
+    render(<App />)
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'Risk' })).toBeInTheDocument())
+    expect(screen.getByPlaceholderText('Search suppliers...')).toBeInTheDocument()
+  })
+
   it('renders a placeholder page for not-yet-built modules', async () => {
     window.history.pushState({}, '', '/esg')
     render(<App />)
