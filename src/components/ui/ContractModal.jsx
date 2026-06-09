@@ -3,6 +3,14 @@ import Modal from './Modal'
 import Button from './Button'
 import { useSupplierContext } from '../../context/SupplierContext'
 
+function formatDateToInput(date) {
+  const d = new Date(date)
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
 const STATUSES = ['active', 'draft', 'expired']
 
 const EMPTY_FORM = {
@@ -33,10 +41,10 @@ export default function ContractModal({ isOpen, onClose, contract, onSubmit }) {
             value: String(contract.value),
             currency: contract.currency,
             startDate: contract.startDate
-              ? new Date(contract.startDate).toISOString().split('T')[0]
+              ? formatDateToInput(contract.startDate)
               : '',
             endDate: contract.endDate
-              ? new Date(contract.endDate).toISOString().split('T')[0]
+              ? formatDateToInput(contract.endDate)
               : '',
             status: contract.status,
             autoRenew: contract.autoRenew ?? false,
@@ -50,7 +58,7 @@ export default function ContractModal({ isOpen, onClose, contract, onSubmit }) {
     const errs = {}
     if (!form.title.trim()) errs.title = 'Title is required'
     if (!form.supplierId) errs.supplierId = 'Supplier is required'
-    if (!form.value || isNaN(Number(form.value))) errs.value = 'Value is required'
+    if (form.value === '' || isNaN(Number(form.value))) errs.value = 'Value is required'
     return errs
   }
 
