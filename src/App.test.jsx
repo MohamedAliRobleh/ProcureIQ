@@ -18,10 +18,17 @@ describe('App', () => {
     expect(screen.getByPlaceholderText('Search suppliers...')).toBeInTheDocument()
   })
 
-  it('renders a placeholder page for not-yet-built modules', async () => {
+  it('renders the Contracts list page at /contracts', async () => {
     window.history.pushState({}, '', '/contracts')
     render(<App />)
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Contracts' })).toBeInTheDocument())
-    expect(screen.getByText(/coming in Phase 3/i)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Search contracts...')).toBeInTheDocument()
+  })
+
+  it('renders a placeholder page for not-yet-built modules', async () => {
+    window.history.pushState({}, '', '/esg')
+    render(<App />)
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'ESG' })).toBeInTheDocument())
+    expect(screen.getByText(/coming in Phase 4/i)).toBeInTheDocument()
   })
 })

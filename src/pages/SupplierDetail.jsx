@@ -4,21 +4,34 @@ import { ArrowLeft } from 'lucide-react'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
+import DataTable from '../components/ui/DataTable'
 import SupplierModal from '../components/ui/SupplierModal'
+import ContractModal from '../components/ui/ContractModal'
+import ContractSlideOver from '../components/ui/ContractSlideOver'
 import PageHeader from '../components/layout/PageHeader'
 import { useSupplierContext } from '../context/SupplierContext'
-import { formatDate, riskColor } from '../utils/formatters'
+import { useContractContext } from '../context/ContractContext'
+import { formatDate, formatCurrency, daysUntil, riskColor } from '../utils/formatters'
+import { filterContracts } from '../utils/contractSelectors'
+import { RISK_LEVEL_BADGE } from '../utils/riskSelectors'
+import { riskAssessments } from '../lib/mockData'
 import { cn } from '../utils/cn'
 
 const TABS = ['Overview', 'Contracts', 'Risk', 'ESG', 'Spend']
-const TAB_PHASE = { Contracts: 'Phase 3', Risk: 'Phase 3', ESG: 'Phase 4', Spend: 'Phase 4' }
+const TAB_PHASE = { ESG: 'Phase 4', Spend: 'Phase 4' }
 const STATUS_BADGE = { active: 'green', pending: 'amber', suspended: 'red' }
+const CONTRACT_STATUS_BADGE = { active: 'green', draft: 'amber', expired: 'red' }
 
 export default function SupplierDetail() {
   const { id } = useParams()
   const { suppliers, updateSupplier, setSupplierStatus } = useSupplierContext()
+  const { contracts, addContract, updateContract } = useContractContext()
   const [activeTab, setActiveTab] = useState('Overview')
   const [modalOpen, setModalOpen] = useState(false)
+  const [contractModalOpen, setContractModalOpen] = useState(false)
+  const [editingContract, setEditingContract] = useState(null)
+  const [contractSlideOpen, setContractSlideOpen] = useState(false)
+  const [selectedContract, setSelectedContract] = useState(null)
 
   const supplier = suppliers.find((s) => s.id === id)
 
@@ -38,6 +51,150 @@ export default function SupplierDetail() {
   }
 
   const isActive = supplier.status === 'active'
+  const supplierContracts = filterContracts(contracts, { supplierId: supplier.id })
+  const riskAssessment = riskAssessments.find((a) => a.supplierId === supplier.id)
+
+  function openAddContract() {
+    setEditingContract(null)
+    setContractModalOpen(true)
+  }
+
+  function openEditContract(contract) {
+    setEditingContract(contract)
+    setContractSlideOpen(false)
+    setContractModalOpen(true)
+  }
+
+  function openContractSlideOver(contract) {
+    setSelectedContract(contract)
+    setContractSlideOpen(true)
+  }
+
+  function handleContractSubmit(data) {
+    if (editingContract) {
+      updateContract(editingContract.id, data)
+    } else {
+      addContract({ ...data, supplierId: supplier.id })
+    }
+  }
+
+  const contractColumns = [
+    {
+      key: 'title',
+      header: 'Contract',
+      render: (row) => (
+        <button
+          onClick={() => openContractSlideOver(row)}
+          className="text-left font-medium text-accent-blue-light hover:underline"
+        >
+          {row.title}
+        </button>
+      ),
+    },
+    {
+      key: 'value',
+      header: 'Value',
+      render: (row) => formatCurrency(row.value, row.currency),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (row) => (
+        <Badge variant={CONTRACT_STATUS_BADGE[row.status] ?? 'muted'}>{row.status}</Badge>
+      ),
+    },
+    {
+      key: 'endDate',
+      header: 'Expires',
+      render: (row) => {
+        const d = daysUntil(row.endDate)
+        const cls = d < 0 ? 'text-accent-red' : d <= 30 ? 'text-accent-amber' : 'text-text-primary'
+        return (
+          <span className={cn('font-medium', cls)}>
+            {d < 0 ? `${Math.abs(d)}d ago` : `${d}d`}
+          </span>
+        )
+      },
+    },
+    {
+      key: 'actions',
+      header: '',
+      render: (row) => (
+        <Button variant="ghost" onClick={() => openEditContract(row)}>
+          Edit
+        </Button>
+      ),
+    },
+  ]
+
+  function renderContractsTab() {
+    return (
+      <div>
+        <div className="mb-3 flex justify-end">
+          <Button variant="ghost" onClick={openAddContract}>
+            Add Contract
+          </Button>
+        </div>
+        <DataTable
+          columns={contractColumns}
+          data={supplierContracts}
+          rowKey={(row) => row.id}
+          emptyMessage="No contracts for this supplier"
+        />
+        <ContractSlideOver
+          isOpen={contractSlideOpen}
+          onClose={() => setContractSlideOpen(false)}
+          contract={selectedContract}
+          supplier={supplier}
+          onEdit={() => openEditContract(selectedContract)}
+        />
+        <ContractModal
+          isOpen={contractModalOpen}
+          onClose={() => setContractModalOpen(false)}
+          contract={editingContract}
+          onSubmit={handleContractSubmit}
+        />
+      </div>
+    )
+  }
+
+  function renderRiskTab() {
+    if (!riskAssessment) {
+      return (
+        <Card className="p-6 text-center">
+          <p className="text-sm text-text-secondary">No risk assessment available</p>
+        </Card>
+      )
+    }
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Badge variant={RISK_LEVEL_BADGE[riskAssessment.level] ?? 'muted'}>
+            {riskAssessment.level}
+          </Badge>
+          <span className={cn('text-xl font-bold', riskColor(riskAssessment.score))}>
+            {riskAssessment.score}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            { label: 'Financial Risk', value: riskAssessment.financialRisk },
+            { label: 'Compliance Risk', value: riskAssessment.complianceRisk },
+            { label: 'Operational Risk', value: riskAssessment.operationalRisk },
+            { label: 'Geopolitical Risk', value: riskAssessment.geopoliticalRisk },
+          ].map(({ label, value }) => (
+            <Card key={label} className="p-4">
+              <p className="text-xs text-text-secondary">{label}</p>
+              <p className={cn('mt-1 text-2xl font-bold', riskColor(value))}>{value}</p>
+            </Card>
+          ))}
+        </div>
+        <p className="text-xs text-text-muted">
+          Assessed {formatDate(riskAssessment.assessedAt)} by {riskAssessment.assessedBy}
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -59,7 +216,9 @@ export default function SupplierDetail() {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <Button variant="secondary" onClick={() => setModalOpen(true)}>Edit</Button>
+          <Button variant="secondary" onClick={() => setModalOpen(true)}>
+            Edit
+          </Button>
           <Button
             variant={isActive ? 'danger' : 'primary'}
             onClick={() => setSupplierStatus(supplier.id, isActive ? 'suspended' : 'active')}
@@ -93,7 +252,9 @@ export default function SupplierDetail() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Card className="p-4">
               <p className="text-xs text-text-secondary">Risk Score</p>
-              <p className={cn('mt-1 text-2xl font-bold', riskColor(supplier.riskScore))}>{supplier.riskScore}</p>
+              <p className={cn('mt-1 text-2xl font-bold', riskColor(supplier.riskScore))}>
+                {supplier.riskScore}
+              </p>
             </Card>
             <Card className="p-4">
               <p className="text-xs text-text-secondary">ESG Score</p>
@@ -101,7 +262,9 @@ export default function SupplierDetail() {
             </Card>
             <Card className="p-4">
               <p className="text-xs text-text-secondary">Onboarded</p>
-              <p className="mt-1 text-sm font-semibold text-text-primary">{formatDate(supplier.onboardedAt)}</p>
+              <p className="mt-1 text-sm font-semibold text-text-primary">
+                {formatDate(supplier.onboardedAt)}
+              </p>
             </Card>
           </div>
 
@@ -136,6 +299,10 @@ export default function SupplierDetail() {
             <p className="text-sm text-text-secondary">{supplier.description}</p>
           </Card>
         </div>
+      ) : activeTab === 'Contracts' ? (
+        renderContractsTab()
+      ) : activeTab === 'Risk' ? (
+        renderRiskTab()
       ) : (
         <Card className="p-6 text-center">
           <p className="font-semibold text-text-primary">{activeTab} is under construction</p>
