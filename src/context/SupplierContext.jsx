@@ -11,6 +11,8 @@ export function SupplierProvider({ children }) {
       ...data,
       id: `sup_${Date.now()}`,
       orgId: 'org_demo',
+      riskScore: 0,
+      esgScore: 0,
       logoUrl: null,
       onboardedAt: new Date(),
       createdAt: new Date(),

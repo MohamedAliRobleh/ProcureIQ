@@ -121,17 +121,19 @@ export default function SupplierDetail() {
                 </a>
               </p>
               <p>Phone: {supplier.phone}</p>
-              <p>
-                Website:{' '}
-                <a
-                  href={supplier.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-accent-blue-light hover:underline"
-                >
-                  {supplier.website}
-                </a>
-              </p>
+              {supplier.website && (
+                <p>
+                  Website:{' '}
+                  <a
+                    href={supplier.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent-blue-light hover:underline"
+                  >
+                    {supplier.website}
+                  </a>
+                </p>
+              )}
             </div>
           </Card>
 
