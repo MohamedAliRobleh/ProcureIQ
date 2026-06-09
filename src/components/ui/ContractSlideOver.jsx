@@ -5,9 +5,8 @@ import { X } from 'lucide-react'
 import Badge from './Badge'
 import Button from './Button'
 import { formatCurrency, formatDate, daysUntil } from '../../utils/formatters'
+import { CONTRACT_STATUS_BADGE } from '../../utils/contractSelectors'
 import { cn } from '../../utils/cn'
-
-const CONTRACT_STATUS_BADGE = { active: 'green', draft: 'amber', expired: 'red' }
 
 export default function ContractSlideOver({ isOpen, onClose, contract, supplier, onEdit }) {
   useEffect(() => {

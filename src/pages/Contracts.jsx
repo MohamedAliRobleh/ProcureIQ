@@ -10,11 +10,9 @@ import ContractModal from '../components/ui/ContractModal'
 import ContractSlideOver from '../components/ui/ContractSlideOver'
 import { useContractContext } from '../context/ContractContext'
 import { useSupplierContext } from '../context/SupplierContext'
-import { filterContracts, sortContracts } from '../utils/contractSelectors'
+import { filterContracts, sortContracts, CONTRACT_STATUS_BADGE } from '../utils/contractSelectors'
 import { formatCurrency, formatCompactCurrency, daysUntil } from '../utils/formatters'
 import { cn } from '../utils/cn'
-
-const CONTRACT_STATUS_BADGE = { active: 'green', draft: 'amber', expired: 'red' }
 
 export default function Contracts() {
   const { contracts, addContract, updateContract } = useContractContext()
@@ -107,6 +105,7 @@ export default function Contracts() {
       key: 'endDate',
       header: 'Expires',
       render: (row) => {
+        if (!row.endDate) return <span className="text-text-muted">—</span>
         const d = daysUntil(row.endDate)
         const cls =
           d < 0 ? 'text-accent-red' : d <= 30 ? 'text-accent-amber' : 'text-text-primary'

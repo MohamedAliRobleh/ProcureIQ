@@ -1,25 +1,14 @@
-import { useEffect, useState } from 'react'
-import { contracts } from '../lib/mockData'
+import { useState, useEffect } from 'react'
+import { useContractContext } from '../context/ContractContext'
 
 export function useContracts() {
+  const { contracts } = useContractContext()
   const [data, setData] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
 
   useEffect(() => {
-    setIsLoading(true)
-    setError(null)
-    const timer = setTimeout(() => {
-      try {
-        setData(contracts)
-      } catch (e) {
-        setError(e)
-      } finally {
-        setIsLoading(false)
-      }
-    }, 150)
+    const timer = setTimeout(() => setData(contracts), 150)
     return () => clearTimeout(timer)
-  }, [])
+  }, [contracts])
 
-  return { contracts: data, isLoading, error }
+  return { contracts: data, isLoading: data === null }
 }

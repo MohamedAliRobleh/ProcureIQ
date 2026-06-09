@@ -1,12 +1,15 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { SupplierProvider } from '../context/SupplierContext'
 import Risk from './Risk'
 
 function renderRisk() {
   return render(
     <MemoryRouter>
-      <Risk />
+      <SupplierProvider>
+        <Risk />
+      </SupplierProvider>
     </MemoryRouter>
   )
 }

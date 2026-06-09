@@ -5,13 +5,14 @@ import DataTable from '../components/ui/DataTable'
 import Badge from '../components/ui/Badge'
 import Card from '../components/ui/Card'
 import { useRisk } from '../hooks/useRisk'
-import { suppliers } from '../lib/mockData'
+import { useSupplierContext } from '../context/SupplierContext'
 import { filterRiskAssessments, sortRiskAssessments, RISK_LEVEL_BADGE } from '../utils/riskSelectors'
 import { riskColor } from '../utils/formatters'
 import { cn } from '../utils/cn'
 
 export default function Risk() {
   const { riskAssessments, isLoading } = useRisk()
+  const { suppliers } = useSupplierContext()
   const [search, setSearch] = useState('')
   const [level, setLevel] = useState('')
 

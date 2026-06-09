@@ -1,3 +1,5 @@
+export const CONTRACT_STATUS_BADGE = { active: 'green', draft: 'amber', expired: 'red' }
+
 export function filterContracts(contracts, { search = '', status = '', supplierId = '' } = {}) {
   return contracts.filter((c) => {
     const matchesSearch = !search || c.title.toLowerCase().includes(search.toLowerCase())

@@ -12,7 +12,7 @@ import PageHeader from '../components/layout/PageHeader'
 import { useSupplierContext } from '../context/SupplierContext'
 import { useContractContext } from '../context/ContractContext'
 import { formatDate, formatCurrency, daysUntil, riskColor } from '../utils/formatters'
-import { filterContracts } from '../utils/contractSelectors'
+import { filterContracts, CONTRACT_STATUS_BADGE } from '../utils/contractSelectors'
 import { RISK_LEVEL_BADGE } from '../utils/riskSelectors'
 import { riskAssessments } from '../lib/mockData'
 import { cn } from '../utils/cn'
@@ -20,7 +20,6 @@ import { cn } from '../utils/cn'
 const TABS = ['Overview', 'Contracts', 'Risk', 'ESG', 'Spend']
 const TAB_PHASE = { ESG: 'Phase 4', Spend: 'Phase 4' }
 const STATUS_BADGE = { active: 'green', pending: 'amber', suspended: 'red' }
-const CONTRACT_STATUS_BADGE = { active: 'green', draft: 'amber', expired: 'red' }
 
 export default function SupplierDetail() {
   const { id } = useParams()
@@ -107,6 +106,7 @@ export default function SupplierDetail() {
       key: 'endDate',
       header: 'Expires',
       render: (row) => {
+        if (!row.endDate) return <span className="text-text-muted">—</span>
         const d = daysUntil(row.endDate)
         const cls = d < 0 ? 'text-accent-red' : d <= 30 ? 'text-accent-amber' : 'text-text-primary'
         return (
