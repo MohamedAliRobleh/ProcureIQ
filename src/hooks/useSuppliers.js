@@ -4,15 +4,22 @@ import { suppliers } from '../lib/mockData'
 export function useSuppliers() {
   const [data, setData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     setIsLoading(true)
+    setError(null)
     const timer = setTimeout(() => {
-      setData(suppliers)
-      setIsLoading(false)
+      try {
+        setData(suppliers)
+      } catch (e) {
+        setError(e)
+      } finally {
+        setIsLoading(false)
+      }
     }, 150)
     return () => clearTimeout(timer)
   }, [])
 
-  return { suppliers: data, isLoading }
+  return { suppliers: data, isLoading, error }
 }

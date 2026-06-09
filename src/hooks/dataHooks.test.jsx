@@ -14,23 +14,27 @@ describe('data hooks', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.suppliers).toEqual(suppliers)
+    expect(result.current.error).toBeNull()
   })
 
   it('useContracts resolves with seeded contracts', async () => {
     const { result } = renderHook(() => useContracts())
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.contracts).toEqual(contracts)
+    expect(result.current.error).toBeNull()
   })
 
   it('useRisk resolves with seeded risk assessments', async () => {
     const { result } = renderHook(() => useRisk())
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.riskAssessments).toEqual(riskAssessments)
+    expect(result.current.error).toBeNull()
   })
 
   it('useSpend resolves with seeded spend records', async () => {
     const { result } = renderHook(() => useSpend())
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.spendRecords).toEqual(spendRecords)
+    expect(result.current.error).toBeNull()
   })
 })
