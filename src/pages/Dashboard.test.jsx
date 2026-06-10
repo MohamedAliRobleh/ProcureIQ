@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { ContractProvider } from '../context/ContractContext'
+import { SpendProvider } from '../context/SpendContext'
 import Dashboard from './Dashboard'
 import { suppliers, contracts, riskAssessments } from '../lib/mockData'
 import { getAverageRiskScore } from '../utils/dashboardSelectors'
@@ -9,7 +10,9 @@ describe('Dashboard', () => {
   it('shows a loading state, then the computed stat cards and AI insight', async () => {
     render(
       <ContractProvider>
-        <Dashboard />
+        <SpendProvider>
+          <Dashboard />
+        </SpendProvider>
       </ContractProvider>
     )
     expect(screen.getByRole('status')).toBeInTheDocument()

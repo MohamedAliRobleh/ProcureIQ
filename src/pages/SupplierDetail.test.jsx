@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { SupplierProvider } from '../context/SupplierContext'
 import { ContractProvider } from '../context/ContractContext'
+import { SpendProvider } from '../context/SpendContext'
 import SupplierDetail from './SupplierDetail'
 
 function renderDetail(id = 'sup_1') {
@@ -10,9 +11,11 @@ function renderDetail(id = 'sup_1') {
     <MemoryRouter initialEntries={[`/suppliers/${id}`]}>
       <SupplierProvider>
         <ContractProvider>
-          <Routes>
-            <Route path="/suppliers/:id" element={<SupplierDetail />} />
-          </Routes>
+          <SpendProvider>
+            <Routes>
+              <Route path="/suppliers/:id" element={<SupplierDetail />} />
+            </Routes>
+          </SpendProvider>
         </ContractProvider>
       </SupplierProvider>
     </MemoryRouter>
@@ -58,5 +61,35 @@ describe('SupplierDetail', () => {
     renderDetail()
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
     expect(screen.getByRole('heading', { name: 'Edit Supplier' })).toBeInTheDocument()
+  })
+
+  it('ESG tab shows rating, score, and sub-score cards for the supplier', () => {
+    renderDetail()
+    fireEvent.click(screen.getByRole('button', { name: 'ESG' }))
+    expect(screen.getByText('Needs Improvement')).toBeInTheDocument()
+    expect(screen.getByText('Environmental')).toBeInTheDocument()
+    expect(screen.getByText('Social')).toBeInTheDocument()
+    expect(screen.getByText('Governance')).toBeInTheDocument()
+  })
+
+  it('Spend tab shows the supplier spend records and total', () => {
+    renderDetail()
+    fireEvent.click(screen.getByRole('button', { name: 'Spend' }))
+    expect(screen.getByText('Total Spend: $68,550')).toBeInTheDocument()
+    expect(screen.getAllByText('Monthly spend — Atlas Steelworks').length).toBe(6)
+  })
+
+  it('Spend tab Add Spend Record flow opens modal and adds a record', async () => {
+    renderDetail()
+    fireEvent.click(screen.getByRole('button', { name: 'Spend' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Add Spend Record' }))
+    expect(screen.getByRole('heading', { name: 'Add Spend Record' })).toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('Amount'), { target: { value: '2500' } })
+    fireEvent.change(screen.getByLabelText('Category'), { target: { value: 'Logistics' } })
+    fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Extra freight charge' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Add Record' }))
+
+    await waitFor(() => expect(screen.getByText('Extra freight charge')).toBeInTheDocument())
   })
 })

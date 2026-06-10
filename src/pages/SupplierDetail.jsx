@@ -8,29 +8,35 @@ import DataTable from '../components/ui/DataTable'
 import SupplierModal from '../components/ui/SupplierModal'
 import ContractModal from '../components/ui/ContractModal'
 import ContractSlideOver from '../components/ui/ContractSlideOver'
+import SpendModal from '../components/ui/SpendModal'
 import PageHeader from '../components/layout/PageHeader'
 import { useSupplierContext } from '../context/SupplierContext'
 import { useContractContext } from '../context/ContractContext'
-import { formatDate, formatCurrency, daysUntil, riskColor } from '../utils/formatters'
+import { useSpendContext } from '../context/SpendContext'
+import { formatDate, formatCurrency, daysUntil, riskColor, esgColor } from '../utils/formatters'
 import { filterContracts, CONTRACT_STATUS_BADGE } from '../utils/contractSelectors'
 import { RISK_LEVEL_BADGE } from '../utils/riskSelectors'
-import { riskAssessments } from '../lib/mockData'
+import { esgRating, ESG_RATING_BADGE, ESG_RATING_LABEL } from '../utils/esgSelectors'
+import { filterSpendRecords } from '../utils/spendSelectors'
+import { riskAssessments, esgResponses } from '../lib/mockData'
 import { cn } from '../utils/cn'
 
 const TABS = ['Overview', 'Contracts', 'Risk', 'ESG', 'Spend']
-const TAB_PHASE = { ESG: 'Phase 4', Spend: 'Phase 4' }
 const STATUS_BADGE = { active: 'green', pending: 'amber', suspended: 'red' }
 
 export default function SupplierDetail() {
   const { id } = useParams()
   const { suppliers, updateSupplier, setSupplierStatus } = useSupplierContext()
   const { contracts, addContract, updateContract } = useContractContext()
+  const { spendRecords, addSpendRecord, updateSpendRecord } = useSpendContext()
   const [activeTab, setActiveTab] = useState('Overview')
   const [modalOpen, setModalOpen] = useState(false)
   const [contractModalOpen, setContractModalOpen] = useState(false)
   const [editingContract, setEditingContract] = useState(null)
   const [contractSlideOpen, setContractSlideOpen] = useState(false)
   const [selectedContract, setSelectedContract] = useState(null)
+  const [spendModalOpen, setSpendModalOpen] = useState(false)
+  const [editingSpend, setEditingSpend] = useState(null)
 
   const supplier = suppliers.find((s) => s.id === id)
 
@@ -74,6 +80,24 @@ export default function SupplierDetail() {
       updateContract(editingContract.id, data)
     } else {
       addContract({ ...data, supplierId: supplier.id })
+    }
+  }
+
+  function openAddSpend() {
+    setEditingSpend(null)
+    setSpendModalOpen(true)
+  }
+
+  function openEditSpend(record) {
+    setEditingSpend(record)
+    setSpendModalOpen(true)
+  }
+
+  function handleSpendSubmit(data) {
+    if (editingSpend) {
+      updateSpendRecord(editingSpend.id, data)
+    } else {
+      addSpendRecord({ ...data, supplierId: supplier.id })
     }
   }
 
@@ -121,6 +145,23 @@ export default function SupplierDetail() {
       header: '',
       render: (row) => (
         <Button variant="ghost" onClick={() => openEditContract(row)}>
+          Edit
+        </Button>
+      ),
+    },
+  ]
+
+  const spendColumns = [
+    { key: 'date', header: 'Date', render: (row) => formatDate(row.date) },
+    { key: 'category', header: 'Category' },
+    { key: 'description', header: 'Description' },
+    { key: 'amount', header: 'Amount', render: (row) => formatCurrency(row.amount, row.currency) },
+    { key: 'invoiceRef', header: 'Invoice Ref' },
+    {
+      key: 'actions',
+      header: '',
+      render: (row) => (
+        <Button variant="ghost" onClick={() => openEditSpend(row)}>
           Edit
         </Button>
       ),
@@ -192,6 +233,71 @@ export default function SupplierDetail() {
         <p className="text-xs text-text-muted">
           Assessed {formatDate(riskAssessment.assessedAt)} by {riskAssessment.assessedBy}
         </p>
+      </div>
+    )
+  }
+
+  function renderEsgTab() {
+    const esgResponse = esgResponses.find((r) => r.supplierId === supplier.id)
+    if (!esgResponse) {
+      return (
+        <Card className="p-6 text-center">
+          <p className="text-sm text-text-secondary">No ESG data available</p>
+        </Card>
+      )
+    }
+    const rating = esgRating(esgResponse.score)
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Badge variant={ESG_RATING_BADGE[rating]}>{ESG_RATING_LABEL[rating]}</Badge>
+          <span className={cn('text-xl font-bold', esgColor(esgResponse.score))}>
+            {esgResponse.score}
+          </span>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {[
+            { label: 'Environmental', value: esgResponse.environmental },
+            { label: 'Social', value: esgResponse.social },
+            { label: 'Governance', value: esgResponse.governance },
+          ].map(({ label, value }) => (
+            <Card key={label} className="p-4">
+              <p className="text-xs text-text-secondary">{label}</p>
+              <p className={cn('mt-1 text-2xl font-bold', esgColor(value))}>{value}</p>
+            </Card>
+          ))}
+        </div>
+        <p className="text-xs text-text-muted">Submitted {formatDate(esgResponse.submittedAt)}</p>
+      </div>
+    )
+  }
+
+  function renderSpendTab() {
+    const supplierSpend = filterSpendRecords(spendRecords, suppliers, { supplierId: supplier.id })
+    const total = supplierSpend.reduce((sum, r) => sum + r.amount, 0)
+    return (
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-sm font-semibold text-text-primary">
+            Total Spend: {formatCurrency(total)}
+          </p>
+          <Button variant="ghost" onClick={openAddSpend}>
+            Add Spend Record
+          </Button>
+        </div>
+        <DataTable
+          columns={spendColumns}
+          data={supplierSpend}
+          rowKey={(row) => row.id}
+          emptyMessage="No spend records for this supplier"
+        />
+        <SpendModal
+          isOpen={spendModalOpen}
+          onClose={() => setSpendModalOpen(false)}
+          record={editingSpend}
+          onSubmit={handleSpendSubmit}
+          defaultSupplierId={supplier.id}
+        />
       </div>
     )
   }
@@ -303,13 +409,10 @@ export default function SupplierDetail() {
         renderContractsTab()
       ) : activeTab === 'Risk' ? (
         renderRiskTab()
+      ) : activeTab === 'ESG' ? (
+        renderEsgTab()
       ) : (
-        <Card className="p-6 text-center">
-          <p className="font-semibold text-text-primary">{activeTab} is under construction</p>
-          <p className="mt-1 text-sm text-text-secondary">
-            This module is coming in {TAB_PHASE[activeTab]}.
-          </p>
-        </Card>
+        renderSpendTab()
       )}
 
       <SupplierModal
