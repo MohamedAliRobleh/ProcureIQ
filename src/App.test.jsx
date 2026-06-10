@@ -3,12 +3,11 @@ import { render, screen, waitFor } from '@testing-library/react'
 import App from './App'
 
 describe('App', () => {
-  it('redirects the root route to the Dashboard and renders the shell', async () => {
+  it('renders the public landing page at the root route', async () => {
     window.history.pushState({}, '', '/')
     render(<App />)
-    await waitFor(() => expect(screen.getByText('Total Suppliers')).toBeInTheDocument())
-    expect(screen.getByText('ProcureIQ', { exact: false })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Suppliers/ })).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: /Open App/ })).toBeInTheDocument()
+    expect(screen.getByText('AI-powered procurement intelligence')).toBeInTheDocument()
   })
 
   it('renders the Suppliers list page at /suppliers', async () => {
@@ -46,10 +45,17 @@ describe('App', () => {
     expect(screen.getByPlaceholderText('Search spend records...')).toBeInTheDocument()
   })
 
-  it('renders a placeholder page for not-yet-built modules', async () => {
+  it('renders the AI Assistant page at /ai-assistant', async () => {
     window.history.pushState({}, '', '/ai-assistant')
     render(<App />)
     await waitFor(() => expect(screen.getByRole('heading', { name: 'AI Assistant' })).toBeInTheDocument())
-    expect(screen.getByText(/coming in Phase 5/i)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Ask about suppliers, contracts, spend...')).toBeInTheDocument()
+  })
+
+  it('renders a placeholder page for not-yet-built modules', async () => {
+    window.history.pushState({}, '', '/portal')
+    render(<App />)
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'Supplier Portal' })).toBeInTheDocument())
+    expect(screen.getByText(/coming in Phase 7/i)).toBeInTheDocument()
   })
 })
