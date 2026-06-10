@@ -52,3 +52,17 @@ export function riskColor(score) {
   if (score <= 66) return 'text-accent-amber'
   return 'text-accent-red'
 }
+
+export function esgColor(score) {
+  if (score >= 67) return 'text-accent-green'
+  if (score >= 34) return 'text-accent-amber'
+  return 'text-accent-red'
+}
+
+export function formatDateToInput(date) {
+  const d = new Date(date)
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}

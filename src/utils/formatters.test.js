@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatCurrency, formatDate, formatPercent, daysUntil, timeAgo, riskColor, formatCompactCurrency } from './formatters'
+import { formatCurrency, formatDate, formatPercent, daysUntil, timeAgo, riskColor, formatCompactCurrency, esgColor, formatDateToInput } from './formatters'
 
 describe('formatCurrency', () => {
   it('formats USD with no decimals', () => {
@@ -78,5 +78,27 @@ describe('formatCompactCurrency', () => {
   })
   it('formats small amounts as $X', () => {
     expect(formatCompactCurrency(500)).toBe('$500')
+  })
+})
+
+describe('esgColor', () => {
+  it('returns red for scores below 34', () => {
+    expect(esgColor(0)).toBe('text-accent-red')
+    expect(esgColor(33)).toBe('text-accent-red')
+  })
+  it('returns amber for scores 34–66', () => {
+    expect(esgColor(34)).toBe('text-accent-amber')
+    expect(esgColor(66)).toBe('text-accent-amber')
+  })
+  it('returns green for scores 67 and above', () => {
+    expect(esgColor(67)).toBe('text-accent-green')
+    expect(esgColor(100)).toBe('text-accent-green')
+  })
+})
+
+describe('formatDateToInput', () => {
+  it('formats a Date as YYYY-MM-DD using local date parts', () => {
+    const d = new Date(2026, 2, 5) // March 5, 2026
+    expect(formatDateToInput(d)).toBe('2026-03-05')
   })
 })
