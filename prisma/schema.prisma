@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Supplier {
+  id          String   @id
+  orgId       String   @default("org_demo")
+  name        String
+  email       String
+  phone       String?
+  country     String?
+  category    String?
+  status      String   @default("active")
+  riskScore   Int      @default(0)
+  esgScore    Int      @default(0)
+  website     String?
+  description String?
+  logoUrl     String?
+  onboardedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  contracts       Contract[]
+  riskAssessments RiskAssessment[]
+  esgResponses    EsgResponse[]
+  spendRecords    SpendRecord[]
+}
+
+model Contract {
+  id         String    @id
+  orgId      String    @default("org_demo")
+  supplierId String
+  supplier   Supplier  @relation(fields: [supplierId], references: [id])
+  title      String
+  status     String    @default("draft")
+  value      Int
+  currency   String    @default("USD")
+  startDate  DateTime?
+  endDate    DateTime?
+  autoRenew  Boolean   @default(false)
+  fileUrl    String?
+  aiSummary  String?
+  terms      String?
+  createdBy  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model RiskAssessment {
+  id               String   @id
+  orgId            String   @default("org_demo")
+  supplierId       String
+  supplier         Supplier @relation(fields: [supplierId], references: [id])
+  score            Int
+  level            String
+  financialRisk    Int
+  complianceRisk   Int
+  operationalRisk  Int
+  geopoliticalRisk Int
+  aiAnalysis       String?
+  assessedAt       DateTime @default(now())
+  assessedBy       String?
+}
+
+model EsgResponse {
+  id            String   @id
+  orgId         String   @default("org_demo")
+  supplierId    String
+  supplier      Supplier @relation(fields: [supplierId], references: [id])
+  score         Int
+  environmental Int
+  social        Int
+  governance    Int
+  answers       Json     @default("{}")
+  aiSuggestions String?
+  submittedAt   DateTime @default(now())
+}
+
+model SpendRecord {
+  id          String   @id
+  orgId       String   @default("org_demo")
+  supplierId  String
+  supplier    Supplier @relation(fields: [supplierId], references: [id])
+  amount      Int
+  currency    String   @default("USD")
+  category    String
+  description String?
+  date        DateTime
+  invoiceRef  String?
+  createdAt   DateTime @default(now())
+}
