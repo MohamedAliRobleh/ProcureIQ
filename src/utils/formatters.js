@@ -61,8 +61,14 @@ export function esgColor(score) {
 
 export function formatDateToInput(date) {
   const d = new Date(date)
-  const yyyy = d.getFullYear()
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
+  // Date-only strings (e.g. "2026-04-05") parse as UTC midnight, which can
+  // shift to the previous day in local-getter output for timezones behind
+  // UTC. Detect that case and read UTC parts instead so the input value
+  // matches the date that was passed in.
+  const isUtcMidnight =
+    d.getUTCHours() === 0 && d.getUTCMinutes() === 0 && d.getUTCSeconds() === 0 && d.getUTCMilliseconds() === 0
+  const yyyy = isUtcMidnight ? d.getUTCFullYear() : d.getFullYear()
+  const mm = String((isUtcMidnight ? d.getUTCMonth() : d.getMonth()) + 1).padStart(2, '0')
+  const dd = String(isUtcMidnight ? d.getUTCDate() : d.getDate()).padStart(2, '0')
   return `${yyyy}-${mm}-${dd}`
 }
