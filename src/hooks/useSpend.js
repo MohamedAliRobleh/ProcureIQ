@@ -1,25 +1,14 @@
-import { useEffect, useState } from 'react'
-import { spendRecords } from '../lib/mockData'
+import { useState, useEffect } from 'react'
+import { useSpendContext } from '../context/SpendContext'
 
 export function useSpend() {
+  const { spendRecords } = useSpendContext()
   const [data, setData] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
 
   useEffect(() => {
-    setIsLoading(true)
-    setError(null)
-    const timer = setTimeout(() => {
-      try {
-        setData(spendRecords)
-      } catch (e) {
-        setError(e)
-      } finally {
-        setIsLoading(false)
-      }
-    }, 150)
+    const timer = setTimeout(() => setData(spendRecords), 150)
     return () => clearTimeout(timer)
-  }, [])
+  }, [spendRecords])
 
-  return { spendRecords: data, isLoading, error }
+  return { spendRecords: data, isLoading: data === null }
 }

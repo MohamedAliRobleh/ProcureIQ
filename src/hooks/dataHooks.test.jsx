@@ -6,6 +6,7 @@ import { useRisk } from './useRisk'
 import { useEsg } from './useEsg'
 import { useSpend } from './useSpend'
 import { ContractProvider } from '../context/ContractContext'
+import { SpendProvider } from '../context/SpendContext'
 import { suppliers, contracts, riskAssessments, esgResponses, spendRecords } from '../lib/mockData'
 
 describe('data hooks', () => {
@@ -41,9 +42,9 @@ describe('data hooks', () => {
   })
 
   it('useSpend resolves with seeded spend records', async () => {
-    const { result } = renderHook(() => useSpend())
+    const wrapper = ({ children }) => <SpendProvider>{children}</SpendProvider>
+    const { result } = renderHook(() => useSpend(), { wrapper })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.spendRecords).toEqual(spendRecords)
-    expect(result.current.error).toBeNull()
   })
 })
