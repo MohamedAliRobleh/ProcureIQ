@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { suppliers, contracts, riskAssessments, esgResponses, spendRecords, recentActivity } from './mockData'
+import { suppliers, contracts, riskAssessments, esgResponses, spendRecords, recentActivity, SPEND_CATEGORIES } from './mockData'
 
 describe('mockData', () => {
   it('seeds 20 suppliers across 10 countries', () => {
@@ -49,6 +49,11 @@ describe('mockData', () => {
       spendRecords.map((r) => `${r.date.getFullYear()}-${r.date.getMonth()}`)
     )
     expect(months.size).toBe(6)
+  })
+
+  it('exports SPEND_CATEGORIES with 8 categories including Raw Materials', () => {
+    expect(SPEND_CATEGORIES).toHaveLength(8)
+    expect(SPEND_CATEGORIES).toContain('Raw Materials')
   })
 
   it('seeds a recent activity feed', () => {

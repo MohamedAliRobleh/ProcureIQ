@@ -118,7 +118,7 @@ export const esgResponses = suppliers.map((supplier, i) => {
   }
 })
 
-const SPEND_CATEGORIES = ['Raw Materials', 'Logistics', 'IT Services', 'Manufacturing', 'Packaging', 'Professional Services', 'Energy', 'Components']
+export const SPEND_CATEGORIES = ['Raw Materials', 'Logistics', 'IT Services', 'Manufacturing', 'Packaging', 'Professional Services', 'Energy', 'Components']
 
 export const spendRecords = []
 let spendCounter = 1
