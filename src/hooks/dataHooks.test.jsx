@@ -3,9 +3,10 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { useSuppliers } from './useSuppliers'
 import { useContracts } from './useContracts'
 import { useRisk } from './useRisk'
+import { useEsg } from './useEsg'
 import { useSpend } from './useSpend'
 import { ContractProvider } from '../context/ContractContext'
-import { suppliers, contracts, riskAssessments, spendRecords } from '../lib/mockData'
+import { suppliers, contracts, riskAssessments, esgResponses, spendRecords } from '../lib/mockData'
 
 describe('data hooks', () => {
   it('useSuppliers starts loading then resolves with seeded suppliers', async () => {
@@ -29,6 +30,13 @@ describe('data hooks', () => {
     const { result } = renderHook(() => useRisk())
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.riskAssessments).toEqual(riskAssessments)
+    expect(result.current.error).toBeNull()
+  })
+
+  it('useEsg resolves with seeded ESG responses', async () => {
+    const { result } = renderHook(() => useEsg())
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(result.current.esgResponses).toEqual(esgResponses)
     expect(result.current.error).toBeNull()
   })
 
