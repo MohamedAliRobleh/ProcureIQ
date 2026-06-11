@@ -1,0 +1,81 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+vi.mock('../_lib/prisma.js', () => ({
+  prisma: {
+    supplier: { findMany: vi.fn(), create: vi.fn(), update: vi.fn() },
+  },
+}))
+
+import listHandler from './index.js'
+import idHandler from './[id].js'
+import { prisma } from '../_lib/prisma.js'
+
+function mockRes() {
+  const res = {}
+  res.status = vi.fn(() => res)
+  res.json = vi.fn(() => res)
+  res.setHeader = vi.fn()
+  return res
+}
+
+beforeEach(() => {
+  vi.clearAllMocks()
+})
+
+describe('GET /api/suppliers', () => {
+  it('returns the org-scoped supplier list', async () => {
+    const rows = [{ id: 'sup_1', name: 'Atlas Steelworks' }]
+    prisma.supplier.findMany.mockResolvedValue(rows)
+    const res = mockRes()
+    await listHandler({ method: 'GET' }, res)
+    expect(prisma.supplier.findMany).toHaveBeenCalledWith({
+      where: { orgId: 'org_demo' },
+      orderBy: { createdAt: 'asc' },
+    })
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith(rows)
+  })
+})
+
+describe('POST /api/suppliers', () => {
+  it('creates a supplier with generated id, orgId, and defaults', async () => {
+    prisma.supplier.create.mockImplementation(async ({ data }) => data)
+    const res = mockRes()
+    await listHandler(
+      { method: 'POST', body: { name: 'New Co', email: 'a@b.com', country: 'France', category: 'Logistics', status: 'active' } },
+      res
+    )
+    expect(res.status).toHaveBeenCalledWith(201)
+    const created = prisma.supplier.create.mock.calls[0][0].data
+    expect(created.id).toMatch(/^sup_/)
+    expect(created.orgId).toBe('org_demo')
+    expect(created.riskScore).toBe(0)
+    expect(created.name).toBe('New Co')
+  })
+
+  it('rejects a body missing name or email with 400', async () => {
+    const res = mockRes()
+    await listHandler({ method: 'POST', body: { name: 'No Email' } }, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(prisma.supplier.create).not.toHaveBeenCalled()
+  })
+})
+
+describe('PATCH /api/suppliers/:id', () => {
+  it('updates the supplier and returns the updated record', async () => {
+    prisma.supplier.update.mockResolvedValue({ id: 'sup_1', status: 'suspended' })
+    const res = mockRes()
+    await idHandler({ method: 'PATCH', query: { id: 'sup_1' }, body: { status: 'suspended' } }, res)
+    expect(prisma.supplier.update).toHaveBeenCalledWith({
+      where: { id: 'sup_1' },
+      data: { status: 'suspended' },
+    })
+    expect(res.status).toHaveBeenCalledWith(200)
+  })
+
+  it('returns 405 for unsupported methods', async () => {
+    const res = mockRes()
+    await idHandler({ method: 'DELETE', query: { id: 'sup_1' } }, res)
+    expect(res.status).toHaveBeenCalledWith(405)
+  })
+})
