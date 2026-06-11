@@ -29,13 +29,15 @@ export function ChatProvider({ children }) {
   // Replies read this ref at reply time (600ms after send), so data that
   // finished loading between send and reply is included.
   const dataRef = useRef({})
-  dataRef.current = {
-    suppliers,
-    contracts,
-    spendRecords,
-    riskAssessments: riskAssessments ?? [],
-    esgResponses: esgResponses ?? [],
-  }
+  useEffect(() => {
+    dataRef.current = {
+      suppliers,
+      contracts,
+      spendRecords,
+      riskAssessments: riskAssessments ?? [],
+      esgResponses: esgResponses ?? [],
+    }
+  })
 
   useEffect(() => () => clearTimeout(timerRef.current), [])
 
