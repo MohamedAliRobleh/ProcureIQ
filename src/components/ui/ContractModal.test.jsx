@@ -52,11 +52,12 @@ describe('ContractModal', () => {
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
-  it('calls onSubmit with form data and onClose when form is valid', () => {
+  it('calls onSubmit with form data and onClose when form is valid', async () => {
     const onSubmit = vi.fn()
     const onClose = vi.fn()
     renderModal({ isOpen: true, onClose, contract: null, onSubmit })
     fireEvent.change(screen.getByLabelText('Contract Title'), { target: { value: 'New Deal' } })
+    await screen.findByRole('option', { name: 'Atlas Steelworks' })
     fireEvent.change(screen.getByLabelText('Supplier'), { target: { value: 'sup_1' } })
     fireEvent.change(screen.getByLabelText('Value (USD)'), { target: { value: '100000' } })
     fireEvent.click(screen.getByRole('button', { name: 'Add Contract' }))

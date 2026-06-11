@@ -10,6 +10,7 @@ import ContractModal from '../components/ui/ContractModal'
 import ContractSlideOver from '../components/ui/ContractSlideOver'
 import SpendModal from '../components/ui/SpendModal'
 import PageHeader from '../components/layout/PageHeader'
+import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { useSupplierContext } from '../context/SupplierContext'
 import { useContractContext } from '../context/ContractContext'
 import { useSpendContext } from '../context/SpendContext'
@@ -26,7 +27,7 @@ const STATUS_BADGE = { active: 'green', pending: 'amber', suspended: 'red' }
 
 export default function SupplierDetail() {
   const { id } = useParams()
-  const { suppliers, updateSupplier, setSupplierStatus } = useSupplierContext()
+  const { suppliers, updateSupplier, setSupplierStatus, isLoading } = useSupplierContext()
   const { contracts, addContract, updateContract } = useContractContext()
   const { spendRecords, addSpendRecord, updateSpendRecord } = useSpendContext()
   const [activeTab, setActiveTab] = useState('Overview')
@@ -39,6 +40,10 @@ export default function SupplierDetail() {
   const [editingSpend, setEditingSpend] = useState(null)
 
   const supplier = suppliers.find((s) => s.id === id)
+
+  if (isLoading) {
+    return <LoadingSpinner className="py-24" />
+  }
 
   if (!supplier) {
     return (

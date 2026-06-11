@@ -23,65 +23,65 @@ function renderDetail(id = 'sup_1') {
 }
 
 describe('SupplierDetail', () => {
-  it('renders the supplier name and Overview tab by default', () => {
+  it('renders the supplier name and Overview tab by default', async () => {
     renderDetail()
-    expect(screen.getByText('Atlas Steelworks')).toBeInTheDocument()
+    expect(await screen.findByText('Atlas Steelworks')).toBeInTheDocument()
     expect(screen.getByText('Contact Information')).toBeInTheDocument()
   })
 
-  it('shows a Suspend button for an active supplier that toggles to Activate after click', () => {
+  it('shows a Suspend button for an active supplier that toggles to Activate after click', async () => {
     renderDetail()
-    const suspendBtn = screen.getByRole('button', { name: 'Suspend' })
+    const suspendBtn = await screen.findByRole('button', { name: 'Suspend' })
     fireEvent.click(suspendBtn)
-    expect(screen.getByRole('button', { name: 'Activate' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Activate' })).toBeInTheDocument()
   })
 
-  it('Contracts tab shows the supplier contracts table', () => {
+  it('Contracts tab shows the supplier contracts table', async () => {
     renderDetail()
-    fireEvent.click(screen.getByRole('button', { name: 'Contracts' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Contracts' }))
     expect(screen.getByText('Master Supply Agreement — Atlas Steelworks')).toBeInTheDocument()
   })
 
-  it('Risk tab shows sub-score cards for the supplier', () => {
+  it('Risk tab shows sub-score cards for the supplier', async () => {
     renderDetail()
-    fireEvent.click(screen.getByRole('button', { name: 'Risk' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Risk' }))
     expect(screen.getByText('Financial Risk')).toBeInTheDocument()
     expect(screen.getByText('Compliance Risk')).toBeInTheDocument()
     expect(screen.getByText('Operational Risk')).toBeInTheDocument()
     expect(screen.getByText('Geopolitical Risk')).toBeInTheDocument()
   })
 
-  it('shows a not-found message for an unknown supplier id', () => {
+  it('shows a not-found message for an unknown supplier id', async () => {
     renderDetail('sup_unknown_999')
-    expect(screen.getByRole('heading', { name: 'Supplier not found' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Supplier not found' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Back to Suppliers/i })).toBeInTheDocument()
   })
 
-  it('opens the Edit Supplier modal when Edit is clicked', () => {
+  it('opens the Edit Supplier modal when Edit is clicked', async () => {
     renderDetail()
-    fireEvent.click(screen.getByRole('button', { name: 'Edit' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit' }))
     expect(screen.getByRole('heading', { name: 'Edit Supplier' })).toBeInTheDocument()
   })
 
-  it('ESG tab shows rating, score, and sub-score cards for the supplier', () => {
+  it('ESG tab shows rating, score, and sub-score cards for the supplier', async () => {
     renderDetail()
-    fireEvent.click(screen.getByRole('button', { name: 'ESG' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'ESG' }))
     expect(screen.getByText('Needs Improvement')).toBeInTheDocument()
     expect(screen.getByText('Environmental')).toBeInTheDocument()
     expect(screen.getByText('Social')).toBeInTheDocument()
     expect(screen.getByText('Governance')).toBeInTheDocument()
   })
 
-  it('Spend tab shows the supplier spend records and total', () => {
+  it('Spend tab shows the supplier spend records and total', async () => {
     renderDetail()
-    fireEvent.click(screen.getByRole('button', { name: 'Spend' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Spend' }))
     expect(screen.getByText('Total Spend: $68,550')).toBeInTheDocument()
     expect(screen.getAllByText('Monthly spend — Atlas Steelworks').length).toBe(6)
   })
 
   it('Spend tab Add Spend Record flow opens modal and adds a record', async () => {
     renderDetail()
-    fireEvent.click(screen.getByRole('button', { name: 'Spend' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Spend' }))
     fireEvent.click(screen.getByRole('button', { name: 'Add Spend Record' }))
     expect(screen.getByRole('heading', { name: 'Add Spend Record' })).toBeInTheDocument()
 

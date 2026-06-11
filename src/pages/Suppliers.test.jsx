@@ -15,28 +15,28 @@ function renderSuppliers() {
 }
 
 describe('Suppliers', () => {
-  it('renders page heading and at least one seeded supplier', () => {
+  it('renders page heading and at least one seeded supplier', async () => {
     renderSuppliers()
     expect(screen.getByRole('heading', { name: 'Suppliers' })).toBeInTheDocument()
-    expect(screen.getByText('Atlas Steelworks')).toBeInTheDocument()
+    expect(await screen.findByText('Atlas Steelworks')).toBeInTheDocument()
   })
 
-  it('filters suppliers by search text', () => {
+  it('filters suppliers by search text', async () => {
     renderSuppliers()
     fireEvent.change(screen.getByPlaceholderText('Search suppliers...'), { target: { value: 'atlas' } })
-    expect(screen.getByText('Atlas Steelworks')).toBeInTheDocument()
+    expect(await screen.findByText('Atlas Steelworks')).toBeInTheDocument()
     expect(screen.queryByText('Nordic Freight Solutions')).not.toBeInTheDocument()
   })
 
-  it('shows the empty message when no suppliers match the filter', () => {
+  it('shows the empty message when no suppliers match the filter', async () => {
     renderSuppliers()
     fireEvent.change(screen.getByPlaceholderText('Search suppliers...'), { target: { value: 'zzznomatch' } })
-    expect(screen.getByText('No suppliers match your filters')).toBeInTheDocument()
+    expect(await screen.findByText('No suppliers match your filters')).toBeInTheDocument()
   })
 
-  it('opens the Add Supplier modal when the Add Supplier button is clicked', () => {
+  it('opens the Add Supplier modal when the Add Supplier button is clicked', async () => {
     renderSuppliers()
     fireEvent.click(screen.getByRole('button', { name: /Add Supplier/i }))
-    expect(screen.getByRole('heading', { name: 'Add Supplier' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Add Supplier' })).toBeInTheDocument()
   })
 })

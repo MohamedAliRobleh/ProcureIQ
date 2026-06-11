@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { SupplierProvider } from '../context/SupplierContext'
 import { SpendProvider } from '../context/SpendContext'
@@ -50,6 +50,7 @@ describe('Spend', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add Spend Record' }))
     expect(screen.getByRole('heading', { name: 'Add Spend Record' })).toBeInTheDocument()
 
+    await within(screen.getByLabelText('Supplier')).findByRole('option', { name: 'Atlas Steelworks' })
     fireEvent.change(screen.getByLabelText('Supplier'), { target: { value: suppliers[0].id } })
     fireEvent.change(screen.getByLabelText('Amount'), { target: { value: '7500' } })
     fireEvent.change(screen.getByLabelText('Category'), { target: { value: 'Logistics' } })

@@ -44,8 +44,9 @@ describe('SpendModal', () => {
     expect(screen.getByLabelText('Date')).toHaveValue('2026-04-05')
   })
 
-  it('pre-fills supplierId from defaultSupplierId in add mode', () => {
+  it('pre-fills supplierId from defaultSupplierId in add mode', async () => {
     renderModal({ isOpen: true, onClose: () => {}, record: null, onSubmit: () => {}, defaultSupplierId: 'sup_1' })
+    await screen.findByRole('option', { name: 'Atlas Steelworks' })
     expect(screen.getByLabelText('Supplier')).toHaveValue('sup_1')
   })
 
@@ -59,10 +60,11 @@ describe('SpendModal', () => {
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
-  it('calls onSubmit with form data and onClose when form is valid', () => {
+  it('calls onSubmit with form data and onClose when form is valid', async () => {
     const onSubmit = vi.fn()
     const onClose = vi.fn()
     renderModal({ isOpen: true, onClose, record: null, onSubmit })
+    await screen.findByRole('option', { name: 'Atlas Steelworks' })
     fireEvent.change(screen.getByLabelText('Supplier'), { target: { value: 'sup_1' } })
     fireEvent.change(screen.getByLabelText('Amount'), { target: { value: '5000' } })
     fireEvent.change(screen.getByLabelText('Category'), { target: { value: 'Logistics' } })

@@ -22,6 +22,11 @@ export function ChatProvider({ children }) {
   const [isThinking, setIsThinking] = useState(false)
   const counterRef = useRef(0)
   const timerRef = useRef(null)
+  const dataRef = useRef({ suppliers, contracts, riskAssessments, esgResponses, spendRecords })
+
+  useEffect(() => {
+    dataRef.current = { suppliers, contracts, riskAssessments, esgResponses, spendRecords }
+  }, [suppliers, contracts, spendRecords])
 
   useEffect(() => () => clearTimeout(timerRef.current), [])
 
@@ -33,7 +38,7 @@ export function ChatProvider({ children }) {
     setMessages((prev) => [...prev, userMessage])
     setIsThinking(true)
     timerRef.current = setTimeout(() => {
-      const reply = getAssistantReply(trimmed, { suppliers, contracts, riskAssessments, esgResponses, spendRecords })
+      const reply = getAssistantReply(trimmed, dataRef.current)
       counterRef.current += 1
       setMessages((prev) => [
         ...prev,

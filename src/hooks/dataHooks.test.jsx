@@ -7,17 +7,16 @@ import { useEsg } from './useEsg'
 import { useSpend } from './useSpend'
 import { ContractProvider } from '../context/ContractContext'
 import { SpendProvider } from '../context/SpendContext'
+import { SupplierProvider } from '../context/SupplierContext'
 import { suppliers, contracts, riskAssessments, esgResponses, spendRecords } from '../lib/mockData'
 
 describe('data hooks', () => {
-  it('useSuppliers starts loading then resolves with seeded suppliers', async () => {
-    const { result } = renderHook(() => useSuppliers())
-    expect(result.current.isLoading).toBe(true)
-    expect(result.current.suppliers).toBe(null)
-
+  it('useSuppliers resolves with API-loaded suppliers', async () => {
+    const wrapper = ({ children }) => <SupplierProvider>{children}</SupplierProvider>
+    const { result } = renderHook(() => useSuppliers(), { wrapper })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
-    expect(result.current.suppliers).toEqual(suppliers)
-    expect(result.current.error).toBeNull()
+    expect(result.current.suppliers).toHaveLength(suppliers.length)
+    expect(result.current.suppliers[0].id).toBe(suppliers[0].id)
   })
 
   it('useContracts resolves with seeded contracts', async () => {

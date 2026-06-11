@@ -1,35 +1,53 @@
-import { createContext, useContext, useState } from 'react'
-import { suppliers as seedSuppliers } from '../lib/mockData'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { api } from '../lib/apiClient'
 
 const SupplierContext = createContext(null)
 
 export function SupplierProvider({ children }) {
-  const [suppliers, setSuppliers] = useState(() => seedSuppliers.map((s) => ({ ...s })))
+  const [suppliers, setSuppliers] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    api
+      .get('/api/suppliers')
+      .then((data) => {
+        if (!cancelled) setSuppliers(data)
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e)
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   function addSupplier(data) {
-    const newSupplier = {
-      ...data,
-      id: `sup_${Date.now()}`,
-      orgId: 'org_demo',
-      riskScore: 0,
-      esgScore: 0,
-      logoUrl: null,
-      onboardedAt: new Date(),
-      createdAt: new Date(),
-    }
-    setSuppliers((prev) => [...prev, newSupplier])
+    api
+      .post('/api/suppliers', data)
+      .then((created) => setSuppliers((prev) => [...prev, created]))
+      .catch((e) => setError(e))
   }
 
   function updateSupplier(id, data) {
-    setSuppliers((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)))
+    api
+      .patch(`/api/suppliers/${id}`, data)
+      .then((updated) => setSuppliers((prev) => prev.map((s) => (s.id === id ? { ...s, ...updated } : s))))
+      .catch((e) => setError(e))
   }
 
   function setSupplierStatus(id, status) {
-    setSuppliers((prev) => prev.map((s) => (s.id === id ? { ...s, status } : s)))
+    updateSupplier(id, { status })
   }
 
   return (
-    <SupplierContext.Provider value={{ suppliers, addSupplier, updateSupplier, setSupplierStatus }}>
+    <SupplierContext.Provider
+      value={{ suppliers, isLoading, error, addSupplier, updateSupplier, setSupplierStatus }}
+    >
       {children}
     </SupplierContext.Provider>
   )
