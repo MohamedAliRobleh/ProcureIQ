@@ -14,12 +14,13 @@ import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { useSupplierContext } from '../context/SupplierContext'
 import { useContractContext } from '../context/ContractContext'
 import { useSpendContext } from '../context/SpendContext'
+import { useRisk } from '../hooks/useRisk'
+import { useEsg } from '../hooks/useEsg'
 import { formatDate, formatCurrency, daysUntil, riskColor, esgColor } from '../utils/formatters'
 import { filterContracts, CONTRACT_STATUS_BADGE } from '../utils/contractSelectors'
 import { RISK_LEVEL_BADGE } from '../utils/riskSelectors'
 import { esgRating, ESG_RATING_BADGE, ESG_RATING_LABEL } from '../utils/esgSelectors'
 import { filterSpendRecords } from '../utils/spendSelectors'
-import { riskAssessments, esgResponses } from '../lib/mockData'
 import { cn } from '../utils/cn'
 
 const TABS = ['Overview', 'Contracts', 'Risk', 'ESG', 'Spend']
@@ -30,6 +31,8 @@ export default function SupplierDetail() {
   const { suppliers, updateSupplier, setSupplierStatus, isLoading } = useSupplierContext()
   const { contracts, addContract, updateContract } = useContractContext()
   const { spendRecords, addSpendRecord, updateSpendRecord } = useSpendContext()
+  const { riskAssessments } = useRisk()
+  const { esgResponses } = useEsg()
   const [activeTab, setActiveTab] = useState('Overview')
   const [modalOpen, setModalOpen] = useState(false)
   const [contractModalOpen, setContractModalOpen] = useState(false)
@@ -62,7 +65,7 @@ export default function SupplierDetail() {
 
   const isActive = supplier.status === 'active'
   const supplierContracts = filterContracts(contracts, { supplierId: supplier.id })
-  const riskAssessment = riskAssessments.find((a) => a.supplierId === supplier.id)
+  const riskAssessment = (riskAssessments ?? []).find((a) => a.supplierId === supplier.id)
 
   function openAddContract() {
     setEditingContract(null)
@@ -243,7 +246,7 @@ export default function SupplierDetail() {
   }
 
   function renderEsgTab() {
-    const esgResponse = esgResponses.find((r) => r.supplierId === supplier.id)
+    const esgResponse = (esgResponses ?? []).find((r) => r.supplierId === supplier.id)
     if (!esgResponse) {
       return (
         <Card className="p-6 text-center">

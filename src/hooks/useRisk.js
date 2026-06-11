@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { riskAssessments } from '../lib/mockData'
+import { api } from '../lib/apiClient'
 
 export function useRisk() {
   const [data, setData] = useState(null)
@@ -7,18 +7,21 @@ export function useRisk() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    setIsLoading(true)
-    setError(null)
-    const timer = setTimeout(() => {
-      try {
-        setData(riskAssessments)
-      } catch (e) {
-        setError(e)
-      } finally {
-        setIsLoading(false)
-      }
-    }, 150)
-    return () => clearTimeout(timer)
+    let cancelled = false
+    api
+      .get('/api/risk')
+      .then((d) => {
+        if (!cancelled) setData(d)
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e)
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   return { riskAssessments: data, isLoading, error }

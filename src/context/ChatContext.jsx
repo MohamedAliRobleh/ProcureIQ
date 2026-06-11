@@ -2,7 +2,8 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { useSupplierContext } from './SupplierContext'
 import { useContractContext } from './ContractContext'
 import { useSpendContext } from './SpendContext'
-import { riskAssessments, esgResponses } from '../lib/mockData'
+import { useRisk } from '../hooks/useRisk'
+import { useEsg } from '../hooks/useEsg'
 import { getAssistantReply } from '../lib/assistantEngine'
 
 const ChatContext = createContext(null)
@@ -18,15 +19,23 @@ export function ChatProvider({ children }) {
   const { suppliers } = useSupplierContext()
   const { contracts } = useContractContext()
   const { spendRecords } = useSpendContext()
+  const { riskAssessments } = useRisk()
+  const { esgResponses } = useEsg()
   const [messages, setMessages] = useState(() => [makeGreeting()])
   const [isThinking, setIsThinking] = useState(false)
   const counterRef = useRef(0)
   const timerRef = useRef(null)
-  const dataRef = useRef({ suppliers, contracts, riskAssessments, esgResponses, spendRecords })
 
-  useEffect(() => {
-    dataRef.current = { suppliers, contracts, riskAssessments, esgResponses, spendRecords }
-  }, [suppliers, contracts, spendRecords])
+  // Replies read this ref at reply time (600ms after send), so data that
+  // finished loading between send and reply is included.
+  const dataRef = useRef({})
+  dataRef.current = {
+    suppliers,
+    contracts,
+    spendRecords,
+    riskAssessments: riskAssessments ?? [],
+    esgResponses: esgResponses ?? [],
+  }
 
   useEffect(() => () => clearTimeout(timerRef.current), [])
 

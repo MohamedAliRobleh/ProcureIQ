@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { esgResponses } from '../lib/mockData'
+import { api } from '../lib/apiClient'
 
 export function useEsg() {
   const [data, setData] = useState(null)
@@ -7,18 +7,21 @@ export function useEsg() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    setIsLoading(true)
-    setError(null)
-    const timer = setTimeout(() => {
-      try {
-        setData(esgResponses)
-      } catch (e) {
-        setError(e)
-      } finally {
-        setIsLoading(false)
-      }
-    }, 150)
-    return () => clearTimeout(timer)
+    let cancelled = false
+    api
+      .get('/api/esg')
+      .then((d) => {
+        if (!cancelled) setData(d)
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e)
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   return { esgResponses: data, isLoading, error }

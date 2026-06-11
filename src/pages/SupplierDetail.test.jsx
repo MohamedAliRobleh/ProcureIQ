@@ -45,7 +45,7 @@ describe('SupplierDetail', () => {
   it('Risk tab shows sub-score cards for the supplier', async () => {
     renderDetail()
     fireEvent.click(await screen.findByRole('button', { name: 'Risk' }))
-    expect(screen.getByText('Financial Risk')).toBeInTheDocument()
+    expect(await screen.findByText('Financial Risk')).toBeInTheDocument()
     expect(screen.getByText('Compliance Risk')).toBeInTheDocument()
     expect(screen.getByText('Operational Risk')).toBeInTheDocument()
     expect(screen.getByText('Geopolitical Risk')).toBeInTheDocument()
@@ -66,7 +66,7 @@ describe('SupplierDetail', () => {
   it('ESG tab shows rating, score, and sub-score cards for the supplier', async () => {
     renderDetail()
     fireEvent.click(await screen.findByRole('button', { name: 'ESG' }))
-    expect(screen.getByText('Needs Improvement')).toBeInTheDocument()
+    expect(await screen.findByText('Needs Improvement')).toBeInTheDocument()
     expect(screen.getByText('Environmental')).toBeInTheDocument()
     expect(screen.getByText('Social')).toBeInTheDocument()
     expect(screen.getByText('Governance')).toBeInTheDocument()

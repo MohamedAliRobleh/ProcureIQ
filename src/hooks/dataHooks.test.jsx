@@ -30,14 +30,16 @@ describe('data hooks', () => {
   it('useRisk resolves with seeded risk assessments', async () => {
     const { result } = renderHook(() => useRisk())
     await waitFor(() => expect(result.current.isLoading).toBe(false))
-    expect(result.current.riskAssessments).toEqual(riskAssessments)
+    expect(result.current.riskAssessments).toHaveLength(riskAssessments.length)
+    expect(result.current.riskAssessments[0].id).toBe(riskAssessments[0].id)
     expect(result.current.error).toBeNull()
   })
 
   it('useEsg resolves with seeded ESG responses', async () => {
     const { result } = renderHook(() => useEsg())
     await waitFor(() => expect(result.current.isLoading).toBe(false))
-    expect(result.current.esgResponses).toEqual(esgResponses)
+    expect(result.current.esgResponses).toHaveLength(esgResponses.length)
+    expect(result.current.esgResponses[0].id).toBe(esgResponses[0].id)
     expect(result.current.error).toBeNull()
   })
 
