@@ -18,10 +18,10 @@ function renderContracts() {
 }
 
 describe('Contracts', () => {
-  it('renders page heading and at least one seeded contract', () => {
+  it('renders page heading and at least one seeded contract', async () => {
     renderContracts()
     expect(screen.getByRole('heading', { name: 'Contracts' })).toBeInTheDocument()
-    expect(screen.getByText('Master Supply Agreement — Atlas Steelworks')).toBeInTheDocument()
+    expect(await screen.findByText('Master Supply Agreement — Atlas Steelworks')).toBeInTheDocument()
   })
 
   it('renders 4 stat cards with labelled headings', () => {
@@ -32,8 +32,9 @@ describe('Contracts', () => {
     expect(screen.getByText('Expired')).toBeInTheDocument()
   })
 
-  it('filters contracts by search text', () => {
+  it('filters contracts by search text', async () => {
     renderContracts()
+    expect(await screen.findByText('Master Supply Agreement — Atlas Steelworks')).toBeInTheDocument()
     fireEvent.change(screen.getByPlaceholderText('Search contracts...'), {
       target: { value: 'Master Supply' },
     })
@@ -41,9 +42,9 @@ describe('Contracts', () => {
     expect(screen.queryByText('Annual Logistics Contract — Nordic Freight Solutions')).not.toBeInTheDocument()
   })
 
-  it('opens the ContractSlideOver when a contract title is clicked', () => {
+  it('opens the ContractSlideOver when a contract title is clicked', async () => {
     renderContracts()
-    fireEvent.click(screen.getByText('Master Supply Agreement — Atlas Steelworks'))
+    fireEvent.click(await screen.findByText('Master Supply Agreement — Atlas Steelworks'))
     expect(screen.getByRole('heading', { level: 2, name: 'Master Supply Agreement — Atlas Steelworks' })).toBeInTheDocument()
   })
 })

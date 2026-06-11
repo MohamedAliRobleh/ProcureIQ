@@ -23,7 +23,8 @@ describe('data hooks', () => {
     const wrapper = ({ children }) => <ContractProvider>{children}</ContractProvider>
     const { result } = renderHook(() => useContracts(), { wrapper })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
-    expect(result.current.contracts).toEqual(contracts)
+    expect(result.current.contracts).toHaveLength(contracts.length)
+    expect(result.current.contracts[0].id).toBe(contracts[0].id)
   })
 
   it('useRisk resolves with seeded risk assessments', async () => {
@@ -44,6 +45,7 @@ describe('data hooks', () => {
     const wrapper = ({ children }) => <SpendProvider>{children}</SpendProvider>
     const { result } = renderHook(() => useSpend(), { wrapper })
     await waitFor(() => expect(result.current.isLoading).toBe(false))
-    expect(result.current.spendRecords).toEqual(spendRecords)
+    expect(result.current.spendRecords).toHaveLength(spendRecords.length)
+    expect(result.current.spendRecords[0].id).toBe(spendRecords[0].id)
   })
 })

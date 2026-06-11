@@ -1,19 +1,22 @@
 import { describe, it, expect } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
+import { renderHook, act, waitFor } from '@testing-library/react'
 import { ContractProvider, useContractContext } from './ContractContext'
 import { contracts as seedContracts } from '../lib/mockData'
 
 const wrapper = ({ children }) => <ContractProvider>{children}</ContractProvider>
 
 describe('ContractContext', () => {
-  it('seeds from mockData.contracts on mount', () => {
+  it('loads contracts from the API on mount', async () => {
     const { result } = renderHook(() => useContractContext(), { wrapper })
+    expect(result.current.isLoading).toBe(true)
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.contracts).toHaveLength(seedContracts.length)
-    expect(result.current.contracts[0].id).toBe('con_1')
+    expect(result.current.contracts[0].id).toBe(seedContracts[0].id)
   })
 
-  it('addContract appends a new contract with a generated id', () => {
+  it('addContract appends the API-created contract', async () => {
     const { result } = renderHook(() => useContractContext(), { wrapper })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
     act(() => {
       result.current.addContract({
         title: 'New Agreement',
@@ -25,25 +28,27 @@ describe('ContractContext', () => {
         terms: '',
       })
     })
-    expect(result.current.contracts).toHaveLength(seedContracts.length + 1)
+    await waitFor(() => expect(result.current.contracts).toHaveLength(seedContracts.length + 1))
     expect(result.current.contracts.at(-1).title).toBe('New Agreement')
     expect(result.current.contracts.at(-1).id).toBeTruthy()
   })
 
-  it('updateContract modifies the matching contract by id', () => {
+  it('updateContract merges the API response into the matching contract', async () => {
     const { result } = renderHook(() => useContractContext(), { wrapper })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
     const id = result.current.contracts[0].id
     act(() => result.current.updateContract(id, { title: 'Updated Agreement' }))
-    expect(result.current.contracts.find((c) => c.id === id).title).toBe('Updated Agreement')
+    await waitFor(() => expect(result.current.contracts.find((c) => c.id === id).title).toBe('Updated Agreement'))
     expect(result.current.contracts).toHaveLength(seedContracts.length)
   })
 
-  it('setContractStatus updates only the status field', () => {
+  it('setContractStatus updates only the status field', async () => {
     const { result } = renderHook(() => useContractContext(), { wrapper })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
     const id = result.current.contracts[0].id
     const originalTitle = result.current.contracts[0].title
     act(() => result.current.setContractStatus(id, 'expired'))
-    expect(result.current.contracts.find((c) => c.id === id).status).toBe('expired')
+    await waitFor(() => expect(result.current.contracts.find((c) => c.id === id).status).toBe('expired'))
     expect(result.current.contracts.find((c) => c.id === id).title).toBe(originalTitle)
   })
 

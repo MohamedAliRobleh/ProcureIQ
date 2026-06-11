@@ -20,24 +20,25 @@ function renderSpend() {
 }
 
 describe('Spend', () => {
-  it('renders page heading and stat cards with correct totals', () => {
+  it('renders page heading and stat cards with correct totals', async () => {
     renderSpend()
     expect(screen.getByRole('heading', { name: 'Spend' })).toBeInTheDocument()
     const totalSpend = spendRecords.reduce((sum, r) => sum + r.amount, 0)
     expect(screen.getByText('Total Spend')).toBeInTheDocument()
-    expect(screen.getByText(formatCompactCurrency(totalSpend))).toBeInTheDocument()
+    expect(await screen.findByText(formatCompactCurrency(totalSpend))).toBeInTheDocument()
     expect(screen.getByText('This Month')).toBeInTheDocument()
     expect(screen.getByText('Top Category')).toBeInTheDocument()
     expect(screen.getByText('Suppliers Tracked')).toBeInTheDocument()
   })
 
-  it('renders the spend records table with a seeded record', () => {
+  it('renders the spend records table with a seeded record', async () => {
     renderSpend()
-    expect(screen.getByText(spendRecords[0].invoiceRef)).toBeInTheDocument()
+    expect(await screen.findByText(spendRecords[0].invoiceRef)).toBeInTheDocument()
   })
 
-  it('filters the table by supplier name search', () => {
+  it('filters the table by supplier name search', async () => {
     renderSpend()
+    expect(await screen.findAllByText('Monthly spend — Atlas Steelworks')).not.toHaveLength(0)
     fireEvent.change(screen.getByPlaceholderText('Search spend records...'), {
       target: { value: 'Atlas' },
     })

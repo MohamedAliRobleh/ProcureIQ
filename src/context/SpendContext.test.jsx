@@ -1,19 +1,22 @@
 import { describe, it, expect } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
+import { renderHook, act, waitFor } from '@testing-library/react'
 import { SpendProvider, useSpendContext } from './SpendContext'
 import { spendRecords as seedSpendRecords } from '../lib/mockData'
 
 const wrapper = ({ children }) => <SpendProvider>{children}</SpendProvider>
 
 describe('SpendContext', () => {
-  it('seeds from mockData.spendRecords on mount', () => {
+  it('loads spend records from the API on mount', async () => {
     const { result } = renderHook(() => useSpendContext(), { wrapper })
+    expect(result.current.isLoading).toBe(true)
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.spendRecords).toHaveLength(seedSpendRecords.length)
     expect(result.current.spendRecords[0].id).toBe(seedSpendRecords[0].id)
   })
 
-  it('addSpendRecord appends a new record with a generated id', () => {
+  it('addSpendRecord appends the API-created record', async () => {
     const { result } = renderHook(() => useSpendContext(), { wrapper })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
     act(() => {
       result.current.addSpendRecord({
         supplierId: 'sup_1',
@@ -25,16 +28,17 @@ describe('SpendContext', () => {
         invoiceRef: 'INV-9999',
       })
     })
-    expect(result.current.spendRecords).toHaveLength(seedSpendRecords.length + 1)
+    await waitFor(() => expect(result.current.spendRecords).toHaveLength(seedSpendRecords.length + 1))
     expect(result.current.spendRecords.at(-1).description).toBe('New spend')
     expect(result.current.spendRecords.at(-1).id).toBeTruthy()
   })
 
-  it('updateSpendRecord modifies the matching record by id', () => {
+  it('updateSpendRecord merges the API response into the matching record', async () => {
     const { result } = renderHook(() => useSpendContext(), { wrapper })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
     const id = result.current.spendRecords[0].id
     act(() => result.current.updateSpendRecord(id, { amount: 99999 }))
-    expect(result.current.spendRecords.find((r) => r.id === id).amount).toBe(99999)
+    await waitFor(() => expect(result.current.spendRecords.find((r) => r.id === id).amount).toBe(99999))
     expect(result.current.spendRecords).toHaveLength(seedSpendRecords.length)
   })
 

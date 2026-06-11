@@ -1,29 +1,47 @@
-import { createContext, useContext, useState } from 'react'
-import { spendRecords as seedSpendRecords } from '../lib/mockData'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { api } from '../lib/apiClient'
 
 const SpendContext = createContext(null)
 
 export function SpendProvider({ children }) {
-  const [spendRecords, setSpendRecords] = useState(() => seedSpendRecords.map((r) => ({ ...r })))
+  const [spendRecords, setSpendRecords] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    api
+      .get('/api/spend')
+      .then((data) => {
+        if (!cancelled) setSpendRecords(data)
+      })
+      .catch((e) => {
+        if (!cancelled) setError(e)
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   function addSpendRecord(data) {
-    const newRecord = {
-      ...data,
-      id: `spend_${Date.now()}`,
-      orgId: 'org_demo',
-      createdAt: new Date(),
-    }
-    setSpendRecords((prev) => [...prev, newRecord])
+    api
+      .post('/api/spend', data)
+      .then((created) => setSpendRecords((prev) => [...prev, created]))
+      .catch((e) => setError(e))
   }
 
   function updateSpendRecord(id, data) {
-    setSpendRecords((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, ...data } : r))
-    )
+    api
+      .patch(`/api/spend/${id}`, data)
+      .then((updated) => setSpendRecords((prev) => prev.map((r) => (r.id === id ? { ...r, ...updated } : r))))
+      .catch((e) => setError(e))
   }
 
   return (
-    <SpendContext.Provider value={{ spendRecords, addSpendRecord, updateSpendRecord }}>
+    <SpendContext.Provider value={{ spendRecords, isLoading, error, addSpendRecord, updateSpendRecord }}>
       {children}
     </SpendContext.Provider>
   )

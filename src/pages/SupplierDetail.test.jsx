@@ -39,7 +39,7 @@ describe('SupplierDetail', () => {
   it('Contracts tab shows the supplier contracts table', async () => {
     renderDetail()
     fireEvent.click(await screen.findByRole('button', { name: 'Contracts' }))
-    expect(screen.getByText('Master Supply Agreement — Atlas Steelworks')).toBeInTheDocument()
+    expect(await screen.findByText('Master Supply Agreement — Atlas Steelworks')).toBeInTheDocument()
   })
 
   it('Risk tab shows sub-score cards for the supplier', async () => {
@@ -75,7 +75,7 @@ describe('SupplierDetail', () => {
   it('Spend tab shows the supplier spend records and total', async () => {
     renderDetail()
     fireEvent.click(await screen.findByRole('button', { name: 'Spend' }))
-    expect(screen.getByText('Total Spend: $68,550')).toBeInTheDocument()
+    expect(await screen.findByText('Total Spend: $68,550')).toBeInTheDocument()
     expect(screen.getAllByText('Monthly spend — Atlas Steelworks').length).toBe(6)
   })
 
