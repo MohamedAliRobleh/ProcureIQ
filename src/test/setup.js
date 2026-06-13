@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom'
 import { beforeEach, vi } from 'vitest'
 import { createMockFetch } from './mockApi'
-import { authState, resetAuthState, DEMO_ORG } from './authState'
+import { resetAuthState } from './authState'
 
 // Global Clerk-free mock of the auth seam. Tests simulate loading/signed-out
 // by mutating authState (reset before every test).
