@@ -1,5 +1,9 @@
-import { describe, it, expect, vi } from 'vitest'
-import { api } from './apiClient'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { api, setTokenGetter } from './apiClient'
+
+afterEach(() => {
+  setTokenGetter(null)
+})
 
 describe('apiClient', () => {
   it('GET parses JSON from the response', async () => {
@@ -21,5 +25,20 @@ describe('apiClient', () => {
   it('throws the server error message on non-OK responses', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 400, json: async () => ({ error: 'name is required' }) })))
     await expect(api.post('/api/suppliers', {})).rejects.toThrow('name is required')
+  })
+
+  it('attaches a Bearer token when a token getter is registered', async () => {
+    const fetchMock = vi.fn(async () => ({ ok: true, status: 200, json: async () => [] }))
+    vi.stubGlobal('fetch', fetchMock)
+    setTokenGetter(async () => 'tok_123')
+    await api.get('/api/suppliers')
+    expect(fetchMock.mock.calls[0][1].headers.Authorization).toBe('Bearer tok_123')
+  })
+
+  it('sends no Authorization header when no getter is registered', async () => {
+    const fetchMock = vi.fn(async () => ({ ok: true, status: 200, json: async () => [] }))
+    vi.stubGlobal('fetch', fetchMock)
+    await api.get('/api/suppliers')
+    expect(fetchMock.mock.calls[0][1].headers.Authorization).toBeUndefined()
   })
 })

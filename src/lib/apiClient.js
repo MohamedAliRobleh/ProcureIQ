@@ -1,6 +1,19 @@
+let getToken = null
+
+// Registered by the auth provider's TokenBridge; null in tests and when
+// signed out, in which case requests go out without an Authorization header.
+export function setTokenGetter(fn) {
+  getToken = fn
+}
+
 async function request(path, options = {}) {
+  const headers = { 'Content-Type': 'application/json' }
+  if (getToken) {
+    const token = await getToken()
+    if (token) headers.Authorization = `Bearer ${token}`
+  }
   const res = await fetch(path, {
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     ...options,
   })
   const body = await res.json().catch(() => null)
