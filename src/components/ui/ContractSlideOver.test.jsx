@@ -88,4 +88,31 @@ describe('ContractSlideOver', () => {
     fireEvent.click(screen.getByTestId('contract-slide-overlay'))
     expect(onClose).toHaveBeenCalled()
   })
+
+  it('renders an existing aiSummary and no generate button', () => {
+    renderSlideOver({
+      isOpen: true,
+      onClose: () => {},
+      contract: { ...mockContract, aiSummary: 'This is the AI summary.' },
+      supplier: mockSupplier,
+      onEdit: () => {},
+      onSummarize: vi.fn(),
+    })
+    expect(screen.getByText('This is the AI summary.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Generate summary' })).not.toBeInTheDocument()
+  })
+
+  it('shows a Generate summary button that calls onSummarize', () => {
+    const onSummarize = vi.fn().mockResolvedValue({})
+    renderSlideOver({
+      isOpen: true,
+      onClose: () => {},
+      contract: mockContract,
+      supplier: mockSupplier,
+      onEdit: () => {},
+      onSummarize,
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Generate summary' }))
+    expect(onSummarize).toHaveBeenCalled()
+  })
 })

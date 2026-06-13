@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
@@ -8,7 +8,7 @@ import { formatCurrency, formatDate, daysUntil } from '../../utils/formatters'
 import { CONTRACT_STATUS_BADGE } from '../../utils/contractSelectors'
 import { cn } from '../../utils/cn'
 
-export default function ContractSlideOver({ isOpen, onClose, contract, supplier, onEdit }) {
+export default function ContractSlideOver({ isOpen, onClose, contract, supplier, onEdit, onSummarize }) {
   useEffect(() => {
     if (!isOpen) return
     function handleKey(e) {
@@ -17,6 +17,21 @@ export default function ContractSlideOver({ isOpen, onClose, contract, supplier,
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
   }, [isOpen, onClose])
+
+  const [isSummarizing, setIsSummarizing] = useState(false)
+  const [summaryError, setSummaryError] = useState(null)
+
+  async function handleSummarize() {
+    setSummaryError(null)
+    setIsSummarizing(true)
+    try {
+      await onSummarize()
+    } catch {
+      setSummaryError('Could not generate a summary. Please try again.')
+    } finally {
+      setIsSummarizing(false)
+    }
+  }
 
   if (!contract) return null
 
@@ -114,6 +129,20 @@ export default function ContractSlideOver({ isOpen, onClose, contract, supplier,
                 <div>
                   <p className="mb-1 text-xs font-medium text-text-secondary">Terms</p>
                   <p className="text-sm text-text-primary">{contract.terms}</p>
+                </div>
+              )}
+
+              {onSummarize && (
+                <div>
+                  <p className="mb-1 text-xs font-medium text-text-secondary">AI Summary</p>
+                  {contract.aiSummary ? (
+                    <p className="text-sm text-text-primary">{contract.aiSummary}</p>
+                  ) : (
+                    <Button variant="secondary" onClick={handleSummarize} disabled={isSummarizing}>
+                      {isSummarizing ? 'Generating…' : 'Generate summary'}
+                    </Button>
+                  )}
+                  {summaryError && <p className="mt-1 text-xs text-accent-red">{summaryError}</p>}
                 </div>
               )}
             </div>
