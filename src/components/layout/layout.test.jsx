@@ -5,7 +5,6 @@ import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import PageHeader from './PageHeader'
 import ErrorBoundary from './ErrorBoundary'
-import { MockAuthProvider } from '../../lib/mockAuth'
 
 describe('Sidebar', () => {
   it('renders a nav link for every module', () => {
@@ -22,14 +21,11 @@ describe('Sidebar', () => {
 })
 
 describe('TopBar', () => {
-  it('renders the mock organization and user info', () => {
-    render(
-      <MockAuthProvider>
-        <TopBar />
-      </MockAuthProvider>
-    )
+  it('renders the demo organization, user info, and user menu', () => {
+    render(<TopBar />)
     expect(screen.getByText('Procure IQ Demo Org')).toBeInTheDocument()
     expect(screen.getByText('Amara Chen')).toBeInTheDocument()
+    expect(screen.getByTestId('user-button')).toBeInTheDocument()
   })
 })
 

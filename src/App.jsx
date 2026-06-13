@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import AppShell from './components/layout/AppShell'
 import ErrorBoundary from './components/layout/ErrorBoundary'
-import { MockAuthProvider } from './lib/mockAuth'
+import { AuthProvider } from './lib/auth'
 import { SupplierProvider } from './context/SupplierContext'
 import { ContractProvider } from './context/ContractContext'
 import { SpendProvider } from './context/SpendContext'
@@ -25,7 +25,7 @@ const PLACEHOLDER_ROUTES = [
 export default function App() {
   return (
     <ErrorBoundary>
-      <MockAuthProvider>
+      <AuthProvider>
         <SupplierProvider>
           <ContractProvider>
             <SpendProvider>
@@ -53,7 +53,7 @@ export default function App() {
             </SpendProvider>
           </ContractProvider>
         </SupplierProvider>
-      </MockAuthProvider>
+      </AuthProvider>
     </ErrorBoundary>
   )
 }
