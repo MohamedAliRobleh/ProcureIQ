@@ -16,6 +16,6 @@ export function getAnthropic() {
   if (!isAiConfigured()) {
     throw new Error('ANTHROPIC_API_KEY is not configured')
   }
-  if (!client) client = new Anthropic({ dangerouslyAllowBrowser: true })
+  if (!client) client = new Anthropic()
   return client
 }
