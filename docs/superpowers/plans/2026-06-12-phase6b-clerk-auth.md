@@ -887,15 +887,15 @@ git commit -m "feat: gate app behind Clerk sign-in with embedded auth pages"
 
 **Files:** none (verification only; commit stragglers if real fixes surface).
 
-- [ ] **Step 1: Full suite** — `npm test`, run twice; report exact counts (expect ~38-39 files / ~241 tests, all green).
+- [x] **Step 1: Full suite** — `npm test`, run twice; report exact counts (expect ~38-39 files / ~241 tests, all green).
 
-- [ ] **Step 2: Lint** — `npx eslint src api`; expect ~10 errors, all pre-existing categories (mockAuth's 2 errors are gone; auth.jsx adds 1 `react-refresh/only-export-components`, same accepted category as the contexts).
+- [x] **Step 2: Lint** — `npx eslint src api`; expect ~10 errors, all pre-existing categories (mockAuth's 2 errors are gone; auth.jsx adds 1 `react-refresh/only-export-components`, same accepted category as the contexts).
 
-- [ ] **Step 3: Live 401 check (no network needed)** — temporary script (delete after, do not commit): import the wrapped default export of `api/suppliers/index.js`, invoke with `{ method: 'GET', headers: {} }` and a mock res; expect 401 without touching the DB. Then with `headers: { authorization: 'Bearer not-a-real-token' }` — expect 401 (verifyToken rejects against the real CLERK_SECRET_KEY).
+- [x] **Step 3: Live 401 check (no network needed)** — temporary script (delete after, do not commit): import the wrapped default export of `api/suppliers/index.js`, invoke with `{ method: 'GET', headers: {} }` and a mock res; expect 401 without touching the DB. Then with `headers: { authorization: 'Bearer not-a-real-token' }` — expect 401 (verifyToken rejects against the real CLERK_SECRET_KEY).
 
-- [ ] **Step 4: Manual checklist (report for the user; execute what's possible)** — `vercel dev`: visit `/`, click Open App → bounced to /sign-in (dark-themed Clerk form) → sign up → land on /dashboard with live data → add a supplier (network tab shows Authorization header) → UserButton → sign out → bounced to sign-in. `curl http://localhost:3000/api/suppliers` without a token → 401.
+- [x] **Step 4: Manual checklist (report for the user; execute what's possible)** — `vercel dev`: visit `/`, click Open App → bounced to /sign-in (dark-themed Clerk form) → sign up → land on /dashboard with live data → add a supplier (network tab shows Authorization header) → UserButton → sign out → bounced to sign-in. `curl http://localhost:3000/api/suppliers` without a token → 401.
 
-- [ ] **Step 5: Report** — counts, lint, 401 results, anything flagged.
+- [x] **Step 5: Report** — counts, lint, 401 results, anything flagged.
 
 ---
 
