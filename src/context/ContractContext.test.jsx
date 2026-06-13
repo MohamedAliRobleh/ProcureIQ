@@ -52,6 +52,16 @@ describe('ContractContext', () => {
     expect(result.current.contracts.find((c) => c.id === id).title).toBe(originalTitle)
   })
 
+  it('summarizeContract sets aiSummary on the matching contract', async () => {
+    const { result } = renderHook(() => useContractContext(), { wrapper })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    const id = result.current.contracts[0].id
+    await act(async () => {
+      await result.current.summarizeContract(id)
+    })
+    expect(result.current.contracts.find((c) => c.id === id).aiSummary).toBe('MOCK AI SUMMARY')
+  })
+
   it('throws when used outside ContractProvider', () => {
     expect(() => renderHook(() => useContractContext())).toThrow(
       'useContractContext must be used inside ContractProvider'

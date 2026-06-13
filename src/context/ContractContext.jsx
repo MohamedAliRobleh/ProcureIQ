@@ -44,9 +44,22 @@ export function ContractProvider({ children }) {
     updateContract(id, { status })
   }
 
+  function summarizeContract(id) {
+    return api
+      .post('/api/contracts/summarize', { id })
+      .then((updated) => {
+        setContracts((prev) => prev.map((c) => (c.id === id ? { ...c, ...updated } : c)))
+        return updated
+      })
+      .catch((e) => {
+        setError(e)
+        throw e
+      })
+  }
+
   return (
     <ContractContext.Provider
-      value={{ contracts, isLoading, error, addContract, updateContract, setContractStatus }}
+      value={{ contracts, isLoading, error, addContract, updateContract, setContractStatus, summarizeContract }}
     >
       {children}
     </ContractContext.Provider>
