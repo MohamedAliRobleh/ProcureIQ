@@ -14,6 +14,8 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@clerk/backend": "^3.7.0",
+    "@clerk/clerk-react": "^5.61.8",
     "@prisma/client": "^6.19.3",
     "clsx": "^2.1.1",
     "framer-motion": "^12.40.0",
