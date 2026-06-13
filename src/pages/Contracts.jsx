@@ -15,7 +15,7 @@ import { formatCurrency, formatCompactCurrency, daysUntil } from '../utils/forma
 import { cn } from '../utils/cn'
 
 export default function Contracts() {
-  const { contracts, addContract, updateContract } = useContractContext()
+  const { contracts, addContract, updateContract, summarizeContract } = useContractContext()
   const { suppliers } = useSupplierContext()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('')
@@ -127,6 +127,10 @@ export default function Contracts() {
     },
   ]
 
+  const liveSelected = selectedContract
+    ? contracts.find((c) => c.id === selectedContract.id) ?? selectedContract
+    : null
+
   return (
     <div>
       <PageHeader
@@ -201,9 +205,10 @@ export default function Contracts() {
       <ContractSlideOver
         isOpen={slideOverOpen}
         onClose={() => setSlideOverOpen(false)}
-        contract={selectedContract}
-        supplier={selectedContract ? suppliers.find((s) => s.id === selectedContract.supplierId) : null}
-        onEdit={() => openEdit(selectedContract)}
+        contract={liveSelected}
+        supplier={liveSelected ? suppliers.find((s) => s.id === liveSelected.supplierId) : null}
+        onEdit={() => openEdit(liveSelected)}
+        onSummarize={liveSelected ? () => summarizeContract(liveSelected.id) : undefined}
       />
 
       <ContractModal

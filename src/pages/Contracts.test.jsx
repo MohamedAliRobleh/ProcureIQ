@@ -47,4 +47,11 @@ describe('Contracts', () => {
     fireEvent.click(await screen.findByText('Master Supply Agreement — Atlas Steelworks'))
     expect(screen.getByRole('heading', { level: 2, name: 'Master Supply Agreement — Atlas Steelworks' })).toBeInTheDocument()
   })
+
+  it('generates an AI summary from the contract slide-over', async () => {
+    renderContracts()
+    fireEvent.click(await screen.findByText('Master Supply Agreement — Atlas Steelworks'))
+    fireEvent.click(screen.getByRole('button', { name: 'Generate summary' }))
+    expect(await screen.findByText('MOCK AI SUMMARY')).toBeInTheDocument()
+  })
 })

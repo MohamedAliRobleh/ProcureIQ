@@ -29,7 +29,7 @@ const STATUS_BADGE = { active: 'green', pending: 'amber', suspended: 'red' }
 export default function SupplierDetail() {
   const { id } = useParams()
   const { suppliers, updateSupplier, setSupplierStatus, isLoading } = useSupplierContext()
-  const { contracts, addContract, updateContract } = useContractContext()
+  const { contracts, addContract, updateContract, summarizeContract } = useContractContext()
   const { spendRecords, addSpendRecord, updateSpendRecord } = useSpendContext()
   const { riskAssessments } = useRisk()
   const { esgResponses } = useEsg()
@@ -177,6 +177,9 @@ export default function SupplierDetail() {
   ]
 
   function renderContractsTab() {
+    const liveSelected = selectedContract
+      ? contracts.find((c) => c.id === selectedContract.id) ?? selectedContract
+      : null
     return (
       <div>
         <div className="mb-3 flex justify-end">
@@ -193,9 +196,10 @@ export default function SupplierDetail() {
         <ContractSlideOver
           isOpen={contractSlideOpen}
           onClose={() => setContractSlideOpen(false)}
-          contract={selectedContract}
+          contract={liveSelected}
           supplier={supplier}
-          onEdit={() => openEditContract(selectedContract)}
+          onEdit={() => openEditContract(liveSelected)}
+          onSummarize={liveSelected ? () => summarizeContract(liveSelected.id) : undefined}
         />
         <ContractModal
           isOpen={contractModalOpen}
