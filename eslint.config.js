@@ -18,4 +18,10 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    files: ['api/**', 'prisma/**'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ])
