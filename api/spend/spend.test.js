@@ -2,9 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('../_lib/prisma.js', () => ({
   prisma: {
-    spendRecord: { findMany: vi.fn(), create: vi.fn(), update: vi.fn() },
+    spendRecord: { findMany: vi.fn(), create: vi.fn(), update: vi.fn(), findFirst: vi.fn() },
   },
 }))
+
+vi.mock('../_lib/auth.js', () => ({ requireAuth: (handler) => handler }))
 
 import listHandler from './index.js'
 import idHandler from './[id].js'
@@ -54,13 +56,25 @@ describe('spend endpoints', () => {
   })
 
   it('PATCH updates by id', async () => {
+    prisma.spendRecord.findFirst.mockResolvedValue({ id: 'spend_1' })
     prisma.spendRecord.update.mockResolvedValue({ id: 'spend_1', amount: 999 })
     const res = mockRes()
     await idHandler({ method: 'PATCH', query: { id: 'spend_1' }, body: { amount: 999 } }, res)
+    expect(prisma.spendRecord.findFirst).toHaveBeenCalledWith({
+      where: { id: 'spend_1', orgId: 'org_demo' },
+    })
     expect(prisma.spendRecord.update).toHaveBeenCalledWith({
       where: { id: 'spend_1' },
       data: { amount: 999 },
     })
     expect(res.status).toHaveBeenCalledWith(200)
+  })
+
+  it('returns 404 when the id does not exist in the org', async () => {
+    prisma.spendRecord.findFirst.mockResolvedValue(null)
+    const res = mockRes()
+    await idHandler({ method: 'PATCH', query: { id: 'spend_other_org' }, body: { amount: 999 } }, res)
+    expect(res.status).toHaveBeenCalledWith(404)
+    expect(prisma.spendRecord.update).not.toHaveBeenCalled()
   })
 })

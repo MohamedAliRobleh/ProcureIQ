@@ -2,9 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('../_lib/prisma.js', () => ({
   prisma: {
-    contract: { findMany: vi.fn(), create: vi.fn(), update: vi.fn() },
+    contract: { findMany: vi.fn(), create: vi.fn(), update: vi.fn(), findFirst: vi.fn() },
   },
 }))
+
+vi.mock('../_lib/auth.js', () => ({ requireAuth: (handler) => handler }))
 
 import listHandler from './index.js'
 import idHandler from './[id].js'
@@ -58,11 +60,23 @@ describe('contracts endpoints', () => {
   })
 
   it('PATCH coerces dates and updates by id', async () => {
+    prisma.contract.findFirst.mockResolvedValue({ id: 'con_1' })
     prisma.contract.update.mockResolvedValue({ id: 'con_1' })
     const res = mockRes()
     await idHandler({ method: 'PATCH', query: { id: 'con_1' }, body: { endDate: '2026-07-22' } }, res)
+    expect(prisma.contract.findFirst).toHaveBeenCalledWith({
+      where: { id: 'con_1', orgId: 'org_demo' },
+    })
     const data = prisma.contract.update.mock.calls[0][0].data
     expect(data.endDate).toBeInstanceOf(Date)
     expect(res.status).toHaveBeenCalledWith(200)
+  })
+
+  it('returns 404 when the id does not exist in the org', async () => {
+    prisma.contract.findFirst.mockResolvedValue(null)
+    const res = mockRes()
+    await idHandler({ method: 'PATCH', query: { id: 'con_other_org' }, body: { endDate: '2026-07-22' } }, res)
+    expect(res.status).toHaveBeenCalledWith(404)
+    expect(prisma.contract.update).not.toHaveBeenCalled()
   })
 })

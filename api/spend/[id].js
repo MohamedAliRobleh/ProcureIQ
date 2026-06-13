@@ -1,9 +1,15 @@
 import { prisma } from '../_lib/prisma.js'
+import { ORG_ID } from '../_lib/org.js'
 import { coerceDates } from '../_lib/dates.js'
+import { requireAuth } from '../_lib/auth.js'
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   try {
     if (req.method === 'PATCH') {
+      const existing = await prisma.spendRecord.findFirst({
+        where: { id: req.query.id, orgId: ORG_ID },
+      })
+      if (!existing) return res.status(404).json({ error: 'Not found' })
       const updated = await prisma.spendRecord.update({
         where: { id: req.query.id },
         data: coerceDates(req.body ?? {}, ['date']),
@@ -17,3 +23,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: e.message })
   }
 }
+
+export default requireAuth(handler)

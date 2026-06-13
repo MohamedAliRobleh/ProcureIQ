@@ -7,6 +7,8 @@ vi.mock('./_lib/prisma.js', () => ({
   },
 }))
 
+vi.mock('./_lib/auth.js', () => ({ requireAuth: (handler) => handler }))
+
 import riskHandler from './risk/index.js'
 import esgHandler from './esg/index.js'
 import { prisma } from './_lib/prisma.js'

@@ -1,8 +1,9 @@
 import { prisma } from '../_lib/prisma.js'
 import { ORG_ID } from '../_lib/org.js'
 import { coerceDates } from '../_lib/dates.js'
+import { requireAuth } from '../_lib/auth.js'
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       const records = await prisma.spendRecord.findMany({
@@ -32,3 +33,5 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: e.message })
   }
 }
+
+export default requireAuth(handler)
