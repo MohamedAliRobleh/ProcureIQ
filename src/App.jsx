@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import AppShell from './components/layout/AppShell'
 import ErrorBoundary from './components/layout/ErrorBoundary'
+import ProtectedRoute from './components/layout/ProtectedRoute'
 import { AuthProvider } from './lib/auth'
 import { SupplierProvider } from './context/SupplierContext'
 import { ContractProvider } from './context/ContractContext'
@@ -16,6 +17,8 @@ import ESG from './pages/ESG'
 import Spend from './pages/Spend'
 import AIAssistant from './pages/AIAssistant'
 import PlaceholderPage from './pages/PlaceholderPage'
+import SignInPage from './pages/SignInPage'
+import SignUpPage from './pages/SignUpPage'
 
 const PLACEHOLDER_ROUTES = [
   { path: '/portal', title: 'Supplier Portal', phase: 'Phase 7' },
@@ -33,7 +36,15 @@ export default function App() {
                 <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Landing />} />
-                    <Route element={<AppShell />}>
+                    <Route path="/sign-in/*" element={<SignInPage />} />
+                    <Route path="/sign-up/*" element={<SignUpPage />} />
+                    <Route
+                      element={
+                        <ProtectedRoute>
+                          <AppShell />
+                        </ProtectedRoute>
+                      }
+                    >
                       <Route path="/dashboard" element={<Dashboard />} />
                       <Route path="/suppliers" element={<Suppliers />} />
                       <Route path="/suppliers/:id" element={<SupplierDetail />} />

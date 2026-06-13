@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import App from './App'
+import { authState } from './test/authState'
 
 describe('App', () => {
   it('renders the public landing page at the root route', async () => {
@@ -57,5 +58,24 @@ describe('App', () => {
     render(<App />)
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Supplier Portal' })).toBeInTheDocument())
     expect(screen.getByText(/coming in Phase 7/i)).toBeInTheDocument()
+  })
+
+  it('renders the embedded sign-in at /sign-in', async () => {
+    window.history.pushState({}, '', '/sign-in')
+    render(<App />)
+    expect(await screen.findByTestId('clerk-sign-in')).toBeInTheDocument()
+  })
+
+  it('renders the embedded sign-up at /sign-up', async () => {
+    window.history.pushState({}, '', '/sign-up')
+    render(<App />)
+    expect(await screen.findByTestId('clerk-sign-up')).toBeInTheDocument()
+  })
+
+  it('redirects app routes to sign-in when signed out', async () => {
+    authState.isSignedIn = false
+    window.history.pushState({}, '', '/dashboard')
+    render(<App />)
+    expect(await screen.findByTestId('clerk-sign-in')).toBeInTheDocument()
   })
 })
