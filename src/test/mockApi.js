@@ -21,6 +21,13 @@ export function createMockFetch() {
     const method = options.method ?? 'GET'
     const body = options.body ? JSON.parse(options.body) : null
 
+    if (method === 'POST' && url === '/api/assistant') {
+      return jsonResponse({ reply: 'MOCK ASSISTANT REPLY', fallback: false })
+    }
+    if (method === 'POST' && url === '/api/contracts/summarize') {
+      return jsonResponse({ id: body.id, aiSummary: 'MOCK AI SUMMARY' })
+    }
+
     if (method === 'GET') {
       if (url === '/api/risk') return jsonResponse(toJson(riskAssessments))
       if (url === '/api/esg') return jsonResponse(toJson(esgResponses))

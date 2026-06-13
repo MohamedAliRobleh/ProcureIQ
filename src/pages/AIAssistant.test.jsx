@@ -44,7 +44,7 @@ describe('AIAssistant', () => {
     expect(screen.queryByRole('button', { name: 'Give me a portfolio overview' })).not.toBeInTheDocument()
     expect(screen.getByTestId('thinking-indicator')).toBeInTheDocument()
 
-    await waitFor(() => expect(screen.getByText(/Pacific Rim Logistics/)).toBeInTheDocument(), { timeout: 2000 })
+    await waitFor(() => expect(screen.getByText('MOCK ASSISTANT REPLY')).toBeInTheDocument())
     expect(screen.queryByTestId('thinking-indicator')).not.toBeInTheDocument()
   })
 
@@ -55,7 +55,7 @@ describe('AIAssistant', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Send' }))
 
     expect(input).toHaveValue('')
-    await waitFor(() => expect(screen.getByText(/portfolio overview/)).toBeInTheDocument(), { timeout: 2000 })
+    await waitFor(() => expect(screen.getByText('MOCK ASSISTANT REPLY')).toBeInTheDocument())
   })
 
   it('ignores submitting an empty input', () => {
@@ -68,10 +68,10 @@ describe('AIAssistant', () => {
   it('Clear chat resets the conversation and restores the chips', async () => {
     renderPage()
     fireEvent.click(screen.getByRole('button', { name: 'Which contracts expire soon?' }))
-    await waitFor(() => expect(screen.getByText(/active contracts/)).toBeInTheDocument(), { timeout: 2000 })
+    await waitFor(() => expect(screen.getByText('MOCK ASSISTANT REPLY')).toBeInTheDocument())
 
     fireEvent.click(screen.getByRole('button', { name: 'Clear chat' }))
-    expect(screen.queryByText(/active contracts/)).not.toBeInTheDocument()
+    expect(screen.queryByText('MOCK ASSISTANT REPLY')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Give me a portfolio overview' })).toBeInTheDocument()
   })
 })

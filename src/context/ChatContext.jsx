@@ -1,66 +1,55 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
-import { useSupplierContext } from './SupplierContext'
-import { useContractContext } from './ContractContext'
-import { useSpendContext } from './SpendContext'
-import { useRisk } from '../hooks/useRisk'
-import { useEsg } from '../hooks/useEsg'
-import { getAssistantReply } from '../lib/assistantEngine'
+import { api } from '../lib/apiClient'
 
 const ChatContext = createContext(null)
 
 const GREETING_TEXT =
   "Hi! I'm your ProcureIQ assistant. Ask me about supplier risk, spend, expiring contracts, ESG performance, or any supplier by name."
 
+const ERROR_TEXT = "Sorry, I couldn't reach the assistant just now. Please try again."
+
 function makeGreeting() {
   return { id: 'msg_0', role: 'assistant', text: GREETING_TEXT, createdAt: new Date() }
 }
 
 export function ChatProvider({ children }) {
-  const { suppliers } = useSupplierContext()
-  const { contracts } = useContractContext()
-  const { spendRecords } = useSpendContext()
-  const { riskAssessments } = useRisk()
-  const { esgResponses } = useEsg()
   const [messages, setMessages] = useState(() => [makeGreeting()])
   const [isThinking, setIsThinking] = useState(false)
   const counterRef = useRef(0)
-  const timerRef = useRef(null)
+  const activeRef = useRef(true)
 
-  // Replies read this ref at reply time (600ms after send), so data that
-  // finished loading between send and reply is included.
-  const dataRef = useRef({})
-  useEffect(() => {
-    dataRef.current = {
-      suppliers,
-      contracts,
-      spendRecords,
-      riskAssessments: riskAssessments ?? [],
-      esgResponses: esgResponses ?? [],
-    }
-  })
+  useEffect(() => () => { activeRef.current = false }, [])
 
-  useEffect(() => () => clearTimeout(timerRef.current), [])
+  function appendAssistant(text) {
+    counterRef.current += 1
+    setMessages((prev) => [...prev, { id: `msg_${counterRef.current}`, role: 'assistant', text, createdAt: new Date() }])
+  }
 
   function sendMessage(text) {
     const trimmed = text.trim()
     if (!trimmed) return
+    // Conversation turns after the greeting, plus the new user turn.
+    const priorTurns = messages.slice(1).map((m) => ({ role: m.role, content: m.text }))
+    const payload = [...priorTurns, { role: 'user', content: trimmed }]
+
     counterRef.current += 1
-    const userMessage = { id: `msg_${counterRef.current}`, role: 'user', text: trimmed, createdAt: new Date() }
-    setMessages((prev) => [...prev, userMessage])
+    setMessages((prev) => [...prev, { id: `msg_${counterRef.current}`, role: 'user', text: trimmed, createdAt: new Date() }])
     setIsThinking(true)
-    timerRef.current = setTimeout(() => {
-      const reply = getAssistantReply(trimmed, dataRef.current)
-      counterRef.current += 1
-      setMessages((prev) => [
-        ...prev,
-        { id: `msg_${counterRef.current}`, role: 'assistant', text: reply.text, createdAt: new Date() },
-      ])
-      setIsThinking(false)
-    }, 600)
+
+    api
+      .post('/api/assistant', { messages: payload })
+      .then((data) => {
+        if (activeRef.current) appendAssistant(data.reply)
+      })
+      .catch(() => {
+        if (activeRef.current) appendAssistant(ERROR_TEXT)
+      })
+      .finally(() => {
+        if (activeRef.current) setIsThinking(false)
+      })
   }
 
   function clearChat() {
-    clearTimeout(timerRef.current)
     setIsThinking(false)
     setMessages([makeGreeting()])
   }
