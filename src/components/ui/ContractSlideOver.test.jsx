@@ -145,4 +145,30 @@ describe('ContractSlideOver', () => {
     fireEvent.change(input, { target: { files: [file] } })
     expect(onUpload).toHaveBeenCalledWith(file)
   })
+
+  it('does not render the Email reminder button without onNotify', () => {
+    renderSlideOver({
+      isOpen: true,
+      onClose: () => {},
+      contract: mockContract,
+      supplier: mockSupplier,
+      onEdit: () => {},
+    })
+    expect(screen.queryByRole('button', { name: 'Email reminder' })).not.toBeInTheDocument()
+  })
+
+  it('clicking Email reminder calls onNotify and shows confirmation', async () => {
+    const onNotify = vi.fn().mockResolvedValue({ ok: true })
+    renderSlideOver({
+      isOpen: true,
+      onClose: () => {},
+      contract: mockContract,
+      supplier: mockSupplier,
+      onEdit: () => {},
+      onNotify,
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Email reminder' }))
+    expect(onNotify).toHaveBeenCalled()
+    expect(await screen.findByText(/Reminder sent/)).toBeInTheDocument()
+  })
 })

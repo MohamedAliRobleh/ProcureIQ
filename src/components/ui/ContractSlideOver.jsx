@@ -8,7 +8,7 @@ import { formatCurrency, formatDate, daysUntil } from '../../utils/formatters'
 import { CONTRACT_STATUS_BADGE } from '../../utils/contractSelectors'
 import { cn } from '../../utils/cn'
 
-export default function ContractSlideOver({ isOpen, onClose, contract, supplier, onEdit, onSummarize, onUpload }) {
+export default function ContractSlideOver({ isOpen, onClose, contract, supplier, onEdit, onSummarize, onUpload, onNotify }) {
   useEffect(() => {
     if (!isOpen) return
     function handleKey(e) {
@@ -49,6 +49,23 @@ export default function ContractSlideOver({ isOpen, onClose, contract, supplier,
       setUploadError('Could not upload the document. Please try again.')
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  const [isSending, setIsSending] = useState(false)
+  const [notifySent, setNotifySent] = useState(false)
+  const [notifyError, setNotifyError] = useState(null)
+
+  async function handleNotify() {
+    setNotifyError(null)
+    setIsSending(true)
+    try {
+      await onNotify()
+      setNotifySent(true)
+    } catch {
+      setNotifyError('Could not send the reminder. Please try again.')
+    } finally {
+      setIsSending(false)
     }
   }
 
@@ -196,6 +213,17 @@ export default function ContractSlideOver({ isOpen, onClose, contract, supplier,
                     </Button>
                   )}
                   {uploadError && <p className="mt-1 text-xs text-accent-red">{uploadError}</p>}
+                </div>
+              )}
+
+              {onNotify && (
+                <div>
+                  <p className="mb-1 text-xs font-medium text-text-secondary">Notifications</p>
+                  <Button variant="secondary" onClick={handleNotify} disabled={isSending}>
+                    {isSending ? 'Sending…' : 'Email reminder'}
+                  </Button>
+                  {notifySent && <p className="mt-1 text-xs text-accent-green">Reminder sent ✓</p>}
+                  {notifyError && <p className="mt-1 text-xs text-accent-red">{notifyError}</p>}
                 </div>
               )}
             </div>
