@@ -29,7 +29,7 @@ const STATUS_BADGE = { active: 'green', pending: 'amber', suspended: 'red' }
 export default function SupplierDetail() {
   const { id } = useParams()
   const { suppliers, updateSupplier, setSupplierStatus, isLoading } = useSupplierContext()
-  const { contracts, addContract, updateContract, summarizeContract } = useContractContext()
+  const { contracts, addContract, updateContract, summarizeContract, attachContractDocument } = useContractContext()
   const { spendRecords, addSpendRecord, updateSpendRecord } = useSpendContext()
   const { riskAssessments } = useRisk()
   const { esgResponses } = useEsg()
@@ -200,6 +200,7 @@ export default function SupplierDetail() {
           supplier={supplier}
           onEdit={() => openEditContract(liveSelected)}
           onSummarize={liveSelected ? () => summarizeContract(liveSelected.id) : undefined}
+          onUpload={liveSelected ? (file) => attachContractDocument(liveSelected.id, file) : undefined}
         />
         <ContractModal
           isOpen={contractModalOpen}

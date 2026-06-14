@@ -54,4 +54,13 @@ describe('Contracts', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Generate summary' }))
     expect(await screen.findByText('MOCK AI SUMMARY')).toBeInTheDocument()
   })
+
+  it('uploads a document from the contract slide-over', async () => {
+    renderContracts()
+    fireEvent.click(await screen.findByText('Master Supply Agreement — Atlas Steelworks'))
+    const input = screen.getByTestId('contract-file-input')
+    const file = new File(['pdf'], 'contract.pdf', { type: 'application/pdf' })
+    fireEvent.change(input, { target: { files: [file] } })
+    expect(await screen.findByRole('link', { name: 'View document' })).toBeInTheDocument()
+  })
 })

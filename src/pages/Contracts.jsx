@@ -15,7 +15,7 @@ import { formatCurrency, formatCompactCurrency, daysUntil } from '../utils/forma
 import { cn } from '../utils/cn'
 
 export default function Contracts() {
-  const { contracts, addContract, updateContract, summarizeContract } = useContractContext()
+  const { contracts, addContract, updateContract, summarizeContract, attachContractDocument } = useContractContext()
   const { suppliers } = useSupplierContext()
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('')
@@ -209,6 +209,7 @@ export default function Contracts() {
         supplier={liveSelected ? suppliers.find((s) => s.id === liveSelected.supplierId) : null}
         onEdit={() => openEdit(liveSelected)}
         onSummarize={liveSelected ? () => summarizeContract(liveSelected.id) : undefined}
+        onUpload={liveSelected ? (file) => attachContractDocument(liveSelected.id, file) : undefined}
       />
 
       <ContractModal
