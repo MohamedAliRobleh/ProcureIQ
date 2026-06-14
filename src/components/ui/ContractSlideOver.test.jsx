@@ -115,4 +115,34 @@ describe('ContractSlideOver', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Generate summary' }))
     expect(onSummarize).toHaveBeenCalled()
   })
+
+  it('renders a View document link when the contract has a fileUrl', () => {
+    renderSlideOver({
+      isOpen: true,
+      onClose: () => {},
+      contract: { ...mockContract, fileUrl: 'https://res.cloudinary.com/democloud/x.pdf' },
+      supplier: mockSupplier,
+      onEdit: () => {},
+      onUpload: vi.fn(),
+    })
+    const link = screen.getByRole('link', { name: 'View document' })
+    expect(link).toHaveAttribute('href', 'https://res.cloudinary.com/democloud/x.pdf')
+    expect(screen.getByRole('button', { name: 'Replace' })).toBeInTheDocument()
+  })
+
+  it('calls onUpload with the selected file', () => {
+    const onUpload = vi.fn().mockResolvedValue({})
+    renderSlideOver({
+      isOpen: true,
+      onClose: () => {},
+      contract: mockContract,
+      supplier: mockSupplier,
+      onEdit: () => {},
+      onUpload,
+    })
+    const input = screen.getByTestId('contract-file-input')
+    const file = new File(['pdf'], 'contract.pdf', { type: 'application/pdf' })
+    fireEvent.change(input, { target: { files: [file] } })
+    expect(onUpload).toHaveBeenCalledWith(file)
+  })
 })

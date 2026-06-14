@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X } from 'lucide-react'
@@ -8,7 +8,7 @@ import { formatCurrency, formatDate, daysUntil } from '../../utils/formatters'
 import { CONTRACT_STATUS_BADGE } from '../../utils/contractSelectors'
 import { cn } from '../../utils/cn'
 
-export default function ContractSlideOver({ isOpen, onClose, contract, supplier, onEdit, onSummarize }) {
+export default function ContractSlideOver({ isOpen, onClose, contract, supplier, onEdit, onSummarize, onUpload }) {
   useEffect(() => {
     if (!isOpen) return
     function handleKey(e) {
@@ -30,6 +30,25 @@ export default function ContractSlideOver({ isOpen, onClose, contract, supplier,
       setSummaryError('Could not generate a summary. Please try again.')
     } finally {
       setIsSummarizing(false)
+    }
+  }
+
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState(null)
+  const fileInputRef = useRef(null)
+
+  async function handleFileChange(e) {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-selecting the same file
+    if (!file) return
+    setUploadError(null)
+    setIsUploading(true)
+    try {
+      await onUpload(file)
+    } catch {
+      setUploadError('Could not upload the document. Please try again.')
+    } finally {
+      setIsUploading(false)
     }
   }
 
@@ -143,6 +162,40 @@ export default function ContractSlideOver({ isOpen, onClose, contract, supplier,
                     </Button>
                   )}
                   {summaryError && <p className="mt-1 text-xs text-accent-red">{summaryError}</p>}
+                </div>
+              )}
+
+              {onUpload && (
+                <div>
+                  <p className="mb-1 text-xs font-medium text-text-secondary">Document</p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf"
+                    data-testid="contract-file-input"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                  {contract.fileUrl ? (
+                    <div className="flex items-center gap-3">
+                      <a
+                        href={contract.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-accent-blue-light hover:underline"
+                      >
+                        View document
+                      </a>
+                      <Button variant="secondary" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+                        {isUploading ? 'Uploading…' : 'Replace'}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button variant="secondary" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
+                      {isUploading ? 'Uploading…' : 'Upload document'}
+                    </Button>
+                  )}
+                  {uploadError && <p className="mt-1 text-xs text-accent-red">{uploadError}</p>}
                 </div>
               )}
             </div>
