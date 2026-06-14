@@ -39,6 +39,9 @@ export function createMockFetch() {
     if (method === 'POST' && url.startsWith('https://api.cloudinary.com/')) {
       return jsonResponse({ secure_url: 'https://res.cloudinary.com/democloud/mock.pdf' })
     }
+    if (method === 'POST' && url === '/api/contracts/notify') {
+      return jsonResponse({ ok: true })
+    }
 
     if (method === 'GET') {
       if (url === '/api/risk') return jsonResponse(toJson(riskAssessments))

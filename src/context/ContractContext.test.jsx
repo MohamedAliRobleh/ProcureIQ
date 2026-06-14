@@ -75,6 +75,17 @@ describe('ContractContext', () => {
     )
   })
 
+  it('notifyContract resolves with { ok: true }', async () => {
+    const { result } = renderHook(() => useContractContext(), { wrapper })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    const id = result.current.contracts[0].id
+    let outcome
+    await act(async () => {
+      outcome = await result.current.notifyContract(id, 'amara@demo.com')
+    })
+    expect(outcome).toEqual({ ok: true })
+  })
+
   it('throws when used outside ContractProvider', () => {
     expect(() => renderHook(() => useContractContext())).toThrow(
       'useContractContext must be used inside ContractProvider'

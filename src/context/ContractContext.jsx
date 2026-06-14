@@ -73,6 +73,13 @@ export function ContractProvider({ children }) {
       })
   }
 
+  function notifyContract(id, toEmail) {
+    return api.post('/api/contracts/notify', { id, toEmail }).catch((e) => {
+      setError(e)
+      throw e
+    })
+  }
+
   return (
     <ContractContext.Provider
       value={{
@@ -84,6 +91,7 @@ export function ContractProvider({ children }) {
         setContractStatus,
         summarizeContract,
         attachContractDocument,
+        notifyContract,
       }}
     >
       {children}
