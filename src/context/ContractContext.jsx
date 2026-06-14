@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { api } from '../lib/apiClient'
+import { uploadToCloudinary } from '../lib/cloudinaryUpload'
 
 const ContractContext = createContext(null)
 
@@ -57,9 +58,33 @@ export function ContractProvider({ children }) {
       })
   }
 
+  function attachContractDocument(id, file) {
+    return api
+      .post('/api/contracts/upload-signature', { id })
+      .then((sig) => uploadToCloudinary(file, sig))
+      .then((fileUrl) => api.patch(`/api/contracts/${id}`, { fileUrl }))
+      .then((updated) => {
+        setContracts((prev) => prev.map((c) => (c.id === id ? { ...c, ...updated } : c)))
+        return updated
+      })
+      .catch((e) => {
+        setError(e)
+        throw e
+      })
+  }
+
   return (
     <ContractContext.Provider
-      value={{ contracts, isLoading, error, addContract, updateContract, setContractStatus, summarizeContract }}
+      value={{
+        contracts,
+        isLoading,
+        error,
+        addContract,
+        updateContract,
+        setContractStatus,
+        summarizeContract,
+        attachContractDocument,
+      }}
     >
       {children}
     </ContractContext.Provider>

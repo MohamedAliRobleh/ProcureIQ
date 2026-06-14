@@ -62,6 +62,19 @@ describe('ContractContext', () => {
     expect(result.current.contracts.find((c) => c.id === id).aiSummary).toBe('MOCK AI SUMMARY')
   })
 
+  it('attachContractDocument uploads and sets fileUrl on the matching contract', async () => {
+    const { result } = renderHook(() => useContractContext(), { wrapper })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    const id = result.current.contracts[0].id
+    const file = new File(['pdf'], 'contract.pdf', { type: 'application/pdf' })
+    await act(async () => {
+      await result.current.attachContractDocument(id, file)
+    })
+    expect(result.current.contracts.find((c) => c.id === id).fileUrl).toBe(
+      'https://res.cloudinary.com/democloud/mock.pdf'
+    )
+  })
+
   it('throws when used outside ContractProvider', () => {
     expect(() => renderHook(() => useContractContext())).toThrow(
       'useContractContext must be used inside ContractProvider'

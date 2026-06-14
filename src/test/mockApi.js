@@ -19,13 +19,25 @@ const COLLECTIONS = {
 export function createMockFetch() {
   return vi.fn(async (url, options = {}) => {
     const method = options.method ?? 'GET'
-    const body = options.body ? JSON.parse(options.body) : null
+    const body = typeof options.body === 'string' ? JSON.parse(options.body) : null
 
     if (method === 'POST' && url === '/api/assistant') {
       return jsonResponse({ reply: 'MOCK ASSISTANT REPLY', fallback: false })
     }
     if (method === 'POST' && url === '/api/contracts/summarize') {
       return jsonResponse({ id: body.id, aiSummary: 'MOCK AI SUMMARY' })
+    }
+    if (method === 'POST' && url === '/api/contracts/upload-signature') {
+      return jsonResponse({
+        cloudName: 'democloud',
+        apiKey: '999',
+        timestamp: 1700000000,
+        folder: 'procureiq/org_demo/contracts',
+        signature: 'MOCK_SIGNATURE',
+      })
+    }
+    if (method === 'POST' && url.startsWith('https://api.cloudinary.com/')) {
+      return jsonResponse({ secure_url: 'https://res.cloudinary.com/democloud/mock.pdf' })
     }
 
     if (method === 'GET') {
