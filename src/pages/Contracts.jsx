@@ -10,13 +10,16 @@ import ContractModal from '../components/ui/ContractModal'
 import ContractSlideOver from '../components/ui/ContractSlideOver'
 import { useContractContext } from '../context/ContractContext'
 import { useSupplierContext } from '../context/SupplierContext'
+import { useUser } from '../lib/auth'
 import { filterContracts, sortContracts, CONTRACT_STATUS_BADGE } from '../utils/contractSelectors'
 import { formatCurrency, formatCompactCurrency, daysUntil } from '../utils/formatters'
 import { cn } from '../utils/cn'
 
 export default function Contracts() {
-  const { contracts, addContract, updateContract, summarizeContract, attachContractDocument } = useContractContext()
+  const { contracts, addContract, updateContract, summarizeContract, attachContractDocument, notifyContract } = useContractContext()
   const { suppliers } = useSupplierContext()
+  const { user } = useUser()
+  const userEmail = user?.emailAddresses?.[0]?.emailAddress
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState('')
   const [supplierId, setSupplierId] = useState('')
@@ -210,6 +213,7 @@ export default function Contracts() {
         onEdit={() => openEdit(liveSelected)}
         onSummarize={liveSelected ? () => summarizeContract(liveSelected.id) : undefined}
         onUpload={liveSelected ? (file) => attachContractDocument(liveSelected.id, file) : undefined}
+        onNotify={liveSelected && userEmail ? () => notifyContract(liveSelected.id, userEmail) : undefined}
       />
 
       <ContractModal

@@ -14,6 +14,7 @@ import LoadingSpinner from '../components/ui/LoadingSpinner'
 import { useSupplierContext } from '../context/SupplierContext'
 import { useContractContext } from '../context/ContractContext'
 import { useSpendContext } from '../context/SpendContext'
+import { useUser } from '../lib/auth'
 import { useRisk } from '../hooks/useRisk'
 import { useEsg } from '../hooks/useEsg'
 import { formatDate, formatCurrency, daysUntil, riskColor, esgColor } from '../utils/formatters'
@@ -29,8 +30,10 @@ const STATUS_BADGE = { active: 'green', pending: 'amber', suspended: 'red' }
 export default function SupplierDetail() {
   const { id } = useParams()
   const { suppliers, updateSupplier, setSupplierStatus, isLoading } = useSupplierContext()
-  const { contracts, addContract, updateContract, summarizeContract, attachContractDocument } = useContractContext()
+  const { contracts, addContract, updateContract, summarizeContract, attachContractDocument, notifyContract } = useContractContext()
   const { spendRecords, addSpendRecord, updateSpendRecord } = useSpendContext()
+  const { user } = useUser()
+  const userEmail = user?.emailAddresses?.[0]?.emailAddress
   const { riskAssessments } = useRisk()
   const { esgResponses } = useEsg()
   const [activeTab, setActiveTab] = useState('Overview')
@@ -201,6 +204,7 @@ export default function SupplierDetail() {
           onEdit={() => openEditContract(liveSelected)}
           onSummarize={liveSelected ? () => summarizeContract(liveSelected.id) : undefined}
           onUpload={liveSelected ? (file) => attachContractDocument(liveSelected.id, file) : undefined}
+          onNotify={liveSelected && userEmail ? () => notifyContract(liveSelected.id, userEmail) : undefined}
         />
         <ContractModal
           isOpen={contractModalOpen}

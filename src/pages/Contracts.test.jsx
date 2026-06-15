@@ -63,4 +63,11 @@ describe('Contracts', () => {
     fireEvent.change(input, { target: { files: [file] } })
     expect(await screen.findByRole('link', { name: 'View document' })).toBeInTheDocument()
   })
+
+  it('sends an email reminder from the contract slide-over', async () => {
+    renderContracts()
+    fireEvent.click(await screen.findByText('Master Supply Agreement — Atlas Steelworks'))
+    fireEvent.click(screen.getByRole('button', { name: 'Email reminder' }))
+    expect(await screen.findByText(/Reminder sent/)).toBeInTheDocument()
+  })
 })
