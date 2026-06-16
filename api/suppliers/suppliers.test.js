@@ -29,9 +29,9 @@ describe('GET /api/suppliers', () => {
     const rows = [{ id: 'sup_1', name: 'Atlas Steelworks' }]
     prisma.supplier.findMany.mockResolvedValue(rows)
     const res = mockRes()
-    await listHandler({ method: 'GET' }, res)
+    await listHandler({ method: 'GET', auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(prisma.supplier.findMany).toHaveBeenCalledWith({
-      where: { orgId: 'org_demo' },
+      where: { orgId: 'org_test' },
       orderBy: { createdAt: 'asc' },
     })
     expect(res.status).toHaveBeenCalledWith(200)
@@ -44,20 +44,20 @@ describe('POST /api/suppliers', () => {
     prisma.supplier.create.mockImplementation(async ({ data }) => data)
     const res = mockRes()
     await listHandler(
-      { method: 'POST', body: { name: 'New Co', email: 'a@b.com', country: 'France', category: 'Logistics', status: 'active' } },
+      { method: 'POST', auth: { userId: 'user_test', orgId: 'org_test' }, body: { name: 'New Co', email: 'a@b.com', country: 'France', category: 'Logistics', status: 'active' } },
       res
     )
     expect(res.status).toHaveBeenCalledWith(201)
     const created = prisma.supplier.create.mock.calls[0][0].data
     expect(created.id).toMatch(/^sup_/)
-    expect(created.orgId).toBe('org_demo')
+    expect(created.orgId).toBe('org_test')
     expect(created.riskScore).toBe(0)
     expect(created.name).toBe('New Co')
   })
 
   it('rejects a body missing name or email with 400', async () => {
     const res = mockRes()
-    await listHandler({ method: 'POST', body: { name: 'No Email' } }, res)
+    await listHandler({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test' }, body: { name: 'No Email' } }, res)
     expect(res.status).toHaveBeenCalledWith(400)
     expect(prisma.supplier.create).not.toHaveBeenCalled()
   })
@@ -68,9 +68,9 @@ describe('PATCH /api/suppliers/:id', () => {
     prisma.supplier.findFirst.mockResolvedValue({ id: 'sup_1' })
     prisma.supplier.update.mockResolvedValue({ id: 'sup_1', status: 'suspended' })
     const res = mockRes()
-    await idHandler({ method: 'PATCH', query: { id: 'sup_1' }, body: { status: 'suspended' } }, res)
+    await idHandler({ method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test' }, query: { id: 'sup_1' }, body: { status: 'suspended' } }, res)
     expect(prisma.supplier.findFirst).toHaveBeenCalledWith({
-      where: { id: 'sup_1', orgId: 'org_demo' },
+      where: { id: 'sup_1', orgId: 'org_test' },
     })
     expect(prisma.supplier.update).toHaveBeenCalledWith({
       where: { id: 'sup_1' },
@@ -82,14 +82,14 @@ describe('PATCH /api/suppliers/:id', () => {
   it('returns 404 when the id does not exist in the org', async () => {
     prisma.supplier.findFirst.mockResolvedValue(null)
     const res = mockRes()
-    await idHandler({ method: 'PATCH', query: { id: 'sup_other_org' }, body: { status: 'suspended' } }, res)
+    await idHandler({ method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test' }, query: { id: 'sup_other_org' }, body: { status: 'suspended' } }, res)
     expect(res.status).toHaveBeenCalledWith(404)
     expect(prisma.supplier.update).not.toHaveBeenCalled()
   })
 
   it('returns 405 for unsupported methods', async () => {
     const res = mockRes()
-    await idHandler({ method: 'DELETE', query: { id: 'sup_1' } }, res)
+    await idHandler({ method: 'DELETE', auth: { userId: 'user_test', orgId: 'org_test' }, query: { id: 'sup_1' } }, res)
     expect(res.status).toHaveBeenCalledWith(405)
   })
 })
