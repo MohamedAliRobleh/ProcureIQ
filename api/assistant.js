@@ -1,5 +1,4 @@
 import { prisma } from './_lib/prisma.js'
-import { ORG_ID } from './_lib/org.js'
 import { requireAuth } from './_lib/auth.js'
 import { getAnthropic, isAiConfigured, AI_MODEL } from './_lib/anthropic.js'
 import { buildDigest } from './_lib/digest.js'
@@ -21,11 +20,11 @@ async function handler(req, res) {
   }
   try {
     const [suppliers, contracts, riskAssessments, esgResponses, spendRecords] = await Promise.all([
-      prisma.supplier.findMany({ where: { orgId: ORG_ID } }),
-      prisma.contract.findMany({ where: { orgId: ORG_ID } }),
-      prisma.riskAssessment.findMany({ where: { orgId: ORG_ID } }),
-      prisma.esgResponse.findMany({ where: { orgId: ORG_ID } }),
-      prisma.spendRecord.findMany({ where: { orgId: ORG_ID } }),
+      prisma.supplier.findMany({ where: { orgId: req.auth.orgId } }),
+      prisma.contract.findMany({ where: { orgId: req.auth.orgId } }),
+      prisma.riskAssessment.findMany({ where: { orgId: req.auth.orgId } }),
+      prisma.esgResponse.findMany({ where: { orgId: req.auth.orgId } }),
+      prisma.spendRecord.findMany({ where: { orgId: req.auth.orgId } }),
     ])
     const data = { suppliers, contracts, riskAssessments, esgResponses, spendRecords }
 
