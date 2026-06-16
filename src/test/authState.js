@@ -24,10 +24,14 @@ export const authState = {
   isLoaded: true,
   isSignedIn: true,
   user: DEFAULT_USER,
+  orgLoaded: true,
+  organization: DEMO_ORG,
 }
 
 export function resetAuthState() {
   authState.isLoaded = true
   authState.isSignedIn = true
   authState.user = DEFAULT_USER
+  authState.orgLoaded = true
+  authState.organization = DEMO_ORG
 }

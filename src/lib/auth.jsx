@@ -1,18 +1,17 @@
 import { useEffect } from 'react'
-import { ClerkProvider, useAuth, useUser, UserButton, SignIn, SignUp } from '@clerk/clerk-react'
+import {
+  ClerkProvider,
+  useAuth,
+  useUser,
+  useOrganization,
+  UserButton,
+  OrganizationSwitcher,
+  SignIn,
+  SignUp,
+} from '@clerk/clerk-react'
 import { setTokenGetter } from './apiClient'
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
-
-// Shared demo org (6b tenancy decision): every signed-in user works in
-// org_demo. Phase 7 swaps this for Clerk Organizations.
-const DEMO_ORG = {
-  id: 'org_demo',
-  name: 'Procure IQ Demo Org',
-  slug: 'procureiq-demo',
-  imageUrl: null,
-  membersCount: 12,
-}
 
 const CLERK_APPEARANCE = {
   variables: {
@@ -43,8 +42,4 @@ export function AuthProvider({ children }) {
   )
 }
 
-export function useOrganization() {
-  return { isLoaded: true, organization: DEMO_ORG }
-}
-
-export { useUser, UserButton, SignIn, SignUp }
+export { useUser, useOrganization, UserButton, OrganizationSwitcher, SignIn, SignUp }
