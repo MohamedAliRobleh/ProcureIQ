@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Building2, FileText, ShieldAlert, Wallet } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts'
 import PageHeader from '../components/layout/PageHeader'
@@ -11,6 +12,8 @@ import { useSuppliers } from '../hooks/useSuppliers'
 import { useContracts } from '../hooks/useContracts'
 import { useRisk } from '../hooks/useRisk'
 import { useSpend } from '../hooks/useSpend'
+import { api } from '../lib/apiClient'
+import Button from '../components/ui/Button'
 import { formatCurrency, formatDate, timeAgo } from '../utils/formatters'
 import {
   getAverageRiskScore,
@@ -31,8 +34,37 @@ export default function Dashboard() {
   const { riskAssessments, isLoading: loadingRisk } = useRisk()
   const { spendRecords, isLoading: loadingSpend } = useSpend()
 
+  const [seeding, setSeeding] = useState(false)
+
+  async function handleSeed() {
+    setSeeding(true)
+    try {
+      await api.post('/api/org/seed', {})
+      window.location.reload()
+    } catch {
+      setSeeding(false)
+    }
+  }
+
   if (loadingSuppliers || loadingContracts || loadingRisk || loadingSpend) {
     return <LoadingSpinner className="py-24" />
+  }
+
+  if (suppliers.length === 0) {
+    return (
+      <div>
+        <PageHeader title="Dashboard" description="Your supplier portfolio at a glance" />
+        <Card className="mt-6 flex flex-col items-center gap-4 p-10 text-center">
+          <h3 className="font-display text-lg font-semibold text-text-primary">Your organization is empty</h3>
+          <p className="max-w-md text-sm text-text-secondary">
+            Load a sample procurement dataset — suppliers, contracts, risk, ESG, and spend — to explore ProcureIQ with realistic data.
+          </p>
+          <Button onClick={handleSeed} disabled={seeding}>
+            {seeding ? 'Loading…' : 'Load sample data'}
+          </Button>
+        </Card>
+      </div>
+    )
   }
 
   const activeContracts = contracts.filter((c) => c.status === 'active')
