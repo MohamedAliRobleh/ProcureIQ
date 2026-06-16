@@ -1,5 +1,4 @@
 import { prisma } from '../_lib/prisma.js'
-import { ORG_ID } from '../_lib/org.js'
 import { requireAuth } from '../_lib/auth.js'
 import { isUploadConfigured, uploadConfig, signUpload } from '../_lib/cloudinary.js'
 
@@ -13,11 +12,11 @@ async function handler(req, res) {
   if (!isUploadConfigured()) return res.status(503).json({ error: 'File uploads are not configured' })
 
   try {
-    const contract = await prisma.contract.findFirst({ where: { id, orgId: ORG_ID } })
+    const contract = await prisma.contract.findFirst({ where: { id, orgId: req.auth.orgId } })
     if (!contract) return res.status(404).json({ error: 'Not found' })
 
     const timestamp = Math.round(Date.now() / 1000)
-    const folder = `procureiq/${ORG_ID}/contracts`
+    const folder = `procureiq/${req.auth.orgId}/contracts`
     const signature = signUpload({ timestamp, folder })
     const { cloudName, apiKey } = uploadConfig()
 
