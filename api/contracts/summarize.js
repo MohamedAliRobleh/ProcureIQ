@@ -1,5 +1,4 @@
 import { prisma } from '../_lib/prisma.js'
-import { ORG_ID } from '../_lib/org.js'
 import { requireAuth } from '../_lib/auth.js'
 import { getAnthropic, isAiConfigured, AI_MODEL } from '../_lib/anthropic.js'
 
@@ -17,7 +16,7 @@ async function handler(req, res) {
   if (!isAiConfigured()) return res.status(503).json({ error: 'AI features are not configured' })
 
   try {
-    const contract = await prisma.contract.findFirst({ where: { id, orgId: ORG_ID } })
+    const contract = await prisma.contract.findFirst({ where: { id, orgId: req.auth.orgId } })
     if (!contract) return res.status(404).json({ error: 'Not found' })
 
     const details = [
