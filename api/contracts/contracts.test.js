@@ -28,9 +28,9 @@ describe('contracts endpoints', () => {
   it('GET returns the org-scoped contract list', async () => {
     prisma.contract.findMany.mockResolvedValue([])
     const res = mockRes()
-    await listHandler({ method: 'GET' }, res)
+    await listHandler({ method: 'GET', auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(prisma.contract.findMany).toHaveBeenCalledWith({
-      where: { orgId: 'org_demo' },
+      where: { orgId: 'org_test' },
       orderBy: { createdAt: 'asc' },
     })
     expect(res.status).toHaveBeenCalledWith(200)
@@ -42,6 +42,7 @@ describe('contracts endpoints', () => {
     await listHandler(
       {
         method: 'POST',
+        auth: { userId: 'user_test', orgId: 'org_test' },
         body: { title: 'Deal', supplierId: 'sup_1', value: 1000, startDate: '2026-01-12', endDate: '' },
       },
       res
@@ -55,7 +56,7 @@ describe('contracts endpoints', () => {
 
   it('POST rejects missing title/supplierId/value with 400', async () => {
     const res = mockRes()
-    await listHandler({ method: 'POST', body: { title: 'No supplier' } }, res)
+    await listHandler({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test' }, body: { title: 'No supplier' } }, res)
     expect(res.status).toHaveBeenCalledWith(400)
   })
 
@@ -63,9 +64,9 @@ describe('contracts endpoints', () => {
     prisma.contract.findFirst.mockResolvedValue({ id: 'con_1' })
     prisma.contract.update.mockResolvedValue({ id: 'con_1' })
     const res = mockRes()
-    await idHandler({ method: 'PATCH', query: { id: 'con_1' }, body: { endDate: '2026-07-22' } }, res)
+    await idHandler({ method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test' }, query: { id: 'con_1' }, body: { endDate: '2026-07-22' } }, res)
     expect(prisma.contract.findFirst).toHaveBeenCalledWith({
-      where: { id: 'con_1', orgId: 'org_demo' },
+      where: { id: 'con_1', orgId: 'org_test' },
     })
     const data = prisma.contract.update.mock.calls[0][0].data
     expect(data.endDate).toBeInstanceOf(Date)
@@ -75,7 +76,7 @@ describe('contracts endpoints', () => {
   it('returns 404 when the id does not exist in the org', async () => {
     prisma.contract.findFirst.mockResolvedValue(null)
     const res = mockRes()
-    await idHandler({ method: 'PATCH', query: { id: 'con_other_org' }, body: { endDate: '2026-07-22' } }, res)
+    await idHandler({ method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test' }, query: { id: 'con_other_org' }, body: { endDate: '2026-07-22' } }, res)
     expect(res.status).toHaveBeenCalledWith(404)
     expect(prisma.contract.update).not.toHaveBeenCalled()
   })
