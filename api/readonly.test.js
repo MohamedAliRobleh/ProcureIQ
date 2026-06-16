@@ -29,9 +29,9 @@ describe('read-only endpoints', () => {
   it('GET /api/risk returns org-scoped assessments', async () => {
     prisma.riskAssessment.findMany.mockResolvedValue([{ id: 'risk_1' }])
     const res = mockRes()
-    await riskHandler({ method: 'GET' }, res)
+    await riskHandler({ method: 'GET', auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(prisma.riskAssessment.findMany).toHaveBeenCalledWith({
-      where: { orgId: 'org_demo' },
+      where: { orgId: 'org_test' },
       orderBy: { assessedAt: 'asc' },
     })
     expect(res.status).toHaveBeenCalledWith(200)
@@ -40,13 +40,13 @@ describe('read-only endpoints', () => {
   it('GET /api/esg returns org-scoped responses', async () => {
     prisma.esgResponse.findMany.mockResolvedValue([{ id: 'esg_1' }])
     const res = mockRes()
-    await esgHandler({ method: 'GET' }, res)
+    await esgHandler({ method: 'GET', auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(res.status).toHaveBeenCalledWith(200)
   })
 
   it('rejects non-GET with 405', async () => {
     const res = mockRes()
-    await riskHandler({ method: 'POST' }, res)
+    await riskHandler({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(res.status).toHaveBeenCalledWith(405)
   })
 })
