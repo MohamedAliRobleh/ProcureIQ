@@ -21,9 +21,9 @@ describe('Sidebar', () => {
 })
 
 describe('TopBar', () => {
-  it('renders the demo organization, user info, and user menu', () => {
+  it('renders the organization switcher, user info, and user menu', () => {
     render(<TopBar />)
-    expect(screen.getByText('Procure IQ Demo Org')).toBeInTheDocument()
+    expect(screen.getByTestId('org-switcher')).toBeInTheDocument()
     expect(screen.getByText('Amara Chen')).toBeInTheDocument()
     expect(screen.getByTestId('user-button')).toBeInTheDocument()
   })
