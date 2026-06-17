@@ -38,4 +38,25 @@ describe('ConfirmDialog', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
     expect(onClose).toHaveBeenCalled()
   })
+
+  it('clears the typed phrase when the dialog is closed and reopened by the parent', () => {
+    const props = {
+      onClose: vi.fn(),
+      onConfirm: vi.fn(),
+      title: 'Clear all data?',
+      description: 'This cannot be undone.',
+      confirmWord: 'clear',
+      confirmLabel: 'Delete everything',
+    }
+    const { rerender } = render(<ConfirmDialog isOpen {...props} />)
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'clear' } })
+    expect(screen.getByRole('button', { name: 'Delete everything' })).toBeEnabled()
+
+    // Parent closes the dialog directly (e.g. after a failed action), then reopens it.
+    rerender(<ConfirmDialog isOpen={false} {...props} />)
+    rerender(<ConfirmDialog isOpen {...props} />)
+
+    expect(screen.getByRole('textbox')).toHaveValue('')
+    expect(screen.getByRole('button', { name: 'Delete everything' })).toBeDisabled()
+  })
 })

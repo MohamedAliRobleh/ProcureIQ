@@ -1,12 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Modal from './Modal'
 import Button from './Button'
 
 // A destructive-action confirmation: the confirm button stays disabled until
-// the user types `confirmWord` exactly. Clears its input on close.
+// the user types `confirmWord` exactly. The typed phrase is cleared whenever
+// the dialog closes, so reopening always starts disabled — even when the
+// parent closes it directly (e.g. after a failed action) rather than via Cancel.
 export default function ConfirmDialog({ isOpen, onClose, onConfirm, title, description, confirmWord, confirmLabel, busy }) {
   const [text, setText] = useState('')
   const matches = text.trim() === confirmWord
+
+  useEffect(() => {
+    if (!isOpen) setText('')
+  }, [isOpen])
 
   function handleClose() {
     setText('')
