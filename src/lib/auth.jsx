@@ -6,6 +6,7 @@ import {
   useOrganization,
   UserButton,
   OrganizationSwitcher,
+  OrganizationProfile,
   SignIn,
   SignUp,
 } from '@clerk/clerk-react'
@@ -42,4 +43,4 @@ export function AuthProvider({ children }) {
   )
 }
 
-export { useUser, useOrganization, UserButton, OrganizationSwitcher, SignIn, SignUp }
+export { useUser, useOrganization, UserButton, OrganizationSwitcher, OrganizationProfile, SignIn, SignUp }
