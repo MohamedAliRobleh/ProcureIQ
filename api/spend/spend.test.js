@@ -28,9 +28,9 @@ describe('spend endpoints', () => {
   it('GET returns the org-scoped spend list', async () => {
     prisma.spendRecord.findMany.mockResolvedValue([])
     const res = mockRes()
-    await listHandler({ method: 'GET' }, res)
+    await listHandler({ method: 'GET', auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(prisma.spendRecord.findMany).toHaveBeenCalledWith({
-      where: { orgId: 'org_demo' },
+      where: { orgId: 'org_test' },
       orderBy: { date: 'asc' },
     })
     expect(res.status).toHaveBeenCalledWith(200)
@@ -40,7 +40,7 @@ describe('spend endpoints', () => {
     prisma.spendRecord.create.mockImplementation(async ({ data }) => data)
     const res = mockRes()
     await listHandler(
-      { method: 'POST', body: { supplierId: 'sup_1', amount: 500, category: 'Logistics', date: '2026-06-01' } },
+      { method: 'POST', body: { supplierId: 'sup_1', amount: 500, category: 'Logistics', date: '2026-06-01' }, auth: { userId: 'user_test', orgId: 'org_test' } },
       res
     )
     const created = prisma.spendRecord.create.mock.calls[0][0].data
@@ -51,7 +51,7 @@ describe('spend endpoints', () => {
 
   it('POST rejects missing supplierId/amount/category/date with 400', async () => {
     const res = mockRes()
-    await listHandler({ method: 'POST', body: { amount: 500 } }, res)
+    await listHandler({ method: 'POST', body: { amount: 500 }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(res.status).toHaveBeenCalledWith(400)
   })
 
@@ -59,9 +59,9 @@ describe('spend endpoints', () => {
     prisma.spendRecord.findFirst.mockResolvedValue({ id: 'spend_1' })
     prisma.spendRecord.update.mockResolvedValue({ id: 'spend_1', amount: 999 })
     const res = mockRes()
-    await idHandler({ method: 'PATCH', query: { id: 'spend_1' }, body: { amount: 999 } }, res)
+    await idHandler({ method: 'PATCH', query: { id: 'spend_1' }, body: { amount: 999 }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(prisma.spendRecord.findFirst).toHaveBeenCalledWith({
-      where: { id: 'spend_1', orgId: 'org_demo' },
+      where: { id: 'spend_1', orgId: 'org_test' },
     })
     expect(prisma.spendRecord.update).toHaveBeenCalledWith({
       where: { id: 'spend_1' },
@@ -73,8 +73,22 @@ describe('spend endpoints', () => {
   it('returns 404 when the id does not exist in the org', async () => {
     prisma.spendRecord.findFirst.mockResolvedValue(null)
     const res = mockRes()
-    await idHandler({ method: 'PATCH', query: { id: 'spend_other_org' }, body: { amount: 999 } }, res)
+    await idHandler({ method: 'PATCH', query: { id: 'spend_other_org' }, body: { amount: 999 }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(res.status).toHaveBeenCalledWith(404)
     expect(prisma.spendRecord.update).not.toHaveBeenCalled()
+  })
+
+  it('ignores client-supplied orgId and id on PATCH (cannot move records across orgs)', async () => {
+    prisma.spendRecord.findFirst.mockResolvedValue({ id: 'spend_1' })
+    prisma.spendRecord.update.mockResolvedValue({ id: 'spend_1', amount: 999 })
+    const res = mockRes()
+    await idHandler(
+      { method: 'PATCH', query: { id: 'spend_1' }, body: { orgId: 'evil_org', id: 'hijack', amount: 999 }, auth: { userId: 'user_test', orgId: 'org_test' } },
+      res
+    )
+    const data = prisma.spendRecord.update.mock.calls[0][0].data
+    expect(data).not.toHaveProperty('orgId')
+    expect(data).not.toHaveProperty('id')
+    expect(data.amount).toBe(999)
   })
 })

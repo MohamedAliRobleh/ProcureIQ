@@ -2,11 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import AppShell from './components/layout/AppShell'
 import ErrorBoundary from './components/layout/ErrorBoundary'
 import ProtectedRoute from './components/layout/ProtectedRoute'
+import RequireOrg from './components/layout/RequireOrg'
+import OrgScopedProviders from './components/layout/OrgScopedProviders'
 import { AuthProvider } from './lib/auth'
-import { SupplierProvider } from './context/SupplierContext'
-import { ContractProvider } from './context/ContractContext'
-import { SpendProvider } from './context/SpendContext'
-import { ChatProvider } from './context/ChatContext'
 import Landing from './pages/Landing'
 import Dashboard from './pages/Dashboard'
 import Suppliers from './pages/Suppliers'
@@ -29,41 +27,37 @@ export default function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <SupplierProvider>
-          <ContractProvider>
-            <SpendProvider>
-              <ChatProvider>
-                <BrowserRouter>
-                  <Routes>
-                    <Route path="/" element={<Landing />} />
-                    <Route path="/sign-in/*" element={<SignInPage />} />
-                    <Route path="/sign-up/*" element={<SignUpPage />} />
-                    <Route
-                      element={
-                        <ProtectedRoute>
-                          <AppShell />
-                        </ProtectedRoute>
-                      }
-                    >
-                      <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/suppliers" element={<Suppliers />} />
-                      <Route path="/suppliers/:id" element={<SupplierDetail />} />
-                      <Route path="/contracts" element={<Contracts />} />
-                      <Route path="/risk" element={<Risk />} />
-                      <Route path="/esg" element={<ESG />} />
-                      <Route path="/spend" element={<Spend />} />
-                      <Route path="/ai-assistant" element={<AIAssistant />} />
-                      {PLACEHOLDER_ROUTES.map(({ path, title, phase }) => (
-                        <Route key={path} path={path} element={<PlaceholderPage title={title} phase={phase} />} />
-                      ))}
-                      <Route path="*" element={<Navigate to="/dashboard" replace />} />
-                    </Route>
-                  </Routes>
-                </BrowserRouter>
-              </ChatProvider>
-            </SpendProvider>
-          </ContractProvider>
-        </SupplierProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/sign-in/*" element={<SignInPage />} />
+            <Route path="/sign-up/*" element={<SignUpPage />} />
+            <Route
+              element={
+                <ProtectedRoute>
+                  <RequireOrg>
+                    <OrgScopedProviders>
+                      <AppShell />
+                    </OrgScopedProviders>
+                  </RequireOrg>
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/suppliers" element={<Suppliers />} />
+              <Route path="/suppliers/:id" element={<SupplierDetail />} />
+              <Route path="/contracts" element={<Contracts />} />
+              <Route path="/risk" element={<Risk />} />
+              <Route path="/esg" element={<ESG />} />
+              <Route path="/spend" element={<Spend />} />
+              <Route path="/ai-assistant" element={<AIAssistant />} />
+              {PLACEHOLDER_ROUTES.map(({ path, title, phase }) => (
+                <Route key={path} path={path} element={<PlaceholderPage title={title} phase={phase} />} />
+              ))}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
       </AuthProvider>
     </ErrorBoundary>
   )

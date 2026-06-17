@@ -35,8 +35,8 @@ describe('POST /api/contracts/summarize', () => {
     })
     prisma.contract.update.mockResolvedValue({ id: 'con_1', aiSummary: 'A concise summary.' })
     const res = mockRes()
-    await handler({ method: 'POST', body: { id: 'con_1' } }, res)
-    expect(prisma.contract.findFirst).toHaveBeenCalledWith({ where: { id: 'con_1', orgId: 'org_demo' } })
+    await handler({ method: 'POST', body: { id: 'con_1' }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
+    expect(prisma.contract.findFirst).toHaveBeenCalledWith({ where: { id: 'con_1', orgId: 'org_test' } })
     expect(prisma.contract.update).toHaveBeenCalledWith({ where: { id: 'con_1' }, data: { aiSummary: 'A concise summary.' } })
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({ id: 'con_1', aiSummary: 'A concise summary.' })
@@ -46,7 +46,7 @@ describe('POST /api/contracts/summarize', () => {
     isAiConfigured.mockReturnValue(true)
     prisma.contract.findFirst.mockResolvedValue(null)
     const res = mockRes()
-    await handler({ method: 'POST', body: { id: 'con_other' } }, res)
+    await handler({ method: 'POST', body: { id: 'con_other' }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(res.status).toHaveBeenCalledWith(404)
     expect(prisma.contract.update).not.toHaveBeenCalled()
   })
@@ -54,20 +54,20 @@ describe('POST /api/contracts/summarize', () => {
   it('returns 503 when AI is not configured', async () => {
     isAiConfigured.mockReturnValue(false)
     const res = mockRes()
-    await handler({ method: 'POST', body: { id: 'con_1' } }, res)
+    await handler({ method: 'POST', body: { id: 'con_1' }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(res.status).toHaveBeenCalledWith(503)
     expect(prisma.contract.findFirst).not.toHaveBeenCalled()
   })
 
   it('returns 400 when id is missing', async () => {
     const res = mockRes()
-    await handler({ method: 'POST', body: {} }, res)
+    await handler({ method: 'POST', body: {}, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(res.status).toHaveBeenCalledWith(400)
   })
 
   it('returns 405 for non-POST', async () => {
     const res = mockRes()
-    await handler({ method: 'GET' }, res)
+    await handler({ method: 'GET', auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(res.status).toHaveBeenCalledWith(405)
   })
 })

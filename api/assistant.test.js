@@ -50,15 +50,16 @@ describe('POST /api/assistant', () => {
       messages: { create: vi.fn().mockResolvedValue({ content: [{ type: 'text', text: 'CLAUDE REPLY' }] }) },
     })
     const res = mockRes()
-    await handler({ method: 'POST', body: { messages: [{ role: 'user', content: 'Which suppliers are riskiest?' }] } }, res)
+    await handler({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test' }, body: { messages: [{ role: 'user', content: 'Which suppliers are riskiest?' }] } }, res)
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({ reply: 'CLAUDE REPLY', fallback: false })
+    expect(prisma.supplier.findMany).toHaveBeenCalledWith({ where: { orgId: 'org_test' } })
   })
 
   it('falls back to the deterministic engine when AI is not configured', async () => {
     isAiConfigured.mockReturnValue(false)
     const res = mockRes()
-    await handler({ method: 'POST', body: { messages: [{ role: 'user', content: 'Which suppliers are riskiest?' }] } }, res)
+    await handler({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test' }, body: { messages: [{ role: 'user', content: 'Which suppliers are riskiest?' }] } }, res)
     expect(res.status).toHaveBeenCalledWith(200)
     const payload = res.json.mock.calls[0][0]
     expect(payload.fallback).toBe(true)
@@ -71,7 +72,7 @@ describe('POST /api/assistant', () => {
       messages: { create: vi.fn().mockRejectedValue(new Error('boom')) },
     })
     const res = mockRes()
-    await handler({ method: 'POST', body: { messages: [{ role: 'user', content: 'Which suppliers are riskiest?' }] } }, res)
+    await handler({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test' }, body: { messages: [{ role: 'user', content: 'Which suppliers are riskiest?' }] } }, res)
     const payload = res.json.mock.calls[0][0]
     expect(payload.fallback).toBe(true)
     expect(payload.reply).toContain('Atlas Steelworks')
@@ -79,13 +80,13 @@ describe('POST /api/assistant', () => {
 
   it('returns 400 when messages is missing or empty', async () => {
     const res = mockRes()
-    await handler({ method: 'POST', body: {} }, res)
+    await handler({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test' }, body: {} }, res)
     expect(res.status).toHaveBeenCalledWith(400)
   })
 
   it('returns 405 for non-POST', async () => {
     const res = mockRes()
-    await handler({ method: 'GET' }, res)
+    await handler({ method: 'GET', auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(res.status).toHaveBeenCalledWith(405)
   })
 })

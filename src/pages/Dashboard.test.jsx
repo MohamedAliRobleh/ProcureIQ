@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { ContractProvider } from '../context/ContractContext'
 import { SpendProvider } from '../context/SpendContext'
 import { SupplierProvider } from '../context/SupplierContext'
@@ -35,5 +35,41 @@ describe('Dashboard', () => {
     expect(screen.getByText('Recent Activity')).toBeInTheDocument()
     expect(screen.getByText('Expiring Contracts')).toBeInTheDocument()
     expect(screen.getByText('Top Suppliers by Spend')).toBeInTheDocument()
+  })
+})
+
+describe('Dashboard — empty org', () => {
+  it('shows the Load sample data panel and seeds on click', async () => {
+    const reload = vi.fn()
+    Object.defineProperty(window, 'location', { value: { reload }, writable: true })
+
+    const fetchMock = vi.fn(async (url, options = {}) => {
+      const method = options.method ?? 'GET'
+      if (method === 'POST' && url === '/api/org/seed') {
+        return { ok: true, status: 200, json: async () => ({ seeded: true }) }
+      }
+      return { ok: true, status: 200, json: async () => [] }
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(
+      <SupplierProvider>
+        <ContractProvider>
+          <SpendProvider>
+            <Dashboard />
+          </SpendProvider>
+        </ContractProvider>
+      </SupplierProvider>
+    )
+
+    const button = await screen.findByRole('button', { name: 'Load sample data' })
+    expect(screen.getByText('Your organization is empty')).toBeInTheDocument()
+
+    fireEvent.click(button)
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith('/api/org/seed', expect.objectContaining({ method: 'POST' }))
+    )
+    await waitFor(() => expect(reload).toHaveBeenCalled())
   })
 })

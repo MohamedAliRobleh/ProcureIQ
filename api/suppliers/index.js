@@ -1,12 +1,11 @@
 import { prisma } from '../_lib/prisma.js'
-import { ORG_ID } from '../_lib/org.js'
 import { requireAuth } from '../_lib/auth.js'
 
 async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       const suppliers = await prisma.supplier.findMany({
-        where: { orgId: ORG_ID },
+        where: { orgId: req.auth.orgId },
         orderBy: { createdAt: 'asc' },
       })
       return res.status(200).json(suppliers)
@@ -20,7 +19,7 @@ async function handler(req, res) {
         data: {
           ...body,
           id: `sup_${Date.now()}`,
-          orgId: ORG_ID,
+          orgId: req.auth.orgId,
           riskScore: 0,
           esgScore: 0,
           logoUrl: null,

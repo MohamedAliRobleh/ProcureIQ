@@ -1,5 +1,4 @@
 import { prisma } from '../_lib/prisma.js'
-import { ORG_ID } from '../_lib/org.js'
 import { coerceDates } from '../_lib/dates.js'
 import { requireAuth } from '../_lib/auth.js'
 
@@ -7,7 +6,7 @@ async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       const records = await prisma.spendRecord.findMany({
-        where: { orgId: ORG_ID },
+        where: { orgId: req.auth.orgId },
         orderBy: { date: 'asc' },
       })
       return res.status(200).json(records)
@@ -21,7 +20,7 @@ async function handler(req, res) {
         data: {
           ...coerceDates(body, ['date']),
           id: `spend_${Date.now()}`,
-          orgId: ORG_ID,
+          orgId: req.auth.orgId,
           createdAt: new Date(),
         },
       })

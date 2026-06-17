@@ -1,12 +1,11 @@
 import { prisma } from '../_lib/prisma.js'
-import { ORG_ID } from '../_lib/org.js'
 import { requireAuth } from '../_lib/auth.js'
 
 async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       const responses = await prisma.esgResponse.findMany({
-        where: { orgId: ORG_ID },
+        where: { orgId: req.auth.orgId },
         orderBy: { submittedAt: 'asc' },
       })
       return res.status(200).json(responses)

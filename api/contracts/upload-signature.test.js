@@ -33,18 +33,18 @@ describe('POST /api/contracts/upload-signature', () => {
     uploadConfig.mockReturnValue({ cloudName: 'democloud', apiKey: '999' })
     signUpload.mockReturnValue('SIGNATURE')
     const res = mockRes()
-    await handler({ method: 'POST', body: { id: 'con_1' } }, res)
+    await handler({ method: 'POST', body: { id: 'con_1' }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
 
-    expect(prisma.contract.findFirst).toHaveBeenCalledWith({ where: { id: 'con_1', orgId: 'org_demo' } })
+    expect(prisma.contract.findFirst).toHaveBeenCalledWith({ where: { id: 'con_1', orgId: 'org_test' } })
     const signedParams = signUpload.mock.calls[0][0]
-    expect(signedParams.folder).toBe('procureiq/org_demo/contracts')
+    expect(signedParams.folder).toBe('procureiq/org_test/contracts')
     expect(typeof signedParams.timestamp).toBe('number')
     expect(res.status).toHaveBeenCalledWith(200)
     const payload = res.json.mock.calls[0][0]
     expect(payload).toMatchObject({
       cloudName: 'democloud',
       apiKey: '999',
-      folder: 'procureiq/org_demo/contracts',
+      folder: 'procureiq/org_test/contracts',
       signature: 'SIGNATURE',
     })
     expect(typeof payload.timestamp).toBe('number')
@@ -54,7 +54,7 @@ describe('POST /api/contracts/upload-signature', () => {
     isUploadConfigured.mockReturnValue(true)
     prisma.contract.findFirst.mockResolvedValue(null)
     const res = mockRes()
-    await handler({ method: 'POST', body: { id: 'con_other' } }, res)
+    await handler({ method: 'POST', body: { id: 'con_other' }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(res.status).toHaveBeenCalledWith(404)
     expect(signUpload).not.toHaveBeenCalled()
   })
@@ -62,20 +62,20 @@ describe('POST /api/contracts/upload-signature', () => {
   it('returns 503 when uploads are not configured (before any DB call)', async () => {
     isUploadConfigured.mockReturnValue(false)
     const res = mockRes()
-    await handler({ method: 'POST', body: { id: 'con_1' } }, res)
+    await handler({ method: 'POST', body: { id: 'con_1' }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(res.status).toHaveBeenCalledWith(503)
     expect(prisma.contract.findFirst).not.toHaveBeenCalled()
   })
 
   it('returns 400 when id is missing', async () => {
     const res = mockRes()
-    await handler({ method: 'POST', body: {} }, res)
+    await handler({ method: 'POST', body: {}, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(res.status).toHaveBeenCalledWith(400)
   })
 
   it('returns 405 for non-POST', async () => {
     const res = mockRes()
-    await handler({ method: 'GET' }, res)
+    await handler({ method: 'GET', auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(res.status).toHaveBeenCalledWith(405)
   })
 })

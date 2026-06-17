@@ -44,14 +44,23 @@ describe('requireAuth', () => {
     expect(handler).not.toHaveBeenCalled()
   })
 
-  it('attaches req.auth.userId and calls the handler on success', async () => {
-    verifyToken.mockResolvedValue({ sub: 'user_123' })
+  it('attaches req.auth and calls the handler when the token has an active org', async () => {
+    verifyToken.mockResolvedValue({ sub: 'user_123', org_id: 'org_abc' })
     const handler = vi.fn()
     const res = mockRes()
     const req = { headers: { authorization: 'Bearer good' } }
     await requireAuth(handler)(req, res)
     expect(handler).toHaveBeenCalledWith(req, res)
-    expect(req.auth).toEqual({ userId: 'user_123' })
+    expect(req.auth).toEqual({ userId: 'user_123', orgId: 'org_abc' })
     expect(res.status).not.toHaveBeenCalled()
+  })
+
+  it('returns 403 when the verified token has no active organization', async () => {
+    verifyToken.mockResolvedValue({ sub: 'user_123' })
+    const handler = vi.fn()
+    const res = mockRes()
+    await requireAuth(handler)({ headers: { authorization: 'Bearer good' } }, res)
+    expect(res.status).toHaveBeenCalledWith(403)
+    expect(handler).not.toHaveBeenCalled()
   })
 })

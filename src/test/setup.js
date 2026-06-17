@@ -7,7 +7,7 @@ import { resetAuthState } from './authState'
 // by mutating authState (reset before every test).
 vi.mock('../lib/auth.jsx', async () => {
   const { createElement } = await import('react')
-  const { authState, DEMO_ORG } = await import('./authState')
+  const { authState } = await import('./authState')
   return {
     AuthProvider: ({ children }) => children,
     useUser: () => ({
@@ -15,8 +15,9 @@ vi.mock('../lib/auth.jsx', async () => {
       isSignedIn: authState.isSignedIn,
       user: authState.isSignedIn ? authState.user : null,
     }),
-    useOrganization: () => ({ isLoaded: true, organization: DEMO_ORG }),
+    useOrganization: () => ({ isLoaded: authState.orgLoaded, organization: authState.organization }),
     UserButton: () => createElement('div', { 'data-testid': 'user-button' }),
+    OrganizationSwitcher: () => createElement('div', { 'data-testid': 'org-switcher' }),
     SignIn: () => createElement('div', { 'data-testid': 'clerk-sign-in' }),
     SignUp: () => createElement('div', { 'data-testid': 'clerk-sign-up' }),
   }

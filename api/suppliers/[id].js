@@ -1,17 +1,17 @@
 import { prisma } from '../_lib/prisma.js'
-import { ORG_ID } from '../_lib/org.js'
 import { requireAuth } from '../_lib/auth.js'
 
 async function handler(req, res) {
   try {
     if (req.method === 'PATCH') {
       const existing = await prisma.supplier.findFirst({
-        where: { id: req.query.id, orgId: ORG_ID },
+        where: { id: req.query.id, orgId: req.auth.orgId },
       })
       if (!existing) return res.status(404).json({ error: 'Not found' })
+      const { id: _ignoredId, orgId: _ignoredOrgId, ...rest } = req.body ?? {}
       const updated = await prisma.supplier.update({
         where: { id: req.query.id },
-        data: req.body ?? {},
+        data: rest,
       })
       return res.status(200).json(updated)
     }
