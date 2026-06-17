@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { authState } from '../../test/authState'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import PageHeader from './PageHeader'
@@ -17,6 +18,17 @@ describe('Sidebar', () => {
     expect(screen.getByRole('link', { name: /Suppliers/ })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /AI Assistant/ })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Admin/ })).toBeInTheDocument()
+  })
+
+  it('hides the Admin link for non-admin members', () => {
+    authState.membership = { role: 'org:member' }
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    )
+    expect(screen.queryByRole('link', { name: /Admin/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Dashboard/ })).toBeInTheDocument()
   })
 })
 
