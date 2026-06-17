@@ -2,8 +2,8 @@ import { verifyToken } from '@clerk/backend'
 
 // Wraps a handler so it only runs with a valid Clerk session token that
 // carries an active organization. Networkless verification: the JWT is
-// checked against CLERK_SECRET_KEY. `org_id` is a default Clerk session-token
-// claim, present only when an org is active.
+// checked against CLERK_SECRET_KEY. `org_id` and `org_role` are default Clerk
+// session-token claims, present only when an org is active.
 export function requireAuth(handler) {
   return async (req, res) => {
     const header = req.headers?.authorization ?? ''
@@ -17,7 +17,18 @@ export function requireAuth(handler) {
     }
     const orgId = payload.org_id ?? null
     if (!orgId) return res.status(403).json({ error: 'No active organization' })
-    req.auth = { userId: payload.sub, orgId }
+    req.auth = { userId: payload.sub, orgId, orgRole: payload.org_role ?? null }
     return handler(req, res)
   }
+}
+
+// Wraps a handler so it only runs for an organization admin (Clerk role
+// `org:admin`). Composes requireAuth, so 401/403-no-org still apply first.
+export function requireOrgAdmin(handler) {
+  return requireAuth((req, res) => {
+    if (req.auth.orgRole !== 'org:admin') {
+      return res.status(403).json({ error: 'Admin access required' })
+    }
+    return handler(req, res)
+  })
 }
