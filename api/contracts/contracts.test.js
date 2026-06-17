@@ -80,4 +80,18 @@ describe('contracts endpoints', () => {
     expect(res.status).toHaveBeenCalledWith(404)
     expect(prisma.contract.update).not.toHaveBeenCalled()
   })
+
+  it('ignores client-supplied orgId and id on PATCH (cannot move records across orgs)', async () => {
+    prisma.contract.findFirst.mockResolvedValue({ id: 'con_1' })
+    prisma.contract.update.mockResolvedValue({ id: 'con_1' })
+    const res = mockRes()
+    await idHandler(
+      { method: 'PATCH', query: { id: 'con_1' }, body: { orgId: 'evil_org', id: 'hijack', status: 'active' }, auth: { userId: 'user_test', orgId: 'org_test' } },
+      res
+    )
+    const data = prisma.contract.update.mock.calls[0][0].data
+    expect(data).not.toHaveProperty('orgId')
+    expect(data).not.toHaveProperty('id')
+    expect(data.status).toBe('active')
+  })
 })

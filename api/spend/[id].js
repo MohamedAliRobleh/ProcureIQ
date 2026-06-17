@@ -9,9 +9,10 @@ async function handler(req, res) {
         where: { id: req.query.id, orgId: req.auth.orgId },
       })
       if (!existing) return res.status(404).json({ error: 'Not found' })
+      const { id: _ignoredId, orgId: _ignoredOrgId, ...rest } = req.body ?? {}
       const updated = await prisma.spendRecord.update({
         where: { id: req.query.id },
-        data: coerceDates(req.body ?? {}, ['date']),
+        data: coerceDates(rest, ['date']),
       })
       return res.status(200).json(updated)
     }

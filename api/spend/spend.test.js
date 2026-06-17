@@ -77,4 +77,18 @@ describe('spend endpoints', () => {
     expect(res.status).toHaveBeenCalledWith(404)
     expect(prisma.spendRecord.update).not.toHaveBeenCalled()
   })
+
+  it('ignores client-supplied orgId and id on PATCH (cannot move records across orgs)', async () => {
+    prisma.spendRecord.findFirst.mockResolvedValue({ id: 'spend_1' })
+    prisma.spendRecord.update.mockResolvedValue({ id: 'spend_1', amount: 999 })
+    const res = mockRes()
+    await idHandler(
+      { method: 'PATCH', query: { id: 'spend_1' }, body: { orgId: 'evil_org', id: 'hijack', amount: 999 }, auth: { userId: 'user_test', orgId: 'org_test' } },
+      res
+    )
+    const data = prisma.spendRecord.update.mock.calls[0][0].data
+    expect(data).not.toHaveProperty('orgId')
+    expect(data).not.toHaveProperty('id')
+    expect(data.amount).toBe(999)
+  })
 })

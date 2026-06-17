@@ -92,4 +92,18 @@ describe('PATCH /api/suppliers/:id', () => {
     await idHandler({ method: 'DELETE', auth: { userId: 'user_test', orgId: 'org_test' }, query: { id: 'sup_1' } }, res)
     expect(res.status).toHaveBeenCalledWith(405)
   })
+
+  it('ignores client-supplied orgId and id on PATCH (cannot move records across orgs)', async () => {
+    prisma.supplier.findFirst.mockResolvedValue({ id: 'sup_1' })
+    prisma.supplier.update.mockResolvedValue({ id: 'sup_1', status: 'suspended' })
+    const res = mockRes()
+    await idHandler(
+      { method: 'PATCH', query: { id: 'sup_1' }, body: { orgId: 'evil_org', id: 'hijack', status: 'suspended' }, auth: { userId: 'user_test', orgId: 'org_test' } },
+      res
+    )
+    const data = prisma.supplier.update.mock.calls[0][0].data
+    expect(data).not.toHaveProperty('orgId')
+    expect(data).not.toHaveProperty('id')
+    expect(data.status).toBe('suspended')
+  })
 })
