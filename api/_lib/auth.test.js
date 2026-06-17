@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('@clerk/backend', () => ({ verifyToken: vi.fn() }))
 
-import { requireAuth } from './auth.js'
+import { requireAuth, requireOrgAdmin } from './auth.js'
 import { verifyToken } from '@clerk/backend'
 
 function mockRes() {
@@ -44,15 +44,25 @@ describe('requireAuth', () => {
     expect(handler).not.toHaveBeenCalled()
   })
 
-  it('attaches req.auth and calls the handler when the token has an active org', async () => {
+  it('attaches req.auth (incl. orgRole) and calls the handler when the token has an active org', async () => {
+    verifyToken.mockResolvedValue({ sub: 'user_123', org_id: 'org_abc', org_role: 'org:admin' })
+    const handler = vi.fn()
+    const res = mockRes()
+    const req = { headers: { authorization: 'Bearer good' } }
+    await requireAuth(handler)(req, res)
+    expect(handler).toHaveBeenCalledWith(req, res)
+    expect(req.auth).toEqual({ userId: 'user_123', orgId: 'org_abc', orgRole: 'org:admin' })
+    expect(res.status).not.toHaveBeenCalled()
+  })
+
+  it('sets orgRole to null when the token has an org but no role claim', async () => {
     verifyToken.mockResolvedValue({ sub: 'user_123', org_id: 'org_abc' })
     const handler = vi.fn()
     const res = mockRes()
     const req = { headers: { authorization: 'Bearer good' } }
     await requireAuth(handler)(req, res)
     expect(handler).toHaveBeenCalledWith(req, res)
-    expect(req.auth).toEqual({ userId: 'user_123', orgId: 'org_abc' })
-    expect(res.status).not.toHaveBeenCalled()
+    expect(req.auth.orgRole).toBeNull()
   })
 
   it('returns 403 when the verified token has no active organization', async () => {
@@ -60,6 +70,36 @@ describe('requireAuth', () => {
     const handler = vi.fn()
     const res = mockRes()
     await requireAuth(handler)({ headers: { authorization: 'Bearer good' } }, res)
+    expect(res.status).toHaveBeenCalledWith(403)
+    expect(handler).not.toHaveBeenCalled()
+  })
+})
+
+describe('requireOrgAdmin', () => {
+  it('calls the handler for an org admin', async () => {
+    verifyToken.mockResolvedValue({ sub: 'user_123', org_id: 'org_abc', org_role: 'org:admin' })
+    const handler = vi.fn()
+    const res = mockRes()
+    const req = { headers: { authorization: 'Bearer good' } }
+    await requireOrgAdmin(handler)(req, res)
+    expect(handler).toHaveBeenCalledWith(req, res)
+    expect(res.status).not.toHaveBeenCalled()
+  })
+
+  it('returns 403 for a non-admin member', async () => {
+    verifyToken.mockResolvedValue({ sub: 'user_123', org_id: 'org_abc', org_role: 'org:member' })
+    const handler = vi.fn()
+    const res = mockRes()
+    await requireOrgAdmin(handler)({ headers: { authorization: 'Bearer good' } }, res)
+    expect(res.status).toHaveBeenCalledWith(403)
+    expect(handler).not.toHaveBeenCalled()
+  })
+
+  it('returns 403 when the org role is missing', async () => {
+    verifyToken.mockResolvedValue({ sub: 'user_123', org_id: 'org_abc' })
+    const handler = vi.fn()
+    const res = mockRes()
+    await requireOrgAdmin(handler)({ headers: { authorization: 'Bearer good' } }, res)
     expect(res.status).toHaveBeenCalledWith(403)
     expect(handler).not.toHaveBeenCalled()
   })

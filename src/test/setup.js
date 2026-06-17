@@ -15,9 +15,14 @@ vi.mock('../lib/auth.jsx', async () => {
       isSignedIn: authState.isSignedIn,
       user: authState.isSignedIn ? authState.user : null,
     }),
-    useOrganization: () => ({ isLoaded: authState.orgLoaded, organization: authState.organization }),
+    useOrganization: () => ({
+      isLoaded: authState.orgLoaded,
+      organization: authState.organization,
+      membership: authState.membership,
+    }),
     UserButton: () => createElement('div', { 'data-testid': 'user-button' }),
     OrganizationSwitcher: () => createElement('div', { 'data-testid': 'org-switcher' }),
+    OrganizationProfile: () => createElement('div', { 'data-testid': 'org-profile' }),
     SignIn: () => createElement('div', { 'data-testid': 'clerk-sign-in' }),
     SignUp: () => createElement('div', { 'data-testid': 'clerk-sign-up' }),
   }

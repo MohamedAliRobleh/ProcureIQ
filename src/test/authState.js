@@ -26,6 +26,7 @@ export const authState = {
   user: DEFAULT_USER,
   orgLoaded: true,
   organization: DEMO_ORG,
+  membership: { role: 'org:admin' },
 }
 
 export function resetAuthState() {
@@ -34,4 +35,5 @@ export function resetAuthState() {
   authState.user = DEFAULT_USER
   authState.orgLoaded = true
   authState.organization = DEMO_ORG
+  authState.membership = { role: 'org:admin' }
 }

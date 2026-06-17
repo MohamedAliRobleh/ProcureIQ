@@ -17,6 +17,11 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // Allow underscore-prefixed names for intentionally-unused bindings
+      // (e.g. destructuring to omit fields: `const { id: _id, ...rest } = body`).
+      'no-unused-vars': ['error', { varsIgnorePattern: '^_', argsIgnorePattern: '^_' }],
+    },
   },
   {
     files: ['api/**', 'prisma/**'],

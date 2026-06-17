@@ -1,15 +1,20 @@
 import { NavLink } from 'react-router-dom'
 import { cn } from '../../utils/cn'
 import { NAV_ITEMS } from '../../utils/constants'
+import { useOrganization } from '../../lib/auth'
 
 export default function Sidebar() {
+  const { membership } = useOrganization()
+  const isAdmin = membership?.role === 'org:admin'
+  const items = NAV_ITEMS.filter((item) => item.path !== '/admin' || isAdmin)
+
   return (
     <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-border bg-bg-secondary px-4 py-6 lg:flex">
       <div className="px-2 font-display text-xl font-semibold text-text-primary">
         ProcureIQ
       </div>
       <nav className="mt-8 flex flex-1 flex-col gap-1">
-        {NAV_ITEMS.map(({ label, path, icon: Icon }) => (
+        {items.map(({ label, path, icon: Icon }) => (
           <NavLink
             key={path}
             to={path}
