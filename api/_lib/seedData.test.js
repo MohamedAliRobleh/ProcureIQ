@@ -27,4 +27,14 @@ describe('buildSeedData', () => {
     expect(data.contracts.length).toBeGreaterThan(0)
     expect(data.spendRecords.length).toBeGreaterThan(0)
   })
+
+  it('re-keys portalRequests: namespaced id, rewritten supplierId, stamped orgId', () => {
+    const data = buildSeedData('org_xyz')
+    expect(data.portalRequests.length).toBeGreaterThan(0)
+    for (const p of data.portalRequests) {
+      expect(p.id.startsWith('org_xyz__')).toBe(true)
+      expect(p.supplierId.startsWith('org_xyz__')).toBe(true)
+      expect(p.orgId).toBe('org_xyz')
+    }
+  })
 })
