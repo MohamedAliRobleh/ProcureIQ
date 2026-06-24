@@ -21,7 +21,6 @@ export default function Portal() {
   const [selectedId, setSelectedId] = useState(null)
 
   const displayed = filterRequests(requests, { status })
-  const supplierName = (id) => suppliers.find((s) => s.id === id)?.name ?? '—'
 
   function openSlideOver(request) {
     setSelectedId(request.id)

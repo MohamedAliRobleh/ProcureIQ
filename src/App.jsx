@@ -15,13 +15,9 @@ import ESG from './pages/ESG'
 import Spend from './pages/Spend'
 import AIAssistant from './pages/AIAssistant'
 import Admin from './pages/Admin'
-import PlaceholderPage from './pages/PlaceholderPage'
+import Portal from './pages/Portal'
 import SignInPage from './pages/SignInPage'
 import SignUpPage from './pages/SignUpPage'
-
-const PLACEHOLDER_ROUTES = [
-  { path: '/portal', title: 'Supplier Portal', phase: 'Phase 7' },
-]
 
 export default function App() {
   return (
@@ -52,9 +48,7 @@ export default function App() {
               <Route path="/spend" element={<Spend />} />
               <Route path="/ai-assistant" element={<AIAssistant />} />
               <Route path="/admin/*" element={<Admin />} />
-              {PLACEHOLDER_ROUTES.map(({ path, title, phase }) => (
-                <Route key={path} path={path} element={<PlaceholderPage title={title} phase={phase} />} />
-              ))}
+              <Route path="/portal" element={<Portal />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>
           </Routes>
