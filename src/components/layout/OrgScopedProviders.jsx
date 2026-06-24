@@ -4,6 +4,7 @@ import { SupplierProvider } from '../../context/SupplierContext'
 import { ContractProvider } from '../../context/ContractContext'
 import { SpendProvider } from '../../context/SpendContext'
 import { ChatProvider } from '../../context/ChatContext'
+import { PortalProvider } from '../../context/PortalContext'
 
 // Remounts the entire data-provider stack when the active org changes, so each
 // context refetches for the new org. apiClient's per-request getToken() already
@@ -16,7 +17,9 @@ export default function OrgScopedProviders({ children }) {
       <SupplierProvider>
         <ContractProvider>
           <SpendProvider>
-            <ChatProvider>{children}</ChatProvider>
+            <ChatProvider>
+              <PortalProvider>{children}</PortalProvider>
+            </ChatProvider>
           </SpendProvider>
         </ContractProvider>
       </SupplierProvider>
