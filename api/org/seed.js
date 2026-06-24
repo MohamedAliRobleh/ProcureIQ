@@ -21,6 +21,7 @@ async function handler(req, res) {
     await prisma.riskAssessment.createMany({ data: data.riskAssessments })
     await prisma.esgResponse.createMany({ data: data.esgResponses })
     await prisma.spendRecord.createMany({ data: data.spendRecords })
+    await prisma.portalRequest.createMany({ data: data.portalRequests })
     return res.status(200).json({ seeded: true })
   } catch (e) {
     return res.status(500).json({ error: e.message })

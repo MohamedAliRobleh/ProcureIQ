@@ -7,6 +7,7 @@ vi.mock('../_lib/prisma.js', () => ({
     riskAssessment: { deleteMany: vi.fn((a) => ({ op: 'del:risk', ...a })), createMany: vi.fn((a) => ({ op: 'new:risk', ...a })) },
     esgResponse: { deleteMany: vi.fn((a) => ({ op: 'del:esg', ...a })), createMany: vi.fn((a) => ({ op: 'new:esg', ...a })) },
     spendRecord: { deleteMany: vi.fn((a) => ({ op: 'del:spend', ...a })), createMany: vi.fn((a) => ({ op: 'new:spend', ...a })) },
+    portalRequest: { deleteMany: vi.fn((a) => ({ op: 'del:portal', ...a })), createMany: vi.fn((a) => ({ op: 'new:portal', ...a })) },
     supplier: { deleteMany: vi.fn((a) => ({ op: 'del:supplier', ...a })), createMany: vi.fn((a) => ({ op: 'new:supplier', ...a })) },
   },
 }))
@@ -18,6 +19,7 @@ vi.mock('../_lib/seedData.js', () => ({
     riskAssessments: [{ id: 'org_test__risk_1' }],
     esgResponses: [{ id: 'org_test__esg_1' }],
     spendRecords: [{ id: 'org_test__spend_1' }],
+    portalRequests: [{ id: 'org_test__portal_1' }],
   })),
 }))
 
@@ -49,8 +51,8 @@ describe('POST /api/org/reset', () => {
     expect(prisma.$transaction).toHaveBeenCalledTimes(1)
     const ops = prisma.$transaction.mock.calls[0][0].map((o) => o.op)
     expect(ops).toEqual([
-      'del:contract', 'del:risk', 'del:esg', 'del:spend', 'del:supplier',
-      'new:supplier', 'new:contract', 'new:risk', 'new:esg', 'new:spend',
+      'del:contract', 'del:risk', 'del:esg', 'del:spend', 'del:portal', 'del:supplier',
+      'new:supplier', 'new:contract', 'new:risk', 'new:esg', 'new:spend', 'new:portal',
     ])
     expect(prisma.supplier.createMany).toHaveBeenCalledWith({ data: [{ id: 'org_test__sup_1' }] })
     expect(res.status).toHaveBeenCalledWith(200)

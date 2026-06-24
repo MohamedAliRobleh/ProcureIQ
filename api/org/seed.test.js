@@ -7,6 +7,7 @@ vi.mock('../_lib/prisma.js', () => ({
     riskAssessment: { createMany: vi.fn() },
     esgResponse: { createMany: vi.fn() },
     spendRecord: { createMany: vi.fn() },
+    portalRequest: { createMany: vi.fn() },
   },
 }))
 vi.mock('../_lib/auth.js', () => ({ requireAuth: (handler) => handler }))
@@ -17,6 +18,7 @@ vi.mock('../_lib/seedData.js', () => ({
     riskAssessments: [{ id: 'org_test__risk_1' }],
     esgResponses: [{ id: 'org_test__esg_1' }],
     spendRecords: [{ id: 'org_test__spend_1' }],
+    portalRequests: [{ id: 'org_test__portal_1' }],
   })),
 }))
 
@@ -38,7 +40,7 @@ beforeEach(() => {
 })
 
 describe('POST /api/org/seed', () => {
-  it('seeds all five entities for an empty org and returns seeded: true', async () => {
+  it('seeds all six entities for an empty org and returns seeded: true', async () => {
     prisma.supplier.count.mockResolvedValue(0)
     const res = mockRes()
     await handler(authReq(), res)
@@ -48,6 +50,7 @@ describe('POST /api/org/seed', () => {
     expect(prisma.riskAssessment.createMany).toHaveBeenCalled()
     expect(prisma.esgResponse.createMany).toHaveBeenCalled()
     expect(prisma.spendRecord.createMany).toHaveBeenCalled()
+    expect(prisma.portalRequest.createMany).toHaveBeenCalledWith({ data: [{ id: 'org_test__portal_1' }] })
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({ seeded: true })
   })

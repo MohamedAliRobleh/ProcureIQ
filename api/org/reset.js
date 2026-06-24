@@ -17,12 +17,14 @@ async function handler(req, res) {
       prisma.riskAssessment.deleteMany({ where: { orgId } }),
       prisma.esgResponse.deleteMany({ where: { orgId } }),
       prisma.spendRecord.deleteMany({ where: { orgId } }),
+      prisma.portalRequest.deleteMany({ where: { orgId } }),
       prisma.supplier.deleteMany({ where: { orgId } }),
       prisma.supplier.createMany({ data: data.suppliers }),
       prisma.contract.createMany({ data: data.contracts }),
       prisma.riskAssessment.createMany({ data: data.riskAssessments }),
       prisma.esgResponse.createMany({ data: data.esgResponses }),
       prisma.spendRecord.createMany({ data: data.spendRecords }),
+      prisma.portalRequest.createMany({ data: data.portalRequests }),
     ])
     return res.status(200).json({ reset: true })
   } catch (e) {
