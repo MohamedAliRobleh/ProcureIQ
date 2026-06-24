@@ -41,4 +41,14 @@ describe('apiClient', () => {
     await api.get('/api/suppliers')
     expect(fetchMock.mock.calls[0][1].headers.Authorization).toBeUndefined()
   })
+
+  it('DELETE issues a request with method DELETE and parses the JSON response', async () => {
+    const fetchMock = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ deleted: true }) }))
+    vi.stubGlobal('fetch', fetchMock)
+    const result = await api.del('/api/portal-requests/preq_1')
+    const [url, options] = fetchMock.mock.calls[0]
+    expect(url).toBe('/api/portal-requests/preq_1')
+    expect(options.method).toBe('DELETE')
+    expect(result).toEqual({ deleted: true })
+  })
 })

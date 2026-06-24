@@ -1,5 +1,5 @@
 import { vi } from 'vitest'
-import { suppliers, contracts, riskAssessments, esgResponses, spendRecords } from '../lib/mockData'
+import { suppliers, contracts, riskAssessments, esgResponses, spendRecords, portalRequests } from '../lib/mockData'
 
 // Serializes Date fields to ISO strings — the same shape the real API returns.
 const toJson = (data) => JSON.parse(JSON.stringify(data))
@@ -14,6 +14,7 @@ const COLLECTIONS = {
   '/api/suppliers': { data: suppliers, prefix: 'sup' },
   '/api/contracts': { data: contracts, prefix: 'con' },
   '/api/spend': { data: spendRecords, prefix: 'spend' },
+  '/api/portal-requests': { data: portalRequests, prefix: 'preq' },
 }
 
 export function createMockFetch() {
@@ -42,6 +43,9 @@ export function createMockFetch() {
     if (method === 'POST' && url === '/api/contracts/notify') {
       return jsonResponse({ ok: true })
     }
+    if (method === 'POST' && url === '/api/portal-requests/notify') {
+      return jsonResponse({ ok: true })
+    }
 
     if (method === 'GET') {
       if (url === '/api/risk') return jsonResponse(toJson(riskAssessments))
@@ -63,8 +67,12 @@ export function createMockFetch() {
       )
     }
     if (method === 'PATCH') {
-      const match = url.match(/^\/api\/(?:suppliers|contracts|spend)\/(.+)$/)
+      const match = url.match(/^\/api\/(?:suppliers|contracts|spend|portal-requests)\/(.+)$/)
       if (match) return jsonResponse({ ...body, id: match[1] })
+    }
+    if (method === 'DELETE') {
+      const match = url.match(/^\/api\/portal-requests\/(.+)$/)
+      if (match) return jsonResponse({ deleted: true })
     }
     return jsonResponse({ error: `mockApi: unhandled ${method} ${url}` }, 500)
   })

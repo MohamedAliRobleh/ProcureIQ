@@ -4,6 +4,7 @@ import {
   riskAssessments,
   esgResponses,
   spendRecords,
+  portalRequests,
 } from '../../src/lib/mockData.js'
 
 // Re-keys the canonical demo dataset (src/lib/mockData.js) into a target org.
@@ -19,5 +20,6 @@ export function buildSeedData(orgId) {
     riskAssessments: riskAssessments.map((r) => ({ ...r, id: ns(r.id), orgId, supplierId: ns(r.supplierId) })),
     esgResponses: esgResponses.map((e) => ({ ...e, id: ns(e.id), orgId, supplierId: ns(e.supplierId) })),
     spendRecords: spendRecords.map((sp) => ({ ...sp, id: ns(sp.id), orgId, supplierId: ns(sp.supplierId) })),
+    portalRequests: portalRequests.map((p) => ({ ...p, id: ns(p.id), orgId, supplierId: ns(p.supplierId) })),
   }
 }

@@ -16,6 +16,7 @@ async function handler(req, res) {
       prisma.riskAssessment.deleteMany({ where: { orgId } }),
       prisma.esgResponse.deleteMany({ where: { orgId } }),
       prisma.spendRecord.deleteMany({ where: { orgId } }),
+      prisma.portalRequest.deleteMany({ where: { orgId } }),
       prisma.supplier.deleteMany({ where: { orgId } }),
     ])
     return res.status(200).json({ cleared: true })

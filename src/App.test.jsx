@@ -53,11 +53,11 @@ describe('App', () => {
     expect(screen.getByPlaceholderText('Ask about suppliers, contracts, spend...')).toBeInTheDocument()
   })
 
-  it('renders a placeholder page for not-yet-built modules', async () => {
+  it('renders the Supplier Portal page at /portal', async () => {
     window.history.pushState({}, '', '/portal')
     render(<App />)
     await waitFor(() => expect(screen.getByRole('heading', { name: 'Supplier Portal' })).toBeInTheDocument())
-    expect(screen.getByText(/coming in Phase 7/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /New request/i })).toBeInTheDocument()
   })
 
   it('renders the embedded sign-in at /sign-in', async () => {

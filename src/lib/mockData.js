@@ -10,14 +10,14 @@ const SUPPLIER_NAMES = [
   'Vertex Components', 'Global Energy Partners', 'Crestline Logistics', 'Apex Consulting Worldwide',
 ]
 
-function daysFromNow(days) {
+export function daysFromNow(days) {
   const d = new Date()
   d.setHours(12, 0, 0, 0)
   d.setDate(d.getDate() + days)
   return d
 }
 
-function daysAgo(days) {
+export function daysAgo(days) {
   return daysFromNow(-days)
 }
 
@@ -140,6 +140,65 @@ for (let month = 0; month < 6; month++) {
     spendCounter++
   }
 }
+
+export const portalRequests = [
+  {
+    id: 'preq_1',
+    orgId: 'org_demo',
+    supplierId: suppliers[0].id,
+    type: 'esg_questionnaire',
+    title: 'Submit 2026 ESG questionnaire',
+    message: 'Please complete the annual ESG questionnaire by the due date.',
+    status: 'pending',
+    dueDate: daysFromNow(14),
+    responseNote: null,
+    createdBy: 'user_demo_admin',
+    createdAt: daysAgo(2),
+    updatedAt: daysAgo(2),
+  },
+  {
+    id: 'preq_2',
+    orgId: 'org_demo',
+    supplierId: suppliers[1].id,
+    type: 'document',
+    title: 'Upload current insurance certificate',
+    message: 'We need your current liability insurance certificate on file.',
+    status: 'submitted',
+    dueDate: daysFromNow(5),
+    responseNote: 'Certificate emailed on 06-20; pending review.',
+    createdBy: 'user_demo_admin',
+    createdAt: daysAgo(6),
+    updatedAt: daysAgo(1),
+  },
+  {
+    id: 'preq_3',
+    orgId: 'org_demo',
+    supplierId: suppliers[2].id,
+    type: 'risk_review',
+    title: 'Q2 risk review attestation',
+    message: null,
+    status: 'approved',
+    dueDate: daysAgo(3),
+    responseNote: 'Reviewed and approved.',
+    createdBy: 'user_demo_admin',
+    createdAt: daysAgo(20),
+    updatedAt: daysAgo(4),
+  },
+  {
+    id: 'preq_4',
+    orgId: 'org_demo',
+    supplierId: suppliers[3].id,
+    type: 'general',
+    title: 'Confirm updated banking details',
+    message: 'Please confirm your updated remittance details.',
+    status: 'rejected',
+    dueDate: null,
+    responseNote: 'Details could not be verified; resubmission required.',
+    createdBy: 'user_demo_admin',
+    createdAt: daysAgo(12),
+    updatedAt: daysAgo(8),
+  },
+]
 
 export const recentActivity = [
   { id: 'act_1', type: 'supplier_onboarded', message: `${suppliers[0].name} completed onboarding`, timestamp: daysAgo(1) },

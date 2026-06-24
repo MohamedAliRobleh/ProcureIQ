@@ -9,6 +9,7 @@ vi.mock('../_lib/prisma.js', () => ({
     riskAssessment: { deleteMany: vi.fn((a) => ({ op: 'riskAssessment', ...a })) },
     esgResponse: { deleteMany: vi.fn((a) => ({ op: 'esgResponse', ...a })) },
     spendRecord: { deleteMany: vi.fn((a) => ({ op: 'spendRecord', ...a })) },
+    portalRequest: { deleteMany: vi.fn((a) => ({ op: 'portalRequest', ...a })) },
     supplier: { deleteMany: vi.fn((a) => ({ op: 'supplier', ...a })) },
   },
 }))
@@ -36,15 +37,15 @@ beforeEach(() => {
 })
 
 describe('POST /api/org/clear', () => {
-  it('deletes all five entities child-first in one transaction', async () => {
+  it('deletes all six entities child-first in one transaction', async () => {
     const res = mockRes()
     await handler(authReq(), res)
-    for (const model of ['contract', 'riskAssessment', 'esgResponse', 'spendRecord', 'supplier']) {
+    for (const model of ['contract', 'riskAssessment', 'esgResponse', 'spendRecord', 'portalRequest', 'supplier']) {
       expect(prisma[model].deleteMany).toHaveBeenCalledWith({ where: { orgId: 'org_test' } })
     }
     expect(prisma.$transaction).toHaveBeenCalledTimes(1)
     const ops = prisma.$transaction.mock.calls[0][0].map((o) => o.op)
-    expect(ops).toEqual(['contract', 'riskAssessment', 'esgResponse', 'spendRecord', 'supplier'])
+    expect(ops).toEqual(['contract', 'riskAssessment', 'esgResponse', 'spendRecord', 'portalRequest', 'supplier'])
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({ cleared: true })
   })
