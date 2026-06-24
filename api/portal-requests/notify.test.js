@@ -44,6 +44,29 @@ describe('POST /api/portal-requests/notify', () => {
     expect(res.json).toHaveBeenCalledWith({ ok: true })
   })
 
+  it('escapes HTML-dangerous characters in title, message, and supplier name', async () => {
+    isEmailConfigured.mockReturnValue(true)
+    prisma.portalRequest.findFirst.mockResolvedValue({
+      id: 'preq_1',
+      title: 'A<b>&"X',
+      message: 'm<i>&\'',
+      dueDate: '2026-07-01',
+      supplier: { name: 'A<b>&"', email: 's@x.com' },
+    })
+    sendEmail.mockResolvedValue(true)
+    const res = mockRes()
+    await handler({ method: 'POST', auth, body: { id: 'preq_1' } }, res)
+    const arg = sendEmail.mock.calls[0][0]
+    expect(arg.html).toContain('&lt;')
+    expect(arg.html).toContain('&gt;')
+    expect(arg.html).toContain('&amp;')
+    expect(arg.html).toContain('&quot;')
+    expect(arg.html).toContain('&#39;')
+    expect(arg.html).not.toContain('<b>')
+    expect(arg.html).not.toContain('<i>')
+    expect(res.json).toHaveBeenCalledWith({ ok: true })
+  })
+
   it('returns 400 when id is missing', async () => {
     const res = mockRes()
     await handler({ method: 'POST', auth, body: {} }, res)

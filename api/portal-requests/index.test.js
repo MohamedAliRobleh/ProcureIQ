@@ -67,6 +67,12 @@ describe('portal-requests index', () => {
     expect(res.status).toHaveBeenCalledWith(400)
   })
 
+  it('POST rejects an invalid status with 400', async () => {
+    const res = mockRes()
+    await listHandler({ method: 'POST', auth, body: { supplierId: 'sup_1', title: 'x', status: 'bogus' } }, res)
+    expect(res.status).toHaveBeenCalledWith(400)
+  })
+
   it('POST returns 404 when the supplier is not in the org', async () => {
     prisma.supplier.findFirst.mockResolvedValue(null)
     const res = mockRes()
