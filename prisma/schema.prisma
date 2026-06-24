@@ -28,6 +28,7 @@ model Supplier {
   riskAssessments RiskAssessment[]
   esgResponses    EsgResponse[]
   spendRecords    SpendRecord[]
+  portalRequests  PortalRequest[]
 }
 
 model Contract {
@@ -92,4 +93,20 @@ model SpendRecord {
   date        DateTime
   invoiceRef  String?
   createdAt   DateTime @default(now())
+}
+
+model PortalRequest {
+  id           String    @id
+  orgId        String    @default("org_demo")
+  supplierId   String
+  supplier     Supplier  @relation(fields: [supplierId], references: [id])
+  type         String    @default("general")
+  title        String
+  message      String?
+  status       String    @default("pending")
+  dueDate      DateTime?
+  responseNote String?
+  createdBy    String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
