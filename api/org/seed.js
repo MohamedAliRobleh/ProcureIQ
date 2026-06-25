@@ -1,6 +1,7 @@
 import { prisma } from '../_lib/prisma.js'
 import { requireAuth } from '../_lib/auth.js'
 import { buildSeedData } from '../_lib/seedData.js'
+import { buildAuditData } from '../_lib/audit.js'
 
 // Populates a brand-new org with the canonical demo dataset. Count-guarded so
 // it never duplicates: if the org already has suppliers, it is a no-op.
@@ -23,6 +24,7 @@ async function handler(req, res) {
       prisma.esgResponse.createMany({ data: data.esgResponses }),
       prisma.spendRecord.createMany({ data: data.spendRecords }),
       prisma.portalRequest.createMany({ data: data.portalRequests }),
+      prisma.auditLog.create({ data: buildAuditData({ orgId, actorId: req.auth.userId, action: 'org.seed' }) }),
     ])
     return res.status(200).json({ seeded: true })
   } catch (e) {

@@ -1,5 +1,6 @@
 import { prisma } from '../_lib/prisma.js'
 import { requireOrgAdmin } from '../_lib/auth.js'
+import { buildAuditData } from '../_lib/audit.js'
 
 // Admin-only: permanently delete every record in the active org. Children are
 // deleted before suppliers (no onDelete cascade in the schema), all in one
@@ -18,6 +19,7 @@ async function handler(req, res) {
       prisma.spendRecord.deleteMany({ where: { orgId } }),
       prisma.portalRequest.deleteMany({ where: { orgId } }),
       prisma.supplier.deleteMany({ where: { orgId } }),
+      prisma.auditLog.create({ data: buildAuditData({ orgId, actorId: req.auth.userId, action: 'org.clear' }) }),
     ])
     return res.status(200).json({ cleared: true })
   } catch (e) {

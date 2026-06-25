@@ -11,6 +11,7 @@ vi.mock('../_lib/prisma.js', () => ({
     spendRecord: { deleteMany: vi.fn((a) => ({ op: 'spendRecord', ...a })) },
     portalRequest: { deleteMany: vi.fn((a) => ({ op: 'portalRequest', ...a })) },
     supplier: { deleteMany: vi.fn((a) => ({ op: 'supplier', ...a })) },
+    auditLog: { create: vi.fn((a) => ({ op: 'audit', ...a })) },
   },
 }))
 vi.mock('../_lib/auth.js', () => ({ requireOrgAdmin: (handler) => handler }))
@@ -45,7 +46,8 @@ describe('POST /api/org/clear', () => {
     }
     expect(prisma.$transaction).toHaveBeenCalledTimes(1)
     const ops = prisma.$transaction.mock.calls[0][0].map((o) => o.op)
-    expect(ops).toEqual(['contract', 'riskAssessment', 'esgResponse', 'spendRecord', 'portalRequest', 'supplier'])
+    expect(ops).toEqual(['contract', 'riskAssessment', 'esgResponse', 'spendRecord', 'portalRequest', 'supplier', 'audit'])
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({ data: expect.objectContaining({ action: 'org.clear', orgId: 'org_test', actorId: 'user_test' }) })
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({ cleared: true })
   })
