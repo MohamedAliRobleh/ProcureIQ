@@ -53,4 +53,17 @@ describe('Admin', () => {
     )
     await waitFor(() => expect(clickedDownload).toMatch(/^procureiq-backup-.*\.json$/))
   })
+
+  it('renders recent audit log entries for an admin', async () => {
+    const entries = [
+      { id: 'audit_1', action: 'org.clear', actorId: 'user_abc', createdAt: '2026-06-25T10:00:00.000Z' },
+    ]
+    const fetchMock = vi.fn(async () => ({ ok: true, status: 200, json: async () => entries }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(<Admin />)
+    expect(await screen.findByText('Activity log')).toBeInTheDocument()
+    expect(await screen.findByText('Cleared all data')).toBeInTheDocument()
+    expect(screen.getByText(/user_abc/)).toBeInTheDocument()
+  })
 })

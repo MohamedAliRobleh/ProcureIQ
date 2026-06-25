@@ -1,6 +1,7 @@
 import { prisma } from '../_lib/prisma.js'
 import { requireOrgAdmin } from '../_lib/auth.js'
 import { buildSeedData } from '../_lib/seedData.js'
+import { buildAuditData } from '../_lib/audit.js'
 
 // Admin-only: wipe the org then re-seed the canonical demo dataset, all in one
 // transaction. Deletes child-first, inserts parent-first.
@@ -25,6 +26,7 @@ async function handler(req, res) {
       prisma.esgResponse.createMany({ data: data.esgResponses }),
       prisma.spendRecord.createMany({ data: data.spendRecords }),
       prisma.portalRequest.createMany({ data: data.portalRequests }),
+      prisma.auditLog.create({ data: buildAuditData({ orgId, actorId: req.auth.userId, action: 'org.reset' }) }),
     ])
     return res.status(200).json({ reset: true })
   } catch (e) {

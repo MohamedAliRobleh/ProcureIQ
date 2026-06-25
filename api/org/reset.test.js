@@ -9,6 +9,7 @@ vi.mock('../_lib/prisma.js', () => ({
     spendRecord: { deleteMany: vi.fn((a) => ({ op: 'del:spend', ...a })), createMany: vi.fn((a) => ({ op: 'new:spend', ...a })) },
     portalRequest: { deleteMany: vi.fn((a) => ({ op: 'del:portal', ...a })), createMany: vi.fn((a) => ({ op: 'new:portal', ...a })) },
     supplier: { deleteMany: vi.fn((a) => ({ op: 'del:supplier', ...a })), createMany: vi.fn((a) => ({ op: 'new:supplier', ...a })) },
+    auditLog: { create: vi.fn((a) => ({ op: 'audit', ...a })) },
   },
 }))
 vi.mock('../_lib/auth.js', () => ({ requireOrgAdmin: (handler) => handler }))
@@ -52,9 +53,10 @@ describe('POST /api/org/reset', () => {
     const ops = prisma.$transaction.mock.calls[0][0].map((o) => o.op)
     expect(ops).toEqual([
       'del:contract', 'del:risk', 'del:esg', 'del:spend', 'del:portal', 'del:supplier',
-      'new:supplier', 'new:contract', 'new:risk', 'new:esg', 'new:spend', 'new:portal',
+      'new:supplier', 'new:contract', 'new:risk', 'new:esg', 'new:spend', 'new:portal', 'audit',
     ])
     expect(prisma.supplier.createMany).toHaveBeenCalledWith({ data: [{ id: 'org_test__sup_1' }] })
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({ data: expect.objectContaining({ action: 'org.reset', orgId: 'org_test', actorId: 'user_test' }) })
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({ reset: true })
   })

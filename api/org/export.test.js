@@ -8,6 +8,7 @@ vi.mock('../_lib/prisma.js', () => ({
     esgResponse: { findMany: vi.fn() },
     spendRecord: { findMany: vi.fn() },
     portalRequest: { findMany: vi.fn() },
+    auditLog: { create: vi.fn() },
   },
 }))
 vi.mock('../_lib/auth.js', () => ({ requireOrgAdmin: (handler) => handler }))
@@ -37,6 +38,7 @@ beforeEach(() => {
   prisma.esgResponse.findMany.mockResolvedValue([{ id: 'esg_1' }])
   prisma.spendRecord.findMany.mockResolvedValue([{ id: 'spend_1' }])
   prisma.portalRequest.findMany.mockResolvedValue([{ id: 'preq_1' }])
+  prisma.auditLog.create.mockResolvedValue({})
 })
 
 describe('GET /api/org/export', () => {
@@ -46,6 +48,7 @@ describe('GET /api/org/export', () => {
     for (const model of ['supplier', 'contract', 'riskAssessment', 'esgResponse', 'spendRecord', 'portalRequest']) {
       expect(prisma[model].findMany).toHaveBeenCalledWith({ where: { orgId: 'org_test' } })
     }
+    expect(prisma.auditLog.create).toHaveBeenCalledWith({ data: expect.objectContaining({ action: 'org.export', orgId: 'org_test', actorId: 'user_test' }) })
     expect(res.status).toHaveBeenCalledWith(200)
     const payload = res.json.mock.calls[0][0]
     expect(payload.orgId).toBe('org_test')
@@ -65,5 +68,13 @@ describe('GET /api/org/export', () => {
     await handler(authReq({ method: 'POST' }), res)
     expect(res.status).toHaveBeenCalledWith(405)
     expect(prisma.supplier.findMany).not.toHaveBeenCalled()
+  })
+
+  it('still returns the export when the audit insert fails', async () => {
+    prisma.auditLog.create.mockRejectedValue(new Error('audit down'))
+    const res = mockRes()
+    await handler(authReq(), res)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json.mock.calls[0][0].data.suppliers).toEqual([{ id: 'sup_1' }])
   })
 })
