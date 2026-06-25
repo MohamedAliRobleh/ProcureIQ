@@ -1,0 +1,13 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - generic [ref=e6]:
+      - paragraph [ref=e7]: Procure IQ Demo Org
+      - paragraph [ref=e8]: 12 members
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - paragraph [ref=e11]: Amara Chen
+        - paragraph [ref=e12]: org admin
+      - generic [ref=e13]: AC
+  - main [ref=e14]:
+    - status "Loading" [ref=e15]:
+      - img [ref=e16]

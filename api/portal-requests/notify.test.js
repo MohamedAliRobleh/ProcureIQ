@@ -112,5 +112,6 @@ describe('POST /api/portal-requests/notify', () => {
     const res = mockRes()
     await handler({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:member' }, body: { id: 'preq_1' } }, res)
     expect(res.status).toHaveBeenCalledWith(403)
+    expect(sendEmail).not.toHaveBeenCalled()
   })
 })

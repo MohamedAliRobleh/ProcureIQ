@@ -92,5 +92,6 @@ describe('portal-requests index', () => {
     const res = mockRes()
     await listHandler({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:member' }, body: { supplierId: 'sup_1', title: 'x' } }, res)
     expect(res.status).toHaveBeenCalledWith(403)
+    expect(prisma.portalRequest.create).not.toHaveBeenCalled()
   })
 })

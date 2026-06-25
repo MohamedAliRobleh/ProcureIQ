@@ -1,0 +1,18 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - generic [ref=e6]:
+      - paragraph [ref=e7]: Procure IQ Demo Org
+      - paragraph [ref=e8]: 12 members
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - paragraph [ref=e11]: Amara Chen
+        - paragraph [ref=e12]: org admin
+      - generic [ref=e13]: AC
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - generic [ref=e17]:
+        - heading "Suppliers" [level=1] [ref=e18]
+        - paragraph [ref=e19]: This module is coming in Phase 2.
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: Suppliers is under construction
+        - paragraph [ref=e22]: We're building this module in Phase 2. Check back soon — in the meantime, explore the Dashboard for a preview of ProcureIQ's data.
