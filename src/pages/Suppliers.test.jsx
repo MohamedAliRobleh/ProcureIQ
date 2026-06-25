@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { SupplierProvider } from '../context/SupplierContext'
+import { authState } from '../test/authState'
 import Suppliers from './Suppliers'
 
 function renderSuppliers() {
@@ -38,5 +39,12 @@ describe('Suppliers', () => {
     renderSuppliers()
     fireEvent.click(screen.getByRole('button', { name: /Add Supplier/i }))
     expect(await screen.findByRole('heading', { name: 'Add Supplier' })).toBeInTheDocument()
+  })
+
+  it('hides write controls for a read-only member', async () => {
+    authState.membership = { role: 'org:member' }
+    renderSuppliers()
+    await screen.findByText('Atlas Steelworks')
+    expect(screen.queryByRole('button', { name: /Add Supplier/i })).not.toBeInTheDocument()
   })
 })

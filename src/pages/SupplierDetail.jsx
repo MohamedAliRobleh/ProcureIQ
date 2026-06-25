@@ -15,6 +15,7 @@ import { useSupplierContext } from '../context/SupplierContext'
 import { useContractContext } from '../context/ContractContext'
 import { useSpendContext } from '../context/SpendContext'
 import { useUser } from '../lib/auth'
+import { usePermissions } from '../lib/permissions'
 import { useRisk } from '../hooks/useRisk'
 import { useEsg } from '../hooks/useEsg'
 import { formatDate, formatCurrency, daysUntil, riskColor, esgColor } from '../utils/formatters'
@@ -32,6 +33,7 @@ export default function SupplierDetail() {
   const { suppliers, updateSupplier, setSupplierStatus, isLoading } = useSupplierContext()
   const { contracts, addContract, updateContract, summarizeContract, attachContractDocument, notifyContract } = useContractContext()
   const { spendRecords, addSpendRecord, updateSpendRecord } = useSpendContext()
+  const { canManage } = usePermissions()
   const { user } = useUser()
   const userEmail = user?.emailAddresses?.[0]?.emailAddress
   const { riskAssessments } = useRisk()
@@ -339,15 +341,19 @@ export default function SupplierDetail() {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <Button variant="secondary" onClick={() => setModalOpen(true)}>
-            Edit
-          </Button>
-          <Button
-            variant={isActive ? 'danger' : 'primary'}
-            onClick={() => setSupplierStatus(supplier.id, isActive ? 'suspended' : 'active')}
-          >
-            {isActive ? 'Suspend' : 'Activate'}
-          </Button>
+          {canManage('suppliers') && (
+            <Button variant="secondary" onClick={() => setModalOpen(true)}>
+              Edit
+            </Button>
+          )}
+          {canManage('suppliers') && (
+            <Button
+              variant={isActive ? 'danger' : 'primary'}
+              onClick={() => setSupplierStatus(supplier.id, isActive ? 'suspended' : 'active')}
+            >
+              {isActive ? 'Suspend' : 'Activate'}
+            </Button>
+          )}
         </div>
       </div>
 
