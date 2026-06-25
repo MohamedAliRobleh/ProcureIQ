@@ -1,6 +1,7 @@
 import { prisma } from '../_lib/prisma.js'
 import { requireAuth } from '../_lib/auth.js'
 import { getAnthropic, isAiConfigured, AI_MODEL } from '../_lib/anthropic.js'
+import { canManage } from '../_lib/permissions.js'
 
 const SUMMARY_SYSTEM =
   'You are a procurement analyst. Summarize the contract below in 2-3 sentences for a procurement manager. ' +
@@ -10,6 +11,9 @@ async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
     return res.status(405).json({ error: 'Method not allowed' })
+  }
+  if (!canManage(req.auth.orgRole, 'contracts')) {
+    return res.status(403).json({ error: 'You do not have permission to manage contracts' })
   }
   const id = req.body?.id
   if (!id) return res.status(400).json({ error: 'id is required' })
