@@ -117,4 +117,6 @@ model AuditLog {
   actorId   String
   action    String
   createdAt DateTime @default(now())
+
+  @@index([orgId, createdAt])
 }
