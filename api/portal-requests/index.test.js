@@ -19,7 +19,7 @@ function mockRes() {
   return res
 }
 
-const auth = { userId: 'user_test', orgId: 'org_test' }
+const auth = { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' }
 
 beforeEach(() => vi.clearAllMocks())
 
@@ -86,5 +86,11 @@ describe('portal-requests index', () => {
     const res = mockRes()
     await listHandler({ method: 'DELETE', auth }, res)
     expect(res.status).toHaveBeenCalledWith(405)
+  })
+
+  it('POST returns 403 for a member', async () => {
+    const res = mockRes()
+    await listHandler({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:member' }, body: { supplierId: 'sup_1', title: 'x' } }, res)
+    expect(res.status).toHaveBeenCalledWith(403)
   })
 })

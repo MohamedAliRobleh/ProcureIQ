@@ -1,6 +1,7 @@
 import { prisma } from '../_lib/prisma.js'
 import { coerceDates } from '../_lib/dates.js'
 import { requireAuth } from '../_lib/auth.js'
+import { canManage } from '../_lib/permissions.js'
 
 const TYPES = ['esg_questionnaire', 'document', 'risk_review', 'general']
 const STATUSES = ['pending', 'submitted', 'approved', 'rejected']
@@ -16,6 +17,9 @@ async function handler(req, res) {
       return res.status(200).json(requests)
     }
     if (req.method === 'POST') {
+      if (!canManage(req.auth.orgRole, 'portal')) {
+        return res.status(403).json({ error: 'You do not have permission to manage portal' })
+      }
       const body = req.body ?? {}
       if (!body.title || !body.supplierId) {
         return res.status(400).json({ error: 'title and supplierId are required' })
