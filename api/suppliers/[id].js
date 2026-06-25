@@ -1,9 +1,13 @@
 import { prisma } from '../_lib/prisma.js'
 import { requireAuth } from '../_lib/auth.js'
+import { canManage } from '../_lib/permissions.js'
 
 async function handler(req, res) {
   try {
     if (req.method === 'PATCH') {
+      if (!canManage(req.auth.orgRole, 'suppliers')) {
+        return res.status(403).json({ error: 'You do not have permission to manage suppliers' })
+      }
       const existing = await prisma.supplier.findFirst({
         where: { id: req.query.id, orgId: req.auth.orgId },
       })

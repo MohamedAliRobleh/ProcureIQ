@@ -1,5 +1,6 @@
 import { prisma } from '../_lib/prisma.js'
 import { requireAuth } from '../_lib/auth.js'
+import { canManage } from '../_lib/permissions.js'
 
 async function handler(req, res) {
   try {
@@ -11,6 +12,9 @@ async function handler(req, res) {
       return res.status(200).json(suppliers)
     }
     if (req.method === 'POST') {
+      if (!canManage(req.auth.orgRole, 'suppliers')) {
+        return res.status(403).json({ error: 'You do not have permission to manage suppliers' })
+      }
       const body = req.body ?? {}
       if (!body.name || !body.email) {
         return res.status(400).json({ error: 'name and email are required' })
