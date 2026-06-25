@@ -101,7 +101,7 @@ export default function PortalRequestSlideOver({ isOpen, onClose, request, suppl
                 </div>
               )}
 
-              {request.status === 'pending' && (
+              {onUpdate && request.status === 'pending' && (
                 <div>
                   <label className="mb-1 block text-xs font-medium text-text-secondary">
                     Response note
@@ -118,7 +118,7 @@ export default function PortalRequestSlideOver({ isOpen, onClose, request, suppl
                 </div>
               )}
 
-              {request.status === 'submitted' && (
+              {onUpdate && request.status === 'submitted' && (
                 <div className="flex gap-3">
                   <Button variant="primary" onClick={() => onUpdate({ status: 'approved' })}>Approve</Button>
                   <Button variant="danger" onClick={() => onUpdate({ status: 'rejected' })}>Reject</Button>
@@ -144,23 +144,27 @@ export default function PortalRequestSlideOver({ isOpen, onClose, request, suppl
               )}
             </div>
 
-            <div className="border-t border-border px-6 py-4">
-              <Button variant="danger" onClick={() => setConfirmOpen(true)}>Delete request</Button>
-            </div>
+            {onDelete && (
+              <div className="border-t border-border px-6 py-4">
+                <Button variant="danger" onClick={() => setConfirmOpen(true)}>Delete request</Button>
+              </div>
+            )}
           </motion.div>
 
-          <ConfirmDialog
-            isOpen={confirmOpen}
-            onClose={() => setConfirmOpen(false)}
-            onConfirm={() => {
-              setConfirmOpen(false)
-              onDelete()
-            }}
-            title="Delete request"
-            description="This permanently deletes this supplier request."
-            confirmWord="delete"
-            confirmLabel="Delete"
-          />
+          {onDelete && (
+            <ConfirmDialog
+              isOpen={confirmOpen}
+              onClose={() => setConfirmOpen(false)}
+              onConfirm={() => {
+                setConfirmOpen(false)
+                onDelete()
+              }}
+              title="Delete request"
+              description="This permanently deletes this supplier request."
+              confirmWord="delete"
+              confirmLabel="Delete"
+            />
+          )}
         </>
       )}
     </AnimatePresence>
