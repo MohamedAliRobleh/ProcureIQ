@@ -35,6 +35,7 @@ export default function SupplierDetail() {
   const { spendRecords, addSpendRecord, updateSpendRecord } = useSpendContext()
   const { canManage } = usePermissions()
   const canManageContracts = canManage('contracts')
+  const canManageSpend = canManage('spend')
   const { user } = useUser()
   const userEmail = user?.emailAddresses?.[0]?.emailAddress
   const { riskAssessments } = useRisk()
@@ -175,11 +176,12 @@ export default function SupplierDetail() {
     {
       key: 'actions',
       header: '',
-      render: (row) => (
-        <Button variant="ghost" onClick={() => openEditSpend(row)}>
-          Edit
-        </Button>
-      ),
+      render: (row) =>
+        canManageSpend ? (
+          <Button variant="ghost" onClick={() => openEditSpend(row)}>
+            Edit
+          </Button>
+        ) : null,
     },
   ]
 
@@ -304,9 +306,11 @@ export default function SupplierDetail() {
           <p className="text-sm font-semibold text-text-primary">
             Total Spend: {formatCurrency(total)}
           </p>
-          <Button variant="ghost" onClick={openAddSpend}>
-            Add Spend Record
-          </Button>
+          {canManageSpend && (
+            <Button variant="ghost" onClick={openAddSpend}>
+              Add Spend Record
+            </Button>
+          )}
         </div>
         <DataTable
           columns={spendColumns}

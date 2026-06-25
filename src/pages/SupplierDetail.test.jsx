@@ -82,6 +82,15 @@ describe('SupplierDetail', () => {
     expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
   })
 
+  it('hides spend write controls on the Spend tab for a read-only member', async () => {
+    authState.membership = { role: 'org:member' }
+    renderDetail()
+    fireEvent.click(await screen.findByRole('button', { name: 'Spend' }))
+    expect(await screen.findByText('Total Spend: $68,550')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Add Spend Record' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+  })
+
   it('ESG tab shows rating, score, and sub-score cards for the supplier', async () => {
     renderDetail()
     fireEvent.click(await screen.findByRole('button', { name: 'ESG' }))
