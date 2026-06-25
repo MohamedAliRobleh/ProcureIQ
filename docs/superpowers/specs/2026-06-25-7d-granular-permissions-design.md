@@ -36,7 +36,11 @@ Non-goals (YAGNI):
 
 ## Permission model
 
-`MANAGE_RESOURCES = ['suppliers', 'contracts', 'spend', 'risk', 'esg', 'portal']`.
+`MANAGE_RESOURCES = ['suppliers', 'contracts', 'spend', 'portal']`.
+
+> NOTE: `risk` and `esg` are deliberately EXCLUDED — those modules are read-only
+> (GET-only endpoints, no create/edit UI). There is nothing to "manage", so they need no
+> permission and no gating.
 
 `canManage(orgRole, resource)`: returns `true` iff `orgRole === 'org:admin'` (and
 `resource` is a known manage-resource). Member → `false`. This is the single product rule;
@@ -46,7 +50,7 @@ one-place change.
 Backend `api/_lib/permissions.js`:
 
 ```js
-export const MANAGE_RESOURCES = ['suppliers', 'contracts', 'spend', 'risk', 'esg', 'portal']
+export const MANAGE_RESOURCES = ['suppliers', 'contracts', 'spend', 'portal']
 
 // True if the given Clerk org role may create/edit/delete the resource. Reads are
 // open to all members; only "manage" actions are gated. Admin manages everything.
@@ -84,8 +88,7 @@ Endpoints to gate (resource in parens):
 - `api/contracts/index.js` POST, `api/contracts/[id].js` PATCH, `api/contracts/summarize.js`,
   `api/contracts/upload-signature.js`, `api/contracts/notify.js` — `contracts`.
 - `api/spend/index.js` POST, `api/spend/[id].js` PATCH — `spend`.
-- `api/risk/index.js` POST, `api/risk/[id].js` PATCH — `risk`.
-- `api/esg/index.js` POST, `api/esg/[id].js` PATCH — `esg`.
+- (risk and esg have no write endpoints — nothing to gate.)
 - `api/portal-requests/index.js` POST, `api/portal-requests/[id].js` PATCH+DELETE,
   `api/portal-requests/notify.js` — `portal`.
 - `api/org/seed.js` — now admin-only: gate with `req.auth.orgRole !== 'org:admin'` → `403`
@@ -106,8 +109,7 @@ read-only with no action buttons. Pages/components to gate (resource):
 - `src/pages/Contracts.jsx` + `ContractSlideOver` — "Add Contract", Edit, and the
   slide-over Summarize/Upload/Notify actions (`contracts`).
 - `src/pages/Spend.jsx` — Add/Edit (`spend`).
-- `src/pages/Risk.jsx` — write affordances if any (`risk`).
-- `src/pages/ESG.jsx` — write affordances if any (`esg`).
+- (Risk and ESG pages are read-only — no write affordances, no change.)
 - `src/pages/Portal.jsx` + `PortalRequestSlideOver` — "New request", status actions,
   notify, delete (`portal`).
 - `src/pages/Dashboard.jsx` — the empty-org "Load sample data" panel becomes admin-only;
