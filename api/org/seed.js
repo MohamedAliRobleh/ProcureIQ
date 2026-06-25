@@ -15,13 +15,15 @@ async function handler(req, res) {
     if (existing > 0) return res.status(200).json({ seeded: false })
 
     const data = buildSeedData(orgId)
-    // FK order: suppliers first, then everything that references them.
-    await prisma.supplier.createMany({ data: data.suppliers })
-    await prisma.contract.createMany({ data: data.contracts })
-    await prisma.riskAssessment.createMany({ data: data.riskAssessments })
-    await prisma.esgResponse.createMany({ data: data.esgResponses })
-    await prisma.spendRecord.createMany({ data: data.spendRecords })
-    await prisma.portalRequest.createMany({ data: data.portalRequests })
+    // FK order: suppliers first, then everything that references them — all atomic.
+    await prisma.$transaction([
+      prisma.supplier.createMany({ data: data.suppliers }),
+      prisma.contract.createMany({ data: data.contracts }),
+      prisma.riskAssessment.createMany({ data: data.riskAssessments }),
+      prisma.esgResponse.createMany({ data: data.esgResponses }),
+      prisma.spendRecord.createMany({ data: data.spendRecords }),
+      prisma.portalRequest.createMany({ data: data.portalRequests }),
+    ])
     return res.status(200).json({ seeded: true })
   } catch (e) {
     return res.status(500).json({ error: e.message })

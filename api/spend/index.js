@@ -1,6 +1,7 @@
 import { prisma } from '../_lib/prisma.js'
 import { coerceDates } from '../_lib/dates.js'
 import { requireAuth } from '../_lib/auth.js'
+import { isSupplierInOrg } from '../_lib/validateSupplier.js'
 
 async function handler(req, res) {
   try {
@@ -15,6 +16,9 @@ async function handler(req, res) {
       const body = req.body ?? {}
       if (!body.supplierId || body.amount == null || !body.category || !body.date) {
         return res.status(400).json({ error: 'supplierId, amount, category, and date are required' })
+      }
+      if (!(await isSupplierInOrg(prisma, body.supplierId, req.auth.orgId))) {
+        return res.status(400).json({ error: 'supplierId does not belong to your organization' })
       }
       const record = await prisma.spendRecord.create({
         data: {

@@ -8,6 +8,7 @@ vi.mock('../_lib/prisma.js', () => ({
     esgResponse: { createMany: vi.fn() },
     spendRecord: { createMany: vi.fn() },
     portalRequest: { createMany: vi.fn() },
+    $transaction: vi.fn().mockResolvedValue([]),
   },
 }))
 vi.mock('../_lib/auth.js', () => ({ requireAuth: (handler) => handler }))
@@ -51,6 +52,8 @@ describe('POST /api/org/seed', () => {
     expect(prisma.esgResponse.createMany).toHaveBeenCalled()
     expect(prisma.spendRecord.createMany).toHaveBeenCalled()
     expect(prisma.portalRequest.createMany).toHaveBeenCalledWith({ data: [{ id: 'org_test__portal_1' }] })
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1)
+    expect(prisma.$transaction.mock.calls[0][0]).toHaveLength(6)
     expect(res.status).toHaveBeenCalledWith(200)
     expect(res.json).toHaveBeenCalledWith({ seeded: true })
   })
@@ -60,6 +63,7 @@ describe('POST /api/org/seed', () => {
     const res = mockRes()
     await handler(authReq(), res)
     expect(prisma.supplier.createMany).not.toHaveBeenCalled()
+    expect(prisma.$transaction).not.toHaveBeenCalled()
     expect(res.json).toHaveBeenCalledWith({ seeded: false })
   })
 
