@@ -1,5 +1,6 @@
 import { prisma } from '../_lib/prisma.js'
 import { requireOrgAdmin } from '../_lib/auth.js'
+import { buildAuditData } from '../_lib/audit.js'
 
 // Admin-only: return every record in the active org as one JSON payload, so an
 // admin can download a backup before a clear/reset. Read-only, org-scoped.
@@ -20,6 +21,11 @@ async function handler(req, res) {
         prisma.spendRecord.findMany(where),
         prisma.portalRequest.findMany(where),
       ])
+
+    await prisma.auditLog
+      .create({ data: buildAuditData({ orgId, actorId: req.auth.userId, action: 'org.export' }) })
+      .catch(() => {})
+
     return res.status(200).json({
       exportedAt: new Date().toISOString(),
       orgId,
