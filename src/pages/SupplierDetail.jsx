@@ -34,6 +34,7 @@ export default function SupplierDetail() {
   const { contracts, addContract, updateContract, summarizeContract, attachContractDocument, notifyContract } = useContractContext()
   const { spendRecords, addSpendRecord, updateSpendRecord } = useSpendContext()
   const { canManage } = usePermissions()
+  const canManageContracts = canManage('contracts')
   const { user } = useUser()
   const userEmail = user?.emailAddresses?.[0]?.emailAddress
   const { riskAssessments } = useRisk()
@@ -156,11 +157,12 @@ export default function SupplierDetail() {
     {
       key: 'actions',
       header: '',
-      render: (row) => (
-        <Button variant="ghost" onClick={() => openEditContract(row)}>
-          Edit
-        </Button>
-      ),
+      render: (row) =>
+        canManageContracts ? (
+          <Button variant="ghost" onClick={() => openEditContract(row)}>
+            Edit
+          </Button>
+        ) : null,
     },
   ]
 
@@ -187,11 +189,13 @@ export default function SupplierDetail() {
       : null
     return (
       <div>
-        <div className="mb-3 flex justify-end">
-          <Button variant="ghost" onClick={openAddContract}>
-            Add Contract
-          </Button>
-        </div>
+        {canManageContracts && (
+          <div className="mb-3 flex justify-end">
+            <Button variant="ghost" onClick={openAddContract}>
+              Add Contract
+            </Button>
+          </div>
+        )}
         <DataTable
           columns={contractColumns}
           data={supplierContracts}
@@ -203,10 +207,10 @@ export default function SupplierDetail() {
           onClose={() => setContractSlideOpen(false)}
           contract={liveSelected}
           supplier={supplier}
-          onEdit={() => openEditContract(liveSelected)}
-          onSummarize={liveSelected ? () => summarizeContract(liveSelected.id) : undefined}
-          onUpload={liveSelected ? (file) => attachContractDocument(liveSelected.id, file) : undefined}
-          onNotify={liveSelected && userEmail ? () => notifyContract(liveSelected.id, userEmail) : undefined}
+          onEdit={canManageContracts ? () => openEditContract(liveSelected) : undefined}
+          onSummarize={canManageContracts && liveSelected ? () => summarizeContract(liveSelected.id) : undefined}
+          onUpload={canManageContracts && liveSelected ? (file) => attachContractDocument(liveSelected.id, file) : undefined}
+          onNotify={canManageContracts && liveSelected && userEmail ? () => notifyContract(liveSelected.id, userEmail) : undefined}
         />
         <ContractModal
           isOpen={contractModalOpen}

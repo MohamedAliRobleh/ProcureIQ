@@ -73,6 +73,15 @@ describe('SupplierDetail', () => {
     expect(screen.queryByRole('button', { name: 'Activate' })).not.toBeInTheDocument()
   })
 
+  it('hides contract write controls on the Contracts tab for a read-only member', async () => {
+    authState.membership = { role: 'org:member' }
+    renderDetail()
+    fireEvent.click(await screen.findByRole('button', { name: 'Contracts' }))
+    expect(await screen.findByText('Master Supply Agreement — Atlas Steelworks')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Add Contract' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+  })
+
   it('ESG tab shows rating, score, and sub-score cards for the supplier', async () => {
     renderDetail()
     fireEvent.click(await screen.findByRole('button', { name: 'ESG' }))

@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { SupplierProvider } from '../context/SupplierContext'
 import { ContractProvider } from '../context/ContractContext'
+import { authState } from '../test/authState'
 import Contracts from './Contracts'
 
 function renderContracts() {
@@ -69,5 +70,12 @@ describe('Contracts', () => {
     fireEvent.click(await screen.findByText('Master Supply Agreement — Atlas Steelworks'))
     fireEvent.click(screen.getByRole('button', { name: 'Email reminder' }))
     expect(await screen.findByText(/Reminder sent/)).toBeInTheDocument()
+  })
+
+  it('hides write controls for a read-only member', async () => {
+    authState.membership = { role: 'org:member' }
+    renderContracts()
+    expect(await screen.findByText('Master Supply Agreement — Atlas Steelworks')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Add Contract/i })).not.toBeInTheDocument()
   })
 })
