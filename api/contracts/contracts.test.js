@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 vi.mock('../_lib/prisma.js', () => ({
   prisma: {
     contract: { findMany: vi.fn(), create: vi.fn(), update: vi.fn(), findFirst: vi.fn() },
+    supplier: { findFirst: vi.fn() },
   },
 }))
 
@@ -37,6 +38,7 @@ describe('contracts endpoints', () => {
   })
 
   it('POST coerces yyyy-mm-dd dates to Date objects', async () => {
+    prisma.supplier.findFirst.mockResolvedValue({ id: 'sup_1' })
     prisma.contract.create.mockImplementation(async ({ data }) => data)
     const res = mockRes()
     await listHandler(
@@ -93,5 +95,41 @@ describe('contracts endpoints', () => {
     expect(data).not.toHaveProperty('orgId')
     expect(data).not.toHaveProperty('id')
     expect(data.status).toBe('active')
+  })
+
+  it('POST rejects a supplierId that is not in the org with 400', async () => {
+    prisma.supplier.findFirst.mockResolvedValue(null)
+    const res = mockRes()
+    await listHandler(
+      { method: 'POST', auth: { userId: 'user_test', orgId: 'org_test' }, body: { title: 'Deal', supplierId: 'sup_foreign', value: 1000 } },
+      res
+    )
+    expect(prisma.supplier.findFirst).toHaveBeenCalledWith({ where: { id: 'sup_foreign', orgId: 'org_test' } })
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(prisma.contract.create).not.toHaveBeenCalled()
+  })
+
+  it('PATCH rejects reassigning to a supplierId not in the org with 400', async () => {
+    prisma.contract.findFirst.mockResolvedValue({ id: 'con_1' })
+    prisma.supplier.findFirst.mockResolvedValue(null)
+    const res = mockRes()
+    await idHandler(
+      { method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test' }, query: { id: 'con_1' }, body: { supplierId: 'sup_foreign' } },
+      res
+    )
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(prisma.contract.update).not.toHaveBeenCalled()
+  })
+
+  it('PATCH without a supplierId does not run the supplier check', async () => {
+    prisma.contract.findFirst.mockResolvedValue({ id: 'con_1' })
+    prisma.contract.update.mockResolvedValue({ id: 'con_1' })
+    const res = mockRes()
+    await idHandler(
+      { method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test' }, query: { id: 'con_1' }, body: { status: 'active' } },
+      res
+    )
+    expect(prisma.supplier.findFirst).not.toHaveBeenCalled()
+    expect(res.status).toHaveBeenCalledWith(200)
   })
 })
