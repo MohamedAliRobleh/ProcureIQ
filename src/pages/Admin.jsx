@@ -1,17 +1,33 @@
 import { useState } from 'react'
-import { Lock, AlertTriangle } from 'lucide-react'
+import { Lock, AlertTriangle, Download } from 'lucide-react'
 import PageHeader from '../components/layout/PageHeader'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { useOrganization, OrganizationProfile } from '../lib/auth'
 import { api } from '../lib/apiClient'
+import { downloadJson } from '../lib/downloadJson'
 
 export default function Admin() {
   const { membership } = useOrganization()
   const isAdmin = membership?.role === 'org:admin'
   const [dialog, setDialog] = useState(null) // 'reset' | 'clear' | null
   const [busy, setBusy] = useState(false)
+  const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState(null)
+
+  async function handleExport() {
+    setExportError(null)
+    setExporting(true)
+    try {
+      const payload = await api.get('/api/org/export')
+      downloadJson(payload, `procureiq-backup-${new Date().toISOString().slice(0, 10)}.json`)
+    } catch {
+      setExportError('Could not export data. Please try again.')
+    } finally {
+      setExporting(false)
+    }
+  }
 
   if (!isAdmin) {
     return (
@@ -55,6 +71,20 @@ export default function Admin() {
         <div className="mt-4 flex flex-col gap-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
+              <p className="text-sm font-medium text-text-primary">Download backup</p>
+              <p className="text-sm text-text-secondary">
+                Download a full JSON backup of this organization's data before clearing or resetting.
+              </p>
+              {exportError && <p className="mt-1 text-xs text-accent-red">{exportError}</p>}
+            </div>
+            <Button variant="secondary" onClick={handleExport} disabled={exporting}>
+              <Download size={16} />
+              {exporting ? 'Exporting…' : 'Download backup (JSON)'}
+            </Button>
+          </div>
+          <div className="border-t border-border" />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
               <p className="text-sm font-medium text-text-primary">Reload demo data</p>
               <p className="text-sm text-text-secondary">Wipe this organization and re-seed the sample dataset.</p>
             </div>
@@ -78,7 +108,7 @@ export default function Admin() {
         onClose={() => setDialog(null)}
         onConfirm={() => runAction('/api/org/reset')}
         title="Reload demo data?"
-        description="This deletes all current data in this organization and replaces it with a fresh sample dataset. This cannot be undone."
+        description="This deletes all current data in this organization and replaces it with a fresh sample dataset. This cannot be undone. Tip: download a backup from the Danger zone first."
         confirmWord="reset"
         confirmLabel="Reload sample data"
         busy={busy}
@@ -88,7 +118,7 @@ export default function Admin() {
         onClose={() => setDialog(null)}
         onConfirm={() => runAction('/api/org/clear')}
         title="Clear all data?"
-        description="This permanently deletes all suppliers, contracts, risk, ESG and spend records in this organization. This cannot be undone."
+        description="This permanently deletes all suppliers, contracts, risk, ESG and spend records in this organization. This cannot be undone. Tip: download a backup from the Danger zone first."
         confirmWord="clear"
         confirmLabel="Delete everything"
         busy={busy}

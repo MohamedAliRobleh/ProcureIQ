@@ -31,4 +31,26 @@ describe('Admin', () => {
     expect(screen.queryByTestId('org-profile')).not.toBeInTheDocument()
     expect(screen.queryByText('Danger zone')).not.toBeInTheDocument()
   })
+
+  it('downloads a JSON backup when the export button is clicked', async () => {
+    const exportPayload = { exportedAt: '2026-06-25T00:00:00.000Z', orgId: 'org_test', data: { suppliers: [] } }
+    const fetchMock = vi.fn(async () => ({ ok: true, status: 200, json: async () => exportPayload }))
+    vi.stubGlobal('fetch', fetchMock)
+    vi.stubGlobal('URL', { createObjectURL: vi.fn(() => 'blob:fake'), revokeObjectURL: vi.fn() })
+    const realCreate = document.createElement.bind(document)
+    let clickedDownload = null
+    vi.spyOn(document, 'createElement').mockImplementation((tag) => {
+      const el = realCreate(tag)
+      if (tag === 'a') vi.spyOn(el, 'click').mockImplementation(() => { clickedDownload = el.download })
+      return el
+    })
+
+    render(<Admin />)
+    fireEvent.click(screen.getByRole('button', { name: /Download backup/i }))
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith('/api/org/export', expect.anything())
+    )
+    await waitFor(() => expect(clickedDownload).toMatch(/^procureiq-backup-.*\.json$/))
+  })
 })
