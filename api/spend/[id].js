@@ -2,10 +2,14 @@ import { prisma } from '../_lib/prisma.js'
 import { coerceDates } from '../_lib/dates.js'
 import { requireAuth } from '../_lib/auth.js'
 import { isSupplierInOrg } from '../_lib/validateSupplier.js'
+import { canManage } from '../_lib/permissions.js'
 
 async function handler(req, res) {
   try {
     if (req.method === 'PATCH') {
+      if (!canManage(req.auth.orgRole, 'spend')) {
+        return res.status(403).json({ error: 'You do not have permission to manage spend' })
+      }
       const existing = await prisma.spendRecord.findFirst({
         where: { id: req.query.id, orgId: req.auth.orgId },
       })

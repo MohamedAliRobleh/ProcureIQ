@@ -42,7 +42,7 @@ describe('spend endpoints', () => {
     prisma.spendRecord.create.mockImplementation(async ({ data }) => data)
     const res = mockRes()
     await listHandler(
-      { method: 'POST', body: { supplierId: 'sup_1', amount: 500, category: 'Logistics', date: '2026-06-01' }, auth: { userId: 'user_test', orgId: 'org_test' } },
+      { method: 'POST', body: { supplierId: 'sup_1', amount: 500, category: 'Logistics', date: '2026-06-01' }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' } },
       res
     )
     const created = prisma.spendRecord.create.mock.calls[0][0].data
@@ -53,7 +53,7 @@ describe('spend endpoints', () => {
 
   it('POST rejects missing supplierId/amount/category/date with 400', async () => {
     const res = mockRes()
-    await listHandler({ method: 'POST', body: { amount: 500 }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
+    await listHandler({ method: 'POST', body: { amount: 500 }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' } }, res)
     expect(res.status).toHaveBeenCalledWith(400)
   })
 
@@ -61,7 +61,7 @@ describe('spend endpoints', () => {
     prisma.spendRecord.findFirst.mockResolvedValue({ id: 'spend_1' })
     prisma.spendRecord.update.mockResolvedValue({ id: 'spend_1', amount: 999 })
     const res = mockRes()
-    await idHandler({ method: 'PATCH', query: { id: 'spend_1' }, body: { amount: 999 }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
+    await idHandler({ method: 'PATCH', query: { id: 'spend_1' }, body: { amount: 999 }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' } }, res)
     expect(prisma.spendRecord.findFirst).toHaveBeenCalledWith({
       where: { id: 'spend_1', orgId: 'org_test' },
     })
@@ -75,7 +75,7 @@ describe('spend endpoints', () => {
   it('returns 404 when the id does not exist in the org', async () => {
     prisma.spendRecord.findFirst.mockResolvedValue(null)
     const res = mockRes()
-    await idHandler({ method: 'PATCH', query: { id: 'spend_other_org' }, body: { amount: 999 }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
+    await idHandler({ method: 'PATCH', query: { id: 'spend_other_org' }, body: { amount: 999 }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' } }, res)
     expect(res.status).toHaveBeenCalledWith(404)
     expect(prisma.spendRecord.update).not.toHaveBeenCalled()
   })
@@ -85,7 +85,7 @@ describe('spend endpoints', () => {
     prisma.spendRecord.update.mockResolvedValue({ id: 'spend_1', amount: 999 })
     const res = mockRes()
     await idHandler(
-      { method: 'PATCH', query: { id: 'spend_1' }, body: { orgId: 'evil_org', id: 'hijack', amount: 999 }, auth: { userId: 'user_test', orgId: 'org_test' } },
+      { method: 'PATCH', query: { id: 'spend_1' }, body: { orgId: 'evil_org', id: 'hijack', amount: 999 }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' } },
       res
     )
     const data = prisma.spendRecord.update.mock.calls[0][0].data
@@ -98,7 +98,7 @@ describe('spend endpoints', () => {
     prisma.supplier.findFirst.mockResolvedValue(null)
     const res = mockRes()
     await listHandler(
-      { method: 'POST', body: { supplierId: 'sup_foreign', amount: 500, category: 'Logistics', date: '2026-06-01' }, auth: { userId: 'user_test', orgId: 'org_test' } },
+      { method: 'POST', body: { supplierId: 'sup_foreign', amount: 500, category: 'Logistics', date: '2026-06-01' }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' } },
       res
     )
     expect(prisma.supplier.findFirst).toHaveBeenCalledWith({ where: { id: 'sup_foreign', orgId: 'org_test' } })
@@ -111,7 +111,7 @@ describe('spend endpoints', () => {
     prisma.supplier.findFirst.mockResolvedValue(null)
     const res = mockRes()
     await idHandler(
-      { method: 'PATCH', query: { id: 'spend_1' }, body: { supplierId: 'sup_foreign' }, auth: { userId: 'user_test', orgId: 'org_test' } },
+      { method: 'PATCH', query: { id: 'spend_1' }, body: { supplierId: 'sup_foreign' }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' } },
       res
     )
     expect(res.status).toHaveBeenCalledWith(400)
@@ -123,10 +123,24 @@ describe('spend endpoints', () => {
     prisma.spendRecord.update.mockResolvedValue({ id: 'spend_1', amount: 999 })
     const res = mockRes()
     await idHandler(
-      { method: 'PATCH', query: { id: 'spend_1' }, body: { amount: 999 }, auth: { userId: 'user_test', orgId: 'org_test' } },
+      { method: 'PATCH', query: { id: 'spend_1' }, body: { amount: 999 }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' } },
       res
     )
     expect(prisma.supplier.findFirst).not.toHaveBeenCalled()
     expect(res.status).toHaveBeenCalledWith(200)
+  })
+
+  it('POST returns 403 for a member', async () => {
+    const res = mockRes()
+    await listHandler({ method: 'POST', body: { supplierId: 'sup_1', amount: 1, category: 'Logistics', date: '2026-06-01' }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:member' } }, res)
+    expect(res.status).toHaveBeenCalledWith(403)
+    expect(prisma.spendRecord.create).not.toHaveBeenCalled()
+  })
+
+  it('PATCH returns 403 for a member', async () => {
+    const res = mockRes()
+    await idHandler({ method: 'PATCH', query: { id: 'spend_1' }, body: { amount: 9 }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:member' } }, res)
+    expect(res.status).toHaveBeenCalledWith(403)
+    expect(prisma.spendRecord.update).not.toHaveBeenCalled()
   })
 })
