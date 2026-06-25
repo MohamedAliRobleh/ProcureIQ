@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Lock, AlertTriangle, Download } from 'lucide-react'
 import PageHeader from '../components/layout/PageHeader'
 import Card from '../components/ui/Card'
@@ -7,6 +7,8 @@ import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { useOrganization, OrganizationProfile } from '../lib/auth'
 import { api } from '../lib/apiClient'
 import { downloadJson } from '../lib/downloadJson'
+import { AUDIT_ACTION_LABEL } from '../utils/auditLabels'
+import { formatDate } from '../utils/formatters'
 
 export default function Admin() {
   const { membership } = useOrganization()
@@ -15,6 +17,17 @@ export default function Admin() {
   const [busy, setBusy] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [exportError, setExportError] = useState(null)
+  const [auditEntries, setAuditEntries] = useState([])
+
+  useEffect(() => {
+    if (!isAdmin) return
+    api
+      .get('/api/org/audit')
+      .then((data) => {
+        if (Array.isArray(data)) setAuditEntries(data)
+      })
+      .catch(() => {})
+  }, [isAdmin])
 
   async function handleExport() {
     setExportError(null)
@@ -101,6 +114,25 @@ export default function Admin() {
             <Button variant="danger" onClick={() => setDialog('clear')}>Clear all data</Button>
           </div>
         </div>
+      </Card>
+
+      <Card className="mt-6 p-6">
+        <h3 className="font-display text-sm font-semibold text-text-primary">Activity log</h3>
+        <p className="mt-1 text-sm text-text-secondary">Recent sensitive actions in this organization.</p>
+        {auditEntries.length === 0 ? (
+          <p className="mt-4 text-sm text-text-muted">No activity yet.</p>
+        ) : (
+          <ul className="mt-4 divide-y divide-border">
+            {auditEntries.map((e) => (
+              <li key={e.id} className="flex flex-col gap-0.5 py-2 sm:flex-row sm:items-center sm:justify-between">
+                <span className="text-sm text-text-primary">{AUDIT_ACTION_LABEL[e.action] ?? e.action}</span>
+                <span className="text-xs text-text-secondary">
+                  {e.actorId} · {formatDate(e.createdAt)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </Card>
 
       <ConfirmDialog
