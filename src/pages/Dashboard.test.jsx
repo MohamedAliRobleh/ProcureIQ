@@ -6,6 +6,7 @@ import { SupplierProvider } from '../context/SupplierContext'
 import Dashboard from './Dashboard'
 import { suppliers, contracts, riskAssessments } from '../lib/mockData'
 import { getAverageRiskScore } from '../utils/dashboardSelectors'
+import { authState } from '../test/authState'
 
 describe('Dashboard', () => {
   it('shows a loading state, then the computed stat cards and AI insight', async () => {
@@ -71,5 +72,31 @@ describe('Dashboard — empty org', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/org/seed', expect.objectContaining({ method: 'POST' }))
     )
     await waitFor(() => expect(reload).toHaveBeenCalled())
+  })
+
+  it('shows a member note instead of the seed button on an empty org', async () => {
+    authState.membership = { role: 'org:member' }
+
+    const fetchMock = vi.fn(async (url, options = {}) => {
+      const method = options.method ?? 'GET'
+      if (method === 'POST' && url === '/api/org/seed') {
+        return { ok: true, status: 200, json: async () => ({ seeded: true }) }
+      }
+      return { ok: true, status: 200, json: async () => [] }
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    render(
+      <SupplierProvider>
+        <ContractProvider>
+          <SpendProvider>
+            <Dashboard />
+          </SpendProvider>
+        </ContractProvider>
+      </SupplierProvider>
+    )
+
+    expect(await screen.findByText(/Ask an organization admin to load data/i)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Load sample data/i })).not.toBeInTheDocument()
   })
 })
