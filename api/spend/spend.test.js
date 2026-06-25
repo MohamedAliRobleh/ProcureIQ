@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 vi.mock('../_lib/prisma.js', () => ({
   prisma: {
     spendRecord: { findMany: vi.fn(), create: vi.fn(), update: vi.fn(), findFirst: vi.fn() },
+    supplier: { findFirst: vi.fn() },
   },
 }))
 
@@ -37,6 +38,7 @@ describe('spend endpoints', () => {
   })
 
   it('POST creates a record with generated id and coerced date', async () => {
+    prisma.supplier.findFirst.mockResolvedValue({ id: 'sup_1' })
     prisma.spendRecord.create.mockImplementation(async ({ data }) => data)
     const res = mockRes()
     await listHandler(
@@ -90,5 +92,41 @@ describe('spend endpoints', () => {
     expect(data).not.toHaveProperty('orgId')
     expect(data).not.toHaveProperty('id')
     expect(data.amount).toBe(999)
+  })
+
+  it('POST rejects a supplierId that is not in the org with 400', async () => {
+    prisma.supplier.findFirst.mockResolvedValue(null)
+    const res = mockRes()
+    await listHandler(
+      { method: 'POST', body: { supplierId: 'sup_foreign', amount: 500, category: 'Logistics', date: '2026-06-01' }, auth: { userId: 'user_test', orgId: 'org_test' } },
+      res
+    )
+    expect(prisma.supplier.findFirst).toHaveBeenCalledWith({ where: { id: 'sup_foreign', orgId: 'org_test' } })
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(prisma.spendRecord.create).not.toHaveBeenCalled()
+  })
+
+  it('PATCH rejects reassigning to a supplierId not in the org with 400', async () => {
+    prisma.spendRecord.findFirst.mockResolvedValue({ id: 'spend_1' })
+    prisma.supplier.findFirst.mockResolvedValue(null)
+    const res = mockRes()
+    await idHandler(
+      { method: 'PATCH', query: { id: 'spend_1' }, body: { supplierId: 'sup_foreign' }, auth: { userId: 'user_test', orgId: 'org_test' } },
+      res
+    )
+    expect(res.status).toHaveBeenCalledWith(400)
+    expect(prisma.spendRecord.update).not.toHaveBeenCalled()
+  })
+
+  it('PATCH without a supplierId does not run the supplier check', async () => {
+    prisma.spendRecord.findFirst.mockResolvedValue({ id: 'spend_1' })
+    prisma.spendRecord.update.mockResolvedValue({ id: 'spend_1', amount: 999 })
+    const res = mockRes()
+    await idHandler(
+      { method: 'PATCH', query: { id: 'spend_1' }, body: { amount: 999 }, auth: { userId: 'user_test', orgId: 'org_test' } },
+      res
+    )
+    expect(prisma.supplier.findFirst).not.toHaveBeenCalled()
+    expect(res.status).toHaveBeenCalledWith(200)
   })
 })

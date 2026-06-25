@@ -1,6 +1,7 @@
 import { prisma } from '../_lib/prisma.js'
 import { coerceDates } from '../_lib/dates.js'
 import { requireAuth } from '../_lib/auth.js'
+import { isSupplierInOrg } from '../_lib/validateSupplier.js'
 
 async function handler(req, res) {
   try {
@@ -10,6 +11,9 @@ async function handler(req, res) {
       })
       if (!existing) return res.status(404).json({ error: 'Not found' })
       const { id: _ignoredId, orgId: _ignoredOrgId, ...rest } = req.body ?? {}
+      if (rest.supplierId !== undefined && !(await isSupplierInOrg(prisma, rest.supplierId, req.auth.orgId))) {
+        return res.status(400).json({ error: 'supplierId does not belong to your organization' })
+      }
       const updated = await prisma.spendRecord.update({
         where: { id: req.query.id },
         data: coerceDates(rest, ['date']),
