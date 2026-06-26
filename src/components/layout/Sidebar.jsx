@@ -6,7 +6,7 @@ import { useOrganization } from '../../lib/auth'
 export default function Sidebar() {
   const { membership } = useOrganization()
   const isAdmin = membership?.role === 'org:admin'
-  const items = NAV_ITEMS.filter((item) => item.path !== '/admin' || isAdmin)
+  const items = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin)
 
   return (
     <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-border bg-bg-secondary px-4 py-6 lg:flex">
