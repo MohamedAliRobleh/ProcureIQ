@@ -28,3 +28,9 @@ dist-ssr
 *.sln
 *.sw?
 .superpowers/
+
+# Playwright MCP debug artifacts
+.playwright-mcp/
+
+# Local screenshots
+/*.png
