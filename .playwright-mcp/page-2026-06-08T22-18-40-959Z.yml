@@ -1,0 +1,53 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e5]: ProcureIQ
+    - navigation [ref=e6]:
+      - link "Dashboard" [ref=e7] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e8]
+        - text: Dashboard
+      - link "Suppliers" [ref=e13] [cursor=pointer]:
+        - /url: /suppliers
+        - img [ref=e14]
+        - text: Suppliers
+      - link "Contracts" [ref=e18] [cursor=pointer]:
+        - /url: /contracts
+        - img [ref=e19]
+        - text: Contracts
+      - link "Risk" [ref=e22] [cursor=pointer]:
+        - /url: /risk
+        - img [ref=e23]
+        - text: Risk
+      - link "ESG" [ref=e25] [cursor=pointer]:
+        - /url: /esg
+        - img [ref=e26]
+        - text: ESG
+      - link "Spend" [ref=e29] [cursor=pointer]:
+        - /url: /spend
+        - img [ref=e30]
+        - text: Spend
+      - link "AI Assistant" [ref=e33] [cursor=pointer]:
+        - /url: /ai-assistant
+        - img [ref=e34]
+        - text: AI Assistant
+      - link "Supplier Portal" [ref=e37] [cursor=pointer]:
+        - /url: /portal
+        - img [ref=e38]
+        - text: Supplier Portal
+      - link "Admin" [ref=e42] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e43]
+        - text: Admin
+  - generic [ref=e55]:
+    - banner [ref=e56]:
+      - generic [ref=e57]:
+        - paragraph [ref=e58]: Procure IQ Demo Org
+        - paragraph [ref=e59]: 12 members
+      - generic [ref=e60]:
+        - generic [ref=e61]:
+          - paragraph [ref=e62]: Amara Chen
+          - paragraph [ref=e63]: org admin
+        - generic [ref=e64]: AC
+    - main [ref=e65]:
+      - status "Loading" [ref=e66]:
+        - img [ref=e67]

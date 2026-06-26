@@ -2,6 +2,7 @@ import { prisma } from '../_lib/prisma.js'
 import { coerceDates } from '../_lib/dates.js'
 import { requireAuth } from '../_lib/auth.js'
 import { isSupplierInOrg } from '../_lib/validateSupplier.js'
+import { canManage } from '../_lib/permissions.js'
 
 async function handler(req, res) {
   try {
@@ -13,6 +14,9 @@ async function handler(req, res) {
       return res.status(200).json(contracts)
     }
     if (req.method === 'POST') {
+      if (!canManage(req.auth.orgRole, 'contracts')) {
+        return res.status(403).json({ error: 'You do not have permission to manage contracts' })
+      }
       const body = req.body ?? {}
       if (!body.title || !body.supplierId || body.value == null) {
         return res.status(400).json({ error: 'title, supplierId, and value are required' })

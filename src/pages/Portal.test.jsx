@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { SupplierProvider } from '../context/SupplierContext'
 import { PortalProvider } from '../context/PortalContext'
+import { authState } from '../test/authState'
 import Portal from './Portal'
 
 function renderPortal() {
@@ -42,5 +43,11 @@ describe('Portal page', () => {
     expect(await screen.findByText('Submit 2026 ESG questionnaire')).toBeInTheDocument()
     fireEvent.change(screen.getByLabelText(/Status/i), { target: { value: 'approved' } })
     expect(screen.queryByText('Submit 2026 ESG questionnaire')).not.toBeInTheDocument()
+  })
+
+  it('hides write controls for a read-only member', () => {
+    authState.membership = { role: 'org:member' }
+    renderPortal()
+    expect(screen.queryByRole('button', { name: /New request/i })).not.toBeInTheDocument()
   })
 })

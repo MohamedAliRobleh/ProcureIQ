@@ -146,6 +146,27 @@ describe('ContractSlideOver', () => {
     expect(onUpload).toHaveBeenCalledWith(file)
   })
 
+  it('does not render the Edit Contract button without onEdit', () => {
+    renderSlideOver({
+      isOpen: true,
+      onClose: () => {},
+      contract: mockContract,
+      supplier: mockSupplier,
+    })
+    expect(screen.queryByRole('button', { name: 'Edit Contract' })).not.toBeInTheDocument()
+  })
+
+  it('renders the Edit Contract button when onEdit is provided', () => {
+    renderSlideOver({
+      isOpen: true,
+      onClose: () => {},
+      contract: mockContract,
+      supplier: mockSupplier,
+      onEdit: () => {},
+    })
+    expect(screen.getByRole('button', { name: 'Edit Contract' })).toBeInTheDocument()
+  })
+
   it('does not render the Email reminder button without onNotify', () => {
     renderSlideOver({
       isOpen: true,

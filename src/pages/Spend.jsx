@@ -9,6 +9,7 @@ import Card from '../components/ui/Card'
 import SpendModal from '../components/ui/SpendModal'
 import { useSpendContext } from '../context/SpendContext'
 import { useSupplierContext } from '../context/SupplierContext'
+import { usePermissions } from '../lib/permissions'
 import { filterSpendRecords, sortSpendRecords, getMonthlySpendTrend } from '../utils/spendSelectors'
 import { getSpendByCategory } from '../utils/dashboardSelectors'
 import { formatCurrency, formatCompactCurrency, formatDate } from '../utils/formatters'
@@ -20,6 +21,8 @@ const CATEGORY_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', 
 export default function Spend() {
   const { spendRecords, addSpendRecord, updateSpendRecord } = useSpendContext()
   const { suppliers } = useSupplierContext()
+  const { canManage } = usePermissions()
+  const canManageSpend = canManage('spend')
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
   const [supplierId, setSupplierId] = useState('')
@@ -91,11 +94,12 @@ export default function Spend() {
     {
       key: 'actions',
       header: '',
-      render: (row) => (
-        <Button variant="ghost" onClick={() => openEdit(row)}>
-          Edit
-        </Button>
-      ),
+      render: (row) =>
+        canManageSpend ? (
+          <Button variant="ghost" onClick={() => openEdit(row)}>
+            Edit
+          </Button>
+        ) : null,
     },
   ]
 
@@ -105,10 +109,12 @@ export default function Spend() {
         title="Spend"
         description="Track and analyze procurement spend"
         actions={
-          <Button variant="primary" onClick={openAdd}>
-            <PlusCircle size={16} />
-            Add Spend Record
-          </Button>
+          canManageSpend ? (
+            <Button variant="primary" onClick={openAdd}>
+              <PlusCircle size={16} />
+              Add Spend Record
+            </Button>
+          ) : null
         }
       />
 

@@ -33,7 +33,7 @@ describe('POST /api/contracts/upload-signature', () => {
     uploadConfig.mockReturnValue({ cloudName: 'democloud', apiKey: '999' })
     signUpload.mockReturnValue('SIGNATURE')
     const res = mockRes()
-    await handler({ method: 'POST', body: { id: 'con_1' }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
+    await handler({ method: 'POST', body: { id: 'con_1' }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' } }, res)
 
     expect(prisma.contract.findFirst).toHaveBeenCalledWith({ where: { id: 'con_1', orgId: 'org_test' } })
     const signedParams = signUpload.mock.calls[0][0]
@@ -54,7 +54,7 @@ describe('POST /api/contracts/upload-signature', () => {
     isUploadConfigured.mockReturnValue(true)
     prisma.contract.findFirst.mockResolvedValue(null)
     const res = mockRes()
-    await handler({ method: 'POST', body: { id: 'con_other' }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
+    await handler({ method: 'POST', body: { id: 'con_other' }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' } }, res)
     expect(res.status).toHaveBeenCalledWith(404)
     expect(signUpload).not.toHaveBeenCalled()
   })
@@ -62,14 +62,14 @@ describe('POST /api/contracts/upload-signature', () => {
   it('returns 503 when uploads are not configured (before any DB call)', async () => {
     isUploadConfigured.mockReturnValue(false)
     const res = mockRes()
-    await handler({ method: 'POST', body: { id: 'con_1' }, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
+    await handler({ method: 'POST', body: { id: 'con_1' }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' } }, res)
     expect(res.status).toHaveBeenCalledWith(503)
     expect(prisma.contract.findFirst).not.toHaveBeenCalled()
   })
 
   it('returns 400 when id is missing', async () => {
     const res = mockRes()
-    await handler({ method: 'POST', body: {}, auth: { userId: 'user_test', orgId: 'org_test' } }, res)
+    await handler({ method: 'POST', body: {}, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' } }, res)
     expect(res.status).toHaveBeenCalledWith(400)
   })
 
@@ -77,5 +77,12 @@ describe('POST /api/contracts/upload-signature', () => {
     const res = mockRes()
     await handler({ method: 'GET', auth: { userId: 'user_test', orgId: 'org_test' } }, res)
     expect(res.status).toHaveBeenCalledWith(405)
+  })
+
+  it('returns 403 for a member', async () => {
+    const res = mockRes()
+    await handler({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:member' }, body: { id: 'con_1' } }, res)
+    expect(res.status).toHaveBeenCalledWith(403)
+    expect(signUpload).not.toHaveBeenCalled()
   })
 })

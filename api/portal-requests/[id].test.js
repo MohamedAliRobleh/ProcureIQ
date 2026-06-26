@@ -16,7 +16,7 @@ function mockRes() {
   return res
 }
 
-const auth = { userId: 'user_test', orgId: 'org_test' }
+const auth = { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' }
 
 beforeEach(() => vi.clearAllMocks())
 
@@ -83,5 +83,19 @@ describe('portal-requests [id]', () => {
     const res = mockRes()
     await idHandler({ method: 'GET', auth, query: { id: 'preq_1' } }, res)
     expect(res.status).toHaveBeenCalledWith(405)
+  })
+
+  it('PATCH returns 403 for a member', async () => {
+    const res = mockRes()
+    await idHandler({ method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:member' }, query: { id: 'preq_1' }, body: { status: 'approved' } }, res)
+    expect(res.status).toHaveBeenCalledWith(403)
+    expect(prisma.portalRequest.update).not.toHaveBeenCalled()
+  })
+
+  it('DELETE returns 403 for a member', async () => {
+    const res = mockRes()
+    await idHandler({ method: 'DELETE', auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:member' }, query: { id: 'preq_1' } }, res)
+    expect(res.status).toHaveBeenCalledWith(403)
+    expect(prisma.portalRequest.delete).not.toHaveBeenCalled()
   })
 })

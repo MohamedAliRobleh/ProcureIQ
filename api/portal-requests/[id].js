@@ -1,6 +1,7 @@
 import { prisma } from '../_lib/prisma.js'
 import { coerceDates } from '../_lib/dates.js'
 import { requireAuth } from '../_lib/auth.js'
+import { canManage } from '../_lib/permissions.js'
 
 const TYPES = ['esg_questionnaire', 'document', 'risk_review', 'general']
 const STATUSES = ['pending', 'submitted', 'approved', 'rejected']
@@ -8,6 +9,9 @@ const STATUSES = ['pending', 'submitted', 'approved', 'rejected']
 async function handler(req, res) {
   try {
     if (req.method === 'PATCH') {
+      if (!canManage(req.auth.orgRole, 'portal')) {
+        return res.status(403).json({ error: 'You do not have permission to manage portal' })
+      }
       const existing = await prisma.portalRequest.findFirst({
         where: { id: req.query.id, orgId: req.auth.orgId },
       })
@@ -26,6 +30,9 @@ async function handler(req, res) {
       return res.status(200).json(updated)
     }
     if (req.method === 'DELETE') {
+      if (!canManage(req.auth.orgRole, 'portal')) {
+        return res.status(403).json({ error: 'You do not have permission to manage portal' })
+      }
       const existing = await prisma.portalRequest.findFirst({
         where: { id: req.query.id, orgId: req.auth.orgId },
       })

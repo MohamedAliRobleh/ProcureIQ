@@ -44,7 +44,7 @@ describe('contracts endpoints', () => {
     await listHandler(
       {
         method: 'POST',
-        auth: { userId: 'user_test', orgId: 'org_test' },
+        auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' },
         body: { title: 'Deal', supplierId: 'sup_1', value: 1000, startDate: '2026-01-12', endDate: '' },
       },
       res
@@ -58,7 +58,7 @@ describe('contracts endpoints', () => {
 
   it('POST rejects missing title/supplierId/value with 400', async () => {
     const res = mockRes()
-    await listHandler({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test' }, body: { title: 'No supplier' } }, res)
+    await listHandler({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' }, body: { title: 'No supplier' } }, res)
     expect(res.status).toHaveBeenCalledWith(400)
   })
 
@@ -66,7 +66,7 @@ describe('contracts endpoints', () => {
     prisma.contract.findFirst.mockResolvedValue({ id: 'con_1' })
     prisma.contract.update.mockResolvedValue({ id: 'con_1' })
     const res = mockRes()
-    await idHandler({ method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test' }, query: { id: 'con_1' }, body: { endDate: '2026-07-22' } }, res)
+    await idHandler({ method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' }, query: { id: 'con_1' }, body: { endDate: '2026-07-22' } }, res)
     expect(prisma.contract.findFirst).toHaveBeenCalledWith({
       where: { id: 'con_1', orgId: 'org_test' },
     })
@@ -78,7 +78,7 @@ describe('contracts endpoints', () => {
   it('returns 404 when the id does not exist in the org', async () => {
     prisma.contract.findFirst.mockResolvedValue(null)
     const res = mockRes()
-    await idHandler({ method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test' }, query: { id: 'con_other_org' }, body: { endDate: '2026-07-22' } }, res)
+    await idHandler({ method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' }, query: { id: 'con_other_org' }, body: { endDate: '2026-07-22' } }, res)
     expect(res.status).toHaveBeenCalledWith(404)
     expect(prisma.contract.update).not.toHaveBeenCalled()
   })
@@ -88,7 +88,7 @@ describe('contracts endpoints', () => {
     prisma.contract.update.mockResolvedValue({ id: 'con_1' })
     const res = mockRes()
     await idHandler(
-      { method: 'PATCH', query: { id: 'con_1' }, body: { orgId: 'evil_org', id: 'hijack', status: 'active' }, auth: { userId: 'user_test', orgId: 'org_test' } },
+      { method: 'PATCH', query: { id: 'con_1' }, body: { orgId: 'evil_org', id: 'hijack', status: 'active' }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' } },
       res
     )
     const data = prisma.contract.update.mock.calls[0][0].data
@@ -101,7 +101,7 @@ describe('contracts endpoints', () => {
     prisma.supplier.findFirst.mockResolvedValue(null)
     const res = mockRes()
     await listHandler(
-      { method: 'POST', auth: { userId: 'user_test', orgId: 'org_test' }, body: { title: 'Deal', supplierId: 'sup_foreign', value: 1000 } },
+      { method: 'POST', auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' }, body: { title: 'Deal', supplierId: 'sup_foreign', value: 1000 } },
       res
     )
     expect(prisma.supplier.findFirst).toHaveBeenCalledWith({ where: { id: 'sup_foreign', orgId: 'org_test' } })
@@ -114,7 +114,7 @@ describe('contracts endpoints', () => {
     prisma.supplier.findFirst.mockResolvedValue(null)
     const res = mockRes()
     await idHandler(
-      { method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test' }, query: { id: 'con_1' }, body: { supplierId: 'sup_foreign' } },
+      { method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' }, query: { id: 'con_1' }, body: { supplierId: 'sup_foreign' } },
       res
     )
     expect(res.status).toHaveBeenCalledWith(400)
@@ -126,10 +126,17 @@ describe('contracts endpoints', () => {
     prisma.contract.update.mockResolvedValue({ id: 'con_1' })
     const res = mockRes()
     await idHandler(
-      { method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test' }, query: { id: 'con_1' }, body: { status: 'active' } },
+      { method: 'PATCH', auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' }, query: { id: 'con_1' }, body: { status: 'active' } },
       res
     )
     expect(prisma.supplier.findFirst).not.toHaveBeenCalled()
     expect(res.status).toHaveBeenCalledWith(200)
+  })
+
+  it('POST returns 403 for a member', async () => {
+    const res = mockRes()
+    await listHandler({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:member' }, body: { title: 'X', supplierId: 'sup_1', value: 1 } }, res)
+    expect(res.status).toHaveBeenCalledWith(403)
+    expect(prisma.contract.create).not.toHaveBeenCalled()
   })
 })

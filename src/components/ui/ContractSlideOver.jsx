@@ -228,11 +228,13 @@ export default function ContractSlideOver({ isOpen, onClose, contract, supplier,
               )}
             </div>
 
-            <div className="border-t border-border px-6 py-4">
-              <Button variant="secondary" onClick={onEdit}>
-                Edit Contract
-              </Button>
-            </div>
+            {onEdit && (
+              <div className="border-t border-border px-6 py-4">
+                <Button variant="secondary" onClick={onEdit}>
+                  Edit Contract
+                </Button>
+              </div>
+            )}
           </motion.div>
         </>
       )}

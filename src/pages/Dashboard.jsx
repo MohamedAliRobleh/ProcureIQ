@@ -13,6 +13,7 @@ import { useContracts } from '../hooks/useContracts'
 import { useRisk } from '../hooks/useRisk'
 import { useSpend } from '../hooks/useSpend'
 import { api } from '../lib/apiClient'
+import { usePermissions } from '../lib/permissions'
 import Button from '../components/ui/Button'
 import { formatCurrency, formatDate, timeAgo } from '../utils/formatters'
 import {
@@ -33,6 +34,7 @@ export default function Dashboard() {
   const { contracts, isLoading: loadingContracts } = useContracts()
   const { riskAssessments, isLoading: loadingRisk } = useRisk()
   const { spendRecords, isLoading: loadingSpend } = useSpend()
+  const { canManage } = usePermissions()
 
   const [seeding, setSeeding] = useState(false)
 
@@ -59,9 +61,13 @@ export default function Dashboard() {
           <p className="max-w-md text-sm text-text-secondary">
             Load a sample procurement dataset — suppliers, contracts, risk, ESG, and spend — to explore ProcureIQ with realistic data.
           </p>
-          <Button onClick={handleSeed} disabled={seeding}>
-            {seeding ? 'Loading…' : 'Load sample data'}
-          </Button>
+          {canManage('suppliers') ? (
+            <Button onClick={handleSeed} disabled={seeding}>
+              {seeding ? 'Loading…' : 'Load sample data'}
+            </Button>
+          ) : (
+            <p className="text-sm text-text-secondary">Ask an organization admin to load data.</p>
+          )}
         </Card>
       </div>
     )

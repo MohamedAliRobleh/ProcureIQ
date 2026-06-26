@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { SupplierProvider } from '../context/SupplierContext'
 import { ContractProvider } from '../context/ContractContext'
 import { SpendProvider } from '../context/SpendContext'
+import { authState } from '../test/authState'
 import SupplierDetail from './SupplierDetail'
 
 function renderDetail(id = 'sup_1') {
@@ -61,6 +62,33 @@ describe('SupplierDetail', () => {
     renderDetail()
     fireEvent.click(await screen.findByRole('button', { name: 'Edit' }))
     expect(screen.getByRole('heading', { name: 'Edit Supplier' })).toBeInTheDocument()
+  })
+
+  it('hides write controls for a read-only member', async () => {
+    authState.membership = { role: 'org:member' }
+    renderDetail()
+    await screen.findByText('Atlas Steelworks')
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Suspend' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Activate' })).not.toBeInTheDocument()
+  })
+
+  it('hides contract write controls on the Contracts tab for a read-only member', async () => {
+    authState.membership = { role: 'org:member' }
+    renderDetail()
+    fireEvent.click(await screen.findByRole('button', { name: 'Contracts' }))
+    expect(await screen.findByText('Master Supply Agreement — Atlas Steelworks')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Add Contract' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+  })
+
+  it('hides spend write controls on the Spend tab for a read-only member', async () => {
+    authState.membership = { role: 'org:member' }
+    renderDetail()
+    fireEvent.click(await screen.findByRole('button', { name: 'Spend' }))
+    expect(await screen.findByText('Total Spend: $68,550')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Add Spend Record' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
   })
 
   it('ESG tab shows rating, score, and sub-score cards for the supplier', async () => {

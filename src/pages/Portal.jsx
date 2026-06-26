@@ -9,12 +9,15 @@ import PortalRequestModal from '../components/ui/PortalRequestModal'
 import PortalRequestSlideOver from '../components/ui/PortalRequestSlideOver'
 import { usePortalContext } from '../context/PortalContext'
 import { useSupplierContext } from '../context/SupplierContext'
+import { usePermissions } from '../lib/permissions'
 import { filterRequests, PORTAL_STATUS_BADGE, PORTAL_TYPE_LABEL, PORTAL_STATUSES } from '../utils/portalSelectors'
 import { formatDate } from '../utils/formatters'
 
 export default function Portal() {
   const { requests, isLoading, createRequest, updateRequest, deleteRequest, notifyRequest } = usePortalContext()
   const { suppliers } = useSupplierContext()
+  const { canManage } = usePermissions()
+  const canManagePortal = canManage('portal')
   const [status, setStatus] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [slideOverOpen, setSlideOverOpen] = useState(false)
@@ -71,10 +74,12 @@ export default function Portal() {
         title="Supplier Portal"
         description="Create and track requests to your suppliers"
         actions={
-          <Button variant="primary" onClick={() => setModalOpen(true)}>
-            <PlusCircle size={16} />
-            New request
-          </Button>
+          canManagePortal && (
+            <Button variant="primary" onClick={() => setModalOpen(true)}>
+              <PlusCircle size={16} />
+              New request
+            </Button>
+          )
         }
       />
 
@@ -108,10 +113,10 @@ export default function Portal() {
         onClose={() => setSlideOverOpen(false)}
         request={liveSelected}
         supplier={liveSupplier}
-        onUpdate={liveSelected ? (patch) => updateRequest(liveSelected.id, patch) : undefined}
-        onNotify={liveSelected ? () => notifyRequest(liveSelected.id) : undefined}
+        onUpdate={canManagePortal && liveSelected ? (patch) => updateRequest(liveSelected.id, patch) : undefined}
+        onNotify={canManagePortal && liveSelected ? () => notifyRequest(liveSelected.id) : undefined}
         onDelete={
-          liveSelected
+          canManagePortal && liveSelected
             ? () => {
                 deleteRequest(liveSelected.id)
                 setSlideOverOpen(false)

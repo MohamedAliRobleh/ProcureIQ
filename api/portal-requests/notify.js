@@ -1,6 +1,7 @@
 import { prisma } from '../_lib/prisma.js'
 import { requireAuth } from '../_lib/auth.js'
 import { isEmailConfigured, sendEmail } from '../_lib/email.js'
+import { canManage } from '../_lib/permissions.js'
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (c) =>
@@ -12,6 +13,9 @@ async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
     return res.status(405).json({ error: 'Method not allowed' })
+  }
+  if (!canManage(req.auth.orgRole, 'portal')) {
+    return res.status(403).json({ error: 'You do not have permission to manage portal' })
   }
   const { id } = req.body ?? {}
   if (!id) return res.status(400).json({ error: 'id is required' })

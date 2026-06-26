@@ -11,6 +11,9 @@ async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
   const { orgId } = req.auth
+  if (req.auth.orgRole !== 'org:admin') {
+    return res.status(403).json({ error: 'Admin access required' })
+  }
   try {
     const existing = await prisma.supplier.count({ where: { orgId } })
     if (existing > 0) return res.status(200).json({ seeded: false })

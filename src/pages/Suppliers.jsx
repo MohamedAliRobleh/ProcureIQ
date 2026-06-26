@@ -7,6 +7,7 @@ import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
 import SupplierModal from '../components/ui/SupplierModal'
 import { useSupplierContext } from '../context/SupplierContext'
+import { usePermissions } from '../lib/permissions'
 import { filterSuppliers, sortSuppliers } from '../utils/supplierSelectors'
 import { cn } from '../utils/cn'
 import { riskColor } from '../utils/formatters'
@@ -20,6 +21,7 @@ const STATUS_BADGE = { active: 'green', pending: 'amber', suspended: 'red' }
 
 export default function Suppliers() {
   const { suppliers, addSupplier, updateSupplier } = useSupplierContext()
+  const { canManage } = usePermissions()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
   const [status, setStatus] = useState('')
@@ -72,9 +74,11 @@ export default function Suppliers() {
       key: 'actions',
       header: '',
       render: (row) => (
-        <Button variant="ghost" onClick={() => openEdit(row)}>
-          Edit
-        </Button>
+        canManage('suppliers') && (
+          <Button variant="ghost" onClick={() => openEdit(row)}>
+            Edit
+          </Button>
+        )
       ),
     },
   ]
@@ -85,10 +89,12 @@ export default function Suppliers() {
         title="Suppliers"
         description="Manage your supplier portfolio"
         actions={
-          <Button variant="primary" onClick={openAdd}>
-            <PlusCircle size={16} />
-            Add Supplier
-          </Button>
+          canManage('suppliers') && (
+            <Button variant="primary" onClick={openAdd}>
+              <PlusCircle size={16} />
+              Add Supplier
+            </Button>
+          )
         }
       />
 

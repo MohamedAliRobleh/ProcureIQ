@@ -35,7 +35,7 @@ function mockRes() {
   return res
 }
 
-const authReq = (over = {}) => ({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test' }, ...over })
+const authReq = (over = {}) => ({ method: 'POST', auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' }, ...over })
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -75,5 +75,13 @@ describe('POST /api/org/seed', () => {
     await handler(authReq({ method: 'GET' }), res)
     expect(res.status).toHaveBeenCalledWith(405)
     expect(prisma.supplier.count).not.toHaveBeenCalled()
+  })
+
+  it('returns 403 for a non-admin member', async () => {
+    prisma.supplier.count.mockResolvedValue(0)
+    const res = mockRes()
+    await handler(authReq({ auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:member' } }), res)
+    expect(res.status).toHaveBeenCalledWith(403)
+    expect(prisma.$transaction).not.toHaveBeenCalled()
   })
 })

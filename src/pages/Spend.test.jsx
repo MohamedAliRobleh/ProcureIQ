@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import { MemoryRouter } from 'react-router-dom'
 import { SupplierProvider } from '../context/SupplierContext'
 import { SpendProvider } from '../context/SpendContext'
+import { authState } from '../test/authState'
 import Spend from './Spend'
 import { spendRecords, suppliers } from '../lib/mockData'
 import { formatCompactCurrency } from '../utils/formatters'
@@ -59,5 +60,11 @@ describe('Spend', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add Record' }))
 
     await waitFor(() => expect(screen.getByText('New consulting fee')).toBeInTheDocument())
+  })
+
+  it('hides write controls for a read-only member', () => {
+    authState.membership = { role: 'org:member' }
+    renderSpend()
+    expect(screen.queryByRole('button', { name: 'Add Spend Record' })).not.toBeInTheDocument()
   })
 })
