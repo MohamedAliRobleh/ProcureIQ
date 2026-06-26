@@ -1,4 +1,4 @@
-import { LayoutDashboard, Building2, FileText, ShieldAlert, Leaf, Wallet, Bot, UserCog, Store } from 'lucide-react'
+import { LayoutDashboard, Building2, FileText, ShieldAlert, Leaf, Wallet, Bot, UserCog, Store, CreditCard } from 'lucide-react'
 
 export const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -9,5 +9,6 @@ export const NAV_ITEMS = [
   { label: 'Spend', path: '/spend', icon: Wallet },
   { label: 'AI Assistant', path: '/ai-assistant', icon: Bot },
   { label: 'Supplier Portal', path: '/portal', icon: Store },
-  { label: 'Admin', path: '/admin', icon: UserCog },
+  { label: 'Billing', path: '/billing', icon: CreditCard, adminOnly: true },
+  { label: 'Admin', path: '/admin', icon: UserCog, adminOnly: true },
 ]

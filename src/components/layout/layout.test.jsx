@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, cleanup } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { authState } from '../../test/authState'
 import Sidebar from './Sidebar'
@@ -29,6 +29,42 @@ describe('Sidebar', () => {
     )
     expect(screen.queryByRole('link', { name: /Admin/ })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Dashboard/ })).toBeInTheDocument()
+  })
+
+  it('shows the Billing link for an admin and hides it for a member', () => {
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    )
+    expect(screen.getByRole('link', { name: /Billing/ })).toBeInTheDocument()
+
+    cleanup()
+    authState.membership = { role: 'org:member' }
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    )
+    expect(screen.queryByRole('link', { name: /Billing/ })).not.toBeInTheDocument()
+  })
+
+  it('shows the active org name in the header, with a ProcureIQ fallback', () => {
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    )
+    expect(screen.getByText(authState.organization.name)).toBeInTheDocument()
+
+    cleanup()
+    authState.organization = null
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    )
+    expect(screen.getByText('ProcureIQ')).toBeInTheDocument()
   })
 })
 

@@ -16,6 +16,7 @@ import Spend from './pages/Spend'
 import AIAssistant from './pages/AIAssistant'
 import Admin from './pages/Admin'
 import Portal from './pages/Portal'
+import Billing from './pages/Billing'
 import SignInPage from './pages/SignInPage'
 import SignUpPage from './pages/SignUpPage'
 
@@ -49,6 +50,7 @@ export default function App() {
               <Route path="/ai-assistant" element={<AIAssistant />} />
               <Route path="/admin/*" element={<Admin />} />
               <Route path="/portal" element={<Portal />} />
+              <Route path="/billing" element={<Billing />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>
           </Routes>

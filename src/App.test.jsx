@@ -60,6 +60,12 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: /New request/i })).toBeInTheDocument()
   })
 
+  it('renders the Billing page at /billing', async () => {
+    window.history.pushState({}, '', '/billing')
+    render(<App />)
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'Billing' })).toBeInTheDocument())
+  })
+
   it('renders the embedded sign-in at /sign-in', async () => {
     window.history.pushState({}, '', '/sign-in')
     render(<App />)
