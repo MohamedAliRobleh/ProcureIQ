@@ -48,6 +48,24 @@ describe('Sidebar', () => {
     )
     expect(screen.queryByRole('link', { name: /Billing/ })).not.toBeInTheDocument()
   })
+
+  it('shows the active org name in the header, with a ProcureIQ fallback', () => {
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    )
+    expect(screen.getByText(authState.organization.name)).toBeInTheDocument()
+
+    cleanup()
+    authState.organization = null
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    )
+    expect(screen.getByText('ProcureIQ')).toBeInTheDocument()
+  })
 })
 
 describe('TopBar', () => {
