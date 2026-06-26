@@ -16,7 +16,12 @@ async function request(path, options = {}) {
     headers,
     ...options,
   })
-  const body = await res.json().catch(() => null)
+  let body
+  try {
+    body = await res.json()
+  } catch {
+    throw new Error(`Request failed: ${path} did not return JSON (status ${res.status})`)
+  }
   if (!res.ok) throw new Error(body?.error ?? `Request failed: ${res.status}`)
   return body
 }

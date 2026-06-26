@@ -34,3 +34,5 @@ dist-ssr
 
 # Local screenshots
 /*.png
+
+.vercel

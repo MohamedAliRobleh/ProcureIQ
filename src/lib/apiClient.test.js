@@ -22,6 +22,15 @@ describe('apiClient', () => {
     expect(JSON.parse(options.body)).toEqual({ name: 'A' })
   })
 
+  it('throws instead of silently returning null when a 200 response is not JSON (e.g. the Vite SPA fallback HTML when /api is unrouted)', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => { throw new SyntaxError('Unexpected token <') },
+    })))
+    await expect(api.get('/api/suppliers')).rejects.toThrow(/did not return JSON/)
+  })
+
   it('throws the server error message on non-OK responses', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 400, json: async () => ({ error: 'name is required' }) })))
     await expect(api.post('/api/suppliers', {})).rejects.toThrow('name is required')
