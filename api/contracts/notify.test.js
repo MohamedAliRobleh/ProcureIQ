@@ -49,6 +49,27 @@ describe('POST /api/contracts/notify', () => {
     expect(res.json).toHaveBeenCalledWith({ ok: true })
   })
 
+  it('escapes HTML-dangerous characters in the contract fields', async () => {
+    isEmailConfigured.mockReturnValue(true)
+    prisma.contract.findFirst.mockResolvedValue({
+      id: 'con_1',
+      title: 'Deal <script>alert(1)</script> & "Co"',
+      value: 1,
+      currency: 'USD',
+      status: 'active',
+      endDate: null,
+    })
+    sendEmail.mockResolvedValue(true)
+    const res = mockRes()
+    await handler({ method: 'POST', body: { id: 'con_1', toEmail: 'a@b.com' }, auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:admin' } }, res)
+    const arg = sendEmail.mock.calls[0][0]
+    expect(arg.html).toContain('&lt;script&gt;')
+    expect(arg.html).toContain('&amp;')
+    expect(arg.html).toContain('&quot;')
+    expect(arg.html).not.toContain('<script>')
+    expect(res.status).toHaveBeenCalledWith(200)
+  })
+
   it('returns 404 when the contract is not in the org', async () => {
     isEmailConfigured.mockReturnValue(true)
     prisma.contract.findFirst.mockResolvedValue(null)

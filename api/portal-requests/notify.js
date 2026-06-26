@@ -1,13 +1,8 @@
 import { prisma } from '../_lib/prisma.js'
 import { requireAuth } from '../_lib/auth.js'
 import { isEmailConfigured, sendEmail } from '../_lib/email.js'
+import { escapeHtml } from '../_lib/htmlEscape.js'
 import { canManage } from '../_lib/permissions.js'
-
-function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>"']/g, (c) =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
-  )
-}
 
 async function handler(req, res) {
   if (req.method !== 'POST') {

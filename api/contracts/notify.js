@@ -1,6 +1,7 @@
 import { prisma } from '../_lib/prisma.js'
 import { requireAuth } from '../_lib/auth.js'
 import { isEmailConfigured, sendEmail } from '../_lib/email.js'
+import { escapeHtml } from '../_lib/htmlEscape.js'
 import { canManage } from '../_lib/permissions.js'
 
 async function handler(req, res) {
@@ -23,11 +24,11 @@ async function handler(req, res) {
     const end = contract.endDate ? new Date(contract.endDate).toISOString().slice(0, 10) : 'n/a'
     const html = [
       `<h2>Contract reminder</h2>`,
-      `<p>Here is a reminder about <strong>${contract.title}</strong>.</p>`,
+      `<p>Here is a reminder about <strong>${escapeHtml(contract.title)}</strong>.</p>`,
       `<ul>`,
-      `<li>Value: ${contract.currency} ${contract.value}</li>`,
-      `<li>Status: ${contract.status}</li>`,
-      `<li>End date: ${end}</li>`,
+      `<li>Value: ${escapeHtml(contract.currency)} ${escapeHtml(contract.value)}</li>`,
+      `<li>Status: ${escapeHtml(contract.status)}</li>`,
+      `<li>End date: ${escapeHtml(end)}</li>`,
       `</ul>`,
       `<p>— ProcureIQ</p>`,
     ].join('')
