@@ -28,6 +28,8 @@ import { recentActivity } from '../lib/mockData'
 
 const RISK_COLORS = { low: '#10B981', medium: '#F59E0B', high: '#EF4444', critical: '#8B5CF6' }
 const TOOLTIP_STYLE = { background: '#16181F', border: '1px solid #1E2130', borderRadius: 8 }
+const TOOLTIP_ITEM_STYLE = { color: '#F1F5F9' }
+const TOOLTIP_LABEL_STYLE = { color: '#94A3B8' }
 
 export default function Dashboard() {
   const { suppliers, isLoading: loadingSuppliers } = useSuppliers()
@@ -104,7 +106,7 @@ export default function Dashboard() {
                     <Cell key={entry.level} fill={RISK_COLORS[entry.level]} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={TOOLTIP_STYLE} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -126,7 +128,7 @@ export default function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#1E2130" />
                 <XAxis dataKey="category" tick={{ fill: '#94A3B8', fontSize: 11 }} angle={-20} textAnchor="end" height={60} />
                 <YAxis tick={{ fill: '#94A3B8', fontSize: 11 }} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(value) => formatCurrency(value)} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} formatter={(value) => formatCurrency(value)} />
                 <Bar dataKey="amount" fill="#3B82F6" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

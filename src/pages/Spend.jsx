@@ -16,6 +16,8 @@ import { formatCurrency, formatCompactCurrency, formatDate } from '../utils/form
 import { SPEND_CATEGORIES } from '../lib/mockData'
 
 const TOOLTIP_STYLE = { background: '#16181F', border: '1px solid #1E2130', borderRadius: 8 }
+const TOOLTIP_ITEM_STYLE = { color: '#F1F5F9' }
+const TOOLTIP_LABEL_STYLE = { color: '#94A3B8' }
 const CATEGORY_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#60A5FA', '#34D399', '#FB923C']
 
 export default function Spend() {
@@ -146,7 +148,7 @@ export default function Spend() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#1E2130" />
                 <XAxis dataKey="month" tick={{ fill: '#94A3B8', fontSize: 11 }} />
                 <YAxis tick={{ fill: '#94A3B8', fontSize: 11 }} />
-                <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(value) => formatCurrency(value)} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} formatter={(value) => formatCurrency(value)} />
                 <Line type="monotone" dataKey="total" stroke="#3B82F6" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
@@ -163,7 +165,7 @@ export default function Spend() {
                     <Cell key={entry.category} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(value) => formatCurrency(value)} />
+                <Tooltip contentStyle={TOOLTIP_STYLE} itemStyle={TOOLTIP_ITEM_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} formatter={(value) => formatCurrency(value)} />
               </PieChart>
             </ResponsiveContainer>
           </div>

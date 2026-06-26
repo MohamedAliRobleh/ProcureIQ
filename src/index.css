@@ -7,3 +7,20 @@
 body {
   @apply bg-bg-primary text-text-primary font-body antialiased;
 }
+
+/* Native <select> dropdown options inherit the dark page text color but render
+   on the OS's default (light) popup background, which makes them invisible.
+   Force a dark background + light text so option lists stay readable. */
+option {
+  background-color: #16181F;
+  color: #F1F5F9;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #F1F5F9 !important;
+  box-shadow: 0 0 0 1000px #0A0B0F inset !important;
+  caret-color: #F1F5F9 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
