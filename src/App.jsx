@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Suspense, lazy } from 'react'
 import AppShell from './components/layout/AppShell'
 import ErrorBoundary from './components/layout/ErrorBoundary'
 import ProtectedRoute from './components/layout/ProtectedRoute'
@@ -6,19 +7,24 @@ import RequireOrg from './components/layout/RequireOrg'
 import OrgScopedProviders from './components/layout/OrgScopedProviders'
 import { AuthProvider } from './lib/auth'
 import Landing from './pages/Landing'
-import Dashboard from './pages/Dashboard'
-import Suppliers from './pages/Suppliers'
-import SupplierDetail from './pages/SupplierDetail'
-import Contracts from './pages/Contracts'
-import Risk from './pages/Risk'
-import ESG from './pages/ESG'
-import Spend from './pages/Spend'
-import AIAssistant from './pages/AIAssistant'
-import Admin from './pages/Admin'
-import Portal from './pages/Portal'
-import Billing from './pages/Billing'
-import SignInPage from './pages/SignInPage'
-import SignUpPage from './pages/SignUpPage'
+
+// Lazy load pages for code splitting
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Suppliers = lazy(() => import('./pages/Suppliers'))
+const SupplierDetail = lazy(() => import('./pages/SupplierDetail'))
+const Contracts = lazy(() => import('./pages/Contracts'))
+const Risk = lazy(() => import('./pages/Risk'))
+const ESG = lazy(() => import('./pages/ESG'))
+const Spend = lazy(() => import('./pages/Spend'))
+const AIAssistant = lazy(() => import('./pages/AIAssistant'))
+const Admin = lazy(() => import('./pages/Admin'))
+const Portal = lazy(() => import('./pages/Portal'))
+const Billing = lazy(() => import('./pages/Billing'))
+const SignInPage = lazy(() => import('./pages/SignInPage'))
+const SignUpPage = lazy(() => import('./pages/SignUpPage'))
+
+// Loading fallback component
+const Loading = () => <div className="flex items-center justify-center h-screen">Chargement...</div>
 
 export default function App() {
   return (
@@ -27,8 +33,16 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Landing />} />
-            <Route path="/sign-in/*" element={<SignInPage />} />
-            <Route path="/sign-up/*" element={<SignUpPage />} />
+            <Route path="/sign-in/*" element={
+              <Suspense fallback={<Loading />}>
+                <SignInPage />
+              </Suspense>
+            } />
+            <Route path="/sign-up/*" element={
+              <Suspense fallback={<Loading />}>
+                <SignUpPage />
+              </Suspense>
+            } />
             <Route
               element={
                 <ProtectedRoute>
@@ -40,17 +54,17 @@ export default function App() {
                 </ProtectedRoute>
               }
             >
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/suppliers" element={<Suppliers />} />
-              <Route path="/suppliers/:id" element={<SupplierDetail />} />
-              <Route path="/contracts" element={<Contracts />} />
-              <Route path="/risk" element={<Risk />} />
-              <Route path="/esg" element={<ESG />} />
-              <Route path="/spend" element={<Spend />} />
-              <Route path="/ai-assistant" element={<AIAssistant />} />
-              <Route path="/admin/*" element={<Admin />} />
-              <Route path="/portal" element={<Portal />} />
-              <Route path="/billing" element={<Billing />} />
+              <Route path="/dashboard" element={<Suspense fallback={<Loading />}><Dashboard /></Suspense>} />
+              <Route path="/suppliers" element={<Suspense fallback={<Loading />}><Suppliers /></Suspense>} />
+              <Route path="/suppliers/:id" element={<Suspense fallback={<Loading />}><SupplierDetail /></Suspense>} />
+              <Route path="/contracts" element={<Suspense fallback={<Loading />}><Contracts /></Suspense>} />
+              <Route path="/risk" element={<Suspense fallback={<Loading />}><Risk /></Suspense>} />
+              <Route path="/esg" element={<Suspense fallback={<Loading />}><ESG /></Suspense>} />
+              <Route path="/spend" element={<Suspense fallback={<Loading />}><Spend /></Suspense>} />
+              <Route path="/ai-assistant" element={<Suspense fallback={<Loading />}><AIAssistant /></Suspense>} />
+              <Route path="/admin/*" element={<Suspense fallback={<Loading />}><Admin /></Suspense>} />
+              <Route path="/portal" element={<Suspense fallback={<Loading />}><Portal /></Suspense>} />
+              <Route path="/billing" element={<Suspense fallback={<Loading />}><Billing /></Suspense>} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Route>
           </Routes>
