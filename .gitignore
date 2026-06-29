@@ -40,3 +40,4 @@ dist-ssr
 # Demo media (local deliverables)
 demo-frames/
 /*.mp4
+promo/
