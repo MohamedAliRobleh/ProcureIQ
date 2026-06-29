@@ -73,6 +73,25 @@ describe('requireAuth', () => {
     expect(res.status).toHaveBeenCalledWith(403)
     expect(handler).not.toHaveBeenCalled()
   })
+
+  it('reads the org from a Clerk v2 token (o.id / o.rol) and normalizes the role to org:<rol>', async () => {
+    verifyToken.mockResolvedValue({ sub: 'user_123', v: 2, o: { id: 'org_v2', rol: 'admin', slg: 'test' } })
+    const handler = vi.fn()
+    const res = mockRes()
+    const req = { headers: { authorization: 'Bearer good' } }
+    await requireAuth(handler)(req, res)
+    expect(handler).toHaveBeenCalledWith(req, res)
+    expect(req.auth).toEqual({ userId: 'user_123', orgId: 'org_v2', orgRole: 'org:admin' })
+  })
+
+  it('maps a v2 member role to org:member', async () => {
+    verifyToken.mockResolvedValue({ sub: 'user_123', v: 2, o: { id: 'org_v2', rol: 'member' } })
+    const handler = vi.fn()
+    const res = mockRes()
+    const req = { headers: { authorization: 'Bearer good' } }
+    await requireAuth(handler)(req, res)
+    expect(req.auth.orgRole).toBe('org:member')
+  })
 })
 
 describe('requireOrgAdmin', () => {
@@ -93,6 +112,16 @@ describe('requireOrgAdmin', () => {
     await requireOrgAdmin(handler)({ headers: { authorization: 'Bearer good' } }, res)
     expect(res.status).toHaveBeenCalledWith(403)
     expect(handler).not.toHaveBeenCalled()
+  })
+
+  it('calls the handler for a v2-token org admin (o.rol = admin)', async () => {
+    verifyToken.mockResolvedValue({ sub: 'user_123', v: 2, o: { id: 'org_v2', rol: 'admin' } })
+    const handler = vi.fn()
+    const res = mockRes()
+    const req = { headers: { authorization: 'Bearer good' } }
+    await requireOrgAdmin(handler)(req, res)
+    expect(handler).toHaveBeenCalledWith(req, res)
+    expect(res.status).not.toHaveBeenCalled()
   })
 
   it('returns 403 when the org role is missing', async () => {

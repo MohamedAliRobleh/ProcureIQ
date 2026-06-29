@@ -1,9 +1,20 @@
 import { verifyToken } from '@clerk/backend'
 
+// Reads the active org id + role from a verified Clerk session token, handling
+// BOTH token formats: v1 (top-level `org_id` / `org_role`, e.g. "org:admin") and
+// v2 (`v:2`, claims nested under `o` with abbreviated keys: `o.id` / `o.rol`,
+// where the role drops the "org:" prefix, e.g. "admin"). Returns a normalized
+// `{ orgId, orgRole }` with orgRole always in the "org:<role>" form (or null).
+export function readOrg(payload) {
+  const orgId = payload.org_id ?? payload.o?.id ?? null
+  const rawRole = payload.org_role ?? payload.o?.rol ?? null
+  const orgRole = rawRole && !rawRole.startsWith('org:') ? `org:${rawRole}` : rawRole
+  return { orgId, orgRole }
+}
+
 // Wraps a handler so it only runs with a valid Clerk session token that
 // carries an active organization. Networkless verification: the JWT is
-// checked against CLERK_SECRET_KEY. `org_id` and `org_role` are default Clerk
-// session-token claims, present only when an org is active.
+// checked against CLERK_SECRET_KEY.
 export function requireAuth(handler) {
   return async (req, res) => {
     const header = req.headers?.authorization ?? ''
@@ -15,9 +26,9 @@ export function requireAuth(handler) {
     } catch {
       return res.status(401).json({ error: 'Unauthorized' })
     }
-    const orgId = payload.org_id ?? null
+    const { orgId, orgRole } = readOrg(payload)
     if (!orgId) return res.status(403).json({ error: 'No active organization' })
-    req.auth = { userId: payload.sub, orgId, orgRole: payload.org_role ?? null }
+    req.auth = { userId: payload.sub, orgId, orgRole }
     return handler(req, res)
   }
 }
