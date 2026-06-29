@@ -36,3 +36,7 @@ dist-ssr
 /*.png
 
 .vercel
+
+# Demo media (local deliverables)
+demo-frames/
+/*.mp4
