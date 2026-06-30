@@ -6,7 +6,7 @@ export default function SignInPage() {
       <div className="w-full max-w-md rounded-3xl border border-border bg-bg-card p-8 shadow-2xl shadow-black/20">
         <SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" fallbackRedirectUrl="/dashboard" />
         <div className="mt-6 rounded-2xl border border-border bg-bg-primary p-4 text-sm text-text-primary">
-          <p className="text-text-secondary">Utilise ces identifiants de démonstration :</p>
+          <p className="text-text-secondary">Use these demo credentials:</p>
           <div className="mt-3 space-y-2 font-mono text-sm">
             <div className="flex items-center justify-between gap-3 rounded-lg bg-bg-secondary px-3 py-2">
               <span className="text-text-muted">Email</span>
