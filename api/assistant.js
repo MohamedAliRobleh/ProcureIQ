@@ -2,7 +2,7 @@ import { prisma } from './_lib/prisma.js'
 import { requireAuth } from './_lib/auth.js'
 import { getAnthropic, isAiConfigured, AI_MODEL } from './_lib/anthropic.js'
 import { buildDigest } from './_lib/digest.js'
-import { getAssistantReply } from '../src/lib/assistantEngine.js'
+import { getAssistantReply } from './_lib/assistantEngine.js'
 
 const SYSTEM_PREAMBLE =
   "You are the ProcureIQ procurement assistant. Answer the user's questions using ONLY the procurement data provided below. " +

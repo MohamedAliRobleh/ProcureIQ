@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getAssistantReply } from './assistantEngine'
+import { getAssistantReply } from '../_lib/assistantEngine.js'
 
 function daysFromNow(days) {
   const d = new Date()

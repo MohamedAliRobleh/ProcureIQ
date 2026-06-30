@@ -1,6 +1,55 @@
-import { daysUntil, formatCurrency, formatCompactCurrency } from '../utils/formatters'
-import { esgRating, ESG_RATING_LABEL } from '../utils/esgSelectors'
-import { getSpendByCategory, getAverageRiskScore } from '../utils/dashboardSelectors'
+// Deterministic, dependency-free procurement reply engine. Self-contained (no
+// src/ imports) so it bundles cleanly into the Vercel serverless function — a
+// cross-boundary `import '../src/lib/...'` with extensionless sub-imports
+// crashed the deployed function at load (FUNCTION_INVOCATION_FAILED). This is
+// the always-on fallback for POST /api/assistant when Anthropic is unconfigured
+// or errors. Pure: every date consumer does new Date(x), so DB ISO-string dates
+// work unchanged.
+
+function daysUntil(date, referenceDate = new Date()) {
+  const ms = new Date(date).getTime() - new Date(referenceDate).getTime()
+  return Math.ceil(ms / (1000 * 60 * 60 * 24))
+}
+
+function formatCurrency(amount, currency = 'USD') {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(amount)
+}
+
+function formatCompactCurrency(amount) {
+  if (amount >= 1_000_000) return `$${(amount / 1_000_000).toFixed(1)}M`
+  if (amount >= 1_000) return `$${Math.round(amount / 1_000)}k`
+  return `$${amount}`
+}
+
+function esgRating(score) {
+  if (score >= 67) return 'strong'
+  if (score >= 34) return 'developing'
+  return 'needs-improvement'
+}
+
+const ESG_RATING_LABEL = {
+  strong: 'Strong',
+  developing: 'Developing',
+  'needs-improvement': 'Needs Improvement',
+}
+
+function getSpendByCategory(spendRecords) {
+  const totals = new Map()
+  for (const record of spendRecords) {
+    totals.set(record.category, (totals.get(record.category) ?? 0) + record.amount)
+  }
+  return [...totals.entries()].map(([category, amount]) => ({ category, amount }))
+}
+
+function getAverageRiskScore(riskAssessments) {
+  if (riskAssessments.length === 0) return 0
+  const total = riskAssessments.reduce((sum, r) => sum + r.score, 0)
+  return Math.round(total / riskAssessments.length)
+}
 
 const HELP_TEXT = [
   'I can answer questions about your procurement data. Try:',
