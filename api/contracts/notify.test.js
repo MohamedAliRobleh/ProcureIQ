@@ -9,7 +9,7 @@ vi.mock('../_lib/email.js', () => ({
   sendEmail: vi.fn(),
 }))
 
-import handler from './notify.js'
+import { notify as handler } from '../_handlers/contracts.js'
 import { prisma } from '../_lib/prisma.js'
 import { isEmailConfigured, sendEmail } from '../_lib/email.js'
 

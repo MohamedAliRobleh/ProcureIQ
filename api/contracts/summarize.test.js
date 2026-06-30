@@ -10,7 +10,7 @@ vi.mock('../_lib/anthropic.js', () => ({
   getAnthropic: vi.fn(),
 }))
 
-import handler from './summarize.js'
+import { summarize as handler } from '../_handlers/contracts.js'
 import { prisma } from '../_lib/prisma.js'
 import { isAiConfigured, getAnthropic } from '../_lib/anthropic.js'
 

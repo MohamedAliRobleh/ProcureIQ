@@ -9,8 +9,7 @@ vi.mock('../_lib/prisma.js', () => ({
 
 vi.mock('../_lib/auth.js', () => ({ requireAuth: (handler) => handler }))
 
-import listHandler from './index.js'
-import idHandler from './[id].js'
+import { list as listHandler, byId as idHandler } from '../_handlers/contracts.js'
 import { prisma } from '../_lib/prisma.js'
 
 function mockRes() {

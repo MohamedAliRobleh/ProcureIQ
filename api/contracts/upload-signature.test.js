@@ -10,7 +10,7 @@ vi.mock('../_lib/cloudinary.js', () => ({
   signUpload: vi.fn(),
 }))
 
-import handler from './upload-signature.js'
+import { uploadSignature as handler } from '../_handlers/contracts.js'
 import { prisma } from '../_lib/prisma.js'
 import { isUploadConfigured, uploadConfig, signUpload } from '../_lib/cloudinary.js'
 
