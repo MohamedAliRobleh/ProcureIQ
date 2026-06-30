@@ -4,7 +4,7 @@ vi.mock('../_lib/auth.js', () => ({ requireAuth: (handler) => handler }))
 vi.mock('../_lib/prisma.js', () => ({ prisma: { portalRequest: { findFirst: vi.fn() } } }))
 vi.mock('../_lib/email.js', () => ({ isEmailConfigured: vi.fn(), sendEmail: vi.fn() }))
 
-import handler from './notify.js'
+import { notify as handler } from '../_handlers/portalRequests.js'
 import { prisma } from '../_lib/prisma.js'
 import { isEmailConfigured, sendEmail } from '../_lib/email.js'
 
