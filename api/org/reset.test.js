@@ -24,7 +24,7 @@ vi.mock('../_lib/seedData.js', () => ({
   })),
 }))
 
-import handler from './reset.js'
+import { reset as handler } from '../_handlers/org.js'
 import { prisma } from '../_lib/prisma.js'
 
 function mockRes() {

@@ -16,7 +16,7 @@ vi.mock('../_lib/prisma.js', () => ({
 }))
 vi.mock('../_lib/auth.js', () => ({ requireOrgAdmin: (handler) => handler }))
 
-import handler from './clear.js'
+import { clear as handler } from '../_handlers/org.js'
 import { prisma } from '../_lib/prisma.js'
 
 function mockRes() {

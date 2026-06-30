@@ -13,7 +13,7 @@ vi.mock('../_lib/prisma.js', () => ({
 }))
 vi.mock('../_lib/auth.js', () => ({ requireOrgAdmin: (handler) => handler }))
 
-import handler from './export.js'
+import { exportData as handler } from '../_handlers/org.js'
 import { prisma } from '../_lib/prisma.js'
 
 function mockRes() {
