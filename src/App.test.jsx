@@ -7,7 +7,7 @@ describe('App', () => {
   it('renders the public landing page at the root route', async () => {
     window.history.pushState({}, '', '/')
     render(<App />)
-    expect(await screen.findByRole('link', { name: /Open App/ })).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: /Sign in to the demo/ })).toBeInTheDocument()
     expect(screen.getByText('AI-powered procurement intelligence')).toBeInTheDocument()
   })
 

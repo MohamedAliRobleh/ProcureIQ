@@ -18,10 +18,10 @@ describe('Landing', () => {
     expect(screen.getByText('AI-powered procurement intelligence')).toBeInTheDocument()
   })
 
-  it('renders an Open App CTA linking to the dashboard', () => {
+  it('renders a "Sign in to the demo" CTA linking to the sign-in page', () => {
     renderLanding()
-    const cta = screen.getByRole('link', { name: /Open App/ })
-    expect(cta).toHaveAttribute('href', '/dashboard')
+    const cta = screen.getByRole('link', { name: /Sign in to the demo/ })
+    expect(cta).toHaveAttribute('href', '/sign-in')
   })
 
   it('renders 6 module feature cards', () => {
