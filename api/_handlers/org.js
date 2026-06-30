@@ -2,17 +2,16 @@ import { prisma } from '../_lib/prisma.js'
 import { buildSeedData } from '../_lib/seedData.js'
 import { buildAuditData } from '../_lib/audit.js'
 
-// Populates a brand-new org with the canonical demo dataset. Count-guarded so
-// it never duplicates: if the org already has suppliers, it is a no-op.
+// Populates a brand-new org with the canonical demo dataset. Open to ANY org
+// member (not just admins) so visitors/members can self-serve demo data.
+// Count-guarded so it never duplicates: if the org already has suppliers, it is
+// a no-op.
 export async function seed(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
     return res.status(405).json({ error: 'Method not allowed' })
   }
   const { orgId } = req.auth
-  if (req.auth.orgRole !== 'org:admin') {
-    return res.status(403).json({ error: 'Admin access required' })
-  }
   try {
     const existing = await prisma.supplier.count({ where: { orgId } })
     if (existing > 0) return res.status(200).json({ seeded: false })

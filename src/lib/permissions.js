@@ -7,8 +7,16 @@ export function canManage(role, resource) {
   return role === 'org:admin'
 }
 
+export function canSeed(role) {
+  return role === 'org:admin' || role === 'org:member'
+}
+
 export function usePermissions() {
   const { membership } = useOrganization()
   const role = membership?.role ?? null
-  return { role, canManage: (resource) => canManage(role, resource) }
+  return {
+    role,
+    canManage: (resource) => canManage(role, resource),
+    canSeed: () => canSeed(role),
+  }
 }

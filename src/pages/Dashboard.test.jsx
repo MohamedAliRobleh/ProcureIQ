@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { ContractProvider } from '../context/ContractContext'
 import { SpendProvider } from '../context/SpendContext'
@@ -6,7 +6,7 @@ import { SupplierProvider } from '../context/SupplierContext'
 import Dashboard from './Dashboard'
 import { suppliers, contracts, riskAssessments } from '../lib/mockData'
 import { getAverageRiskScore } from '../utils/dashboardSelectors'
-import { authState } from '../test/authState'
+import { authState, resetAuthState } from '../test/authState'
 
 describe('Dashboard', () => {
   it('shows a loading state, then the computed stat cards and AI insight', async () => {
@@ -40,6 +40,8 @@ describe('Dashboard', () => {
 })
 
 describe('Dashboard — empty org', () => {
+  beforeEach(() => resetAuthState())
+
   it('shows the Load sample data panel and seeds on click', async () => {
     const reload = vi.fn()
     Object.defineProperty(window, 'location', { value: { reload }, writable: true })
@@ -74,7 +76,7 @@ describe('Dashboard — empty org', () => {
     await waitFor(() => expect(reload).toHaveBeenCalled())
   })
 
-  it('shows a member note instead of the seed button on an empty org', async () => {
+  it('shows the seed button and a member note to a member (members can load demo data)', async () => {
     authState.membership = { role: 'org:member' }
 
     const fetchMock = vi.fn(async (url, options = {}) => {
@@ -85,6 +87,25 @@ describe('Dashboard — empty org', () => {
       return { ok: true, status: 200, json: async () => [] }
     })
     vi.stubGlobal('fetch', fetchMock)
+
+    render(
+      <SupplierProvider>
+        <ContractProvider>
+          <SpendProvider>
+            <Dashboard />
+          </SpendProvider>
+        </ContractProvider>
+      </SupplierProvider>
+    )
+
+    expect(await screen.findByRole('button', { name: 'Load sample data' })).toBeInTheDocument()
+    expect(screen.getByText(/Members can load demo data/i)).toBeInTheDocument()
+    expect(screen.queryByText(/Ask an organization admin/i)).not.toBeInTheDocument()
+  })
+
+  it('shows the admin-only note when the user has no org role', async () => {
+    authState.membership = null
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, status: 200, json: async () => [] })))
 
     render(
       <SupplierProvider>

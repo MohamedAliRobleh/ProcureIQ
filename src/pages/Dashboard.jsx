@@ -36,7 +36,7 @@ export default function Dashboard() {
   const { contracts, isLoading: loadingContracts } = useContracts()
   const { riskAssessments, isLoading: loadingRisk } = useRisk()
   const { spendRecords, isLoading: loadingSpend } = useSpend()
-  const { canManage } = usePermissions()
+  const { canSeed } = usePermissions()
 
   const [seeding, setSeeding] = useState(false)
 
@@ -63,10 +63,15 @@ export default function Dashboard() {
           <p className="max-w-md text-sm text-text-secondary">
             Load a sample procurement dataset — suppliers, contracts, risk, ESG, and spend — to explore ProcureIQ with realistic data.
           </p>
-          {canManage('suppliers') ? (
-            <Button onClick={handleSeed} disabled={seeding}>
-              {seeding ? 'Loading…' : 'Load sample data'}
-            </Button>
+          {canSeed() ? (
+            <>
+              <Button onClick={handleSeed} disabled={seeding}>
+                {seeding ? 'Loading…' : 'Load sample data'}
+              </Button>
+              <p className="mt-3 text-sm text-text-secondary">
+                Members can load demo data to explore the app without waiting for an admin.
+              </p>
+            </>
           ) : (
             <p className="text-sm text-text-secondary">Ask an organization admin to load data.</p>
           )}

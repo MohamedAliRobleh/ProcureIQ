@@ -77,11 +77,12 @@ describe('POST /api/org/seed', () => {
     expect(prisma.supplier.count).not.toHaveBeenCalled()
   })
 
-  it('returns 403 for a non-admin member', async () => {
+  it('allows a non-admin member to seed (any org member can load demo data)', async () => {
     prisma.supplier.count.mockResolvedValue(0)
     const res = mockRes()
     await handler(authReq({ auth: { userId: 'user_test', orgId: 'org_test', orgRole: 'org:member' } }), res)
-    expect(res.status).toHaveBeenCalledWith(403)
-    expect(prisma.$transaction).not.toHaveBeenCalled()
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1)
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(res.json).toHaveBeenCalledWith({ seeded: true })
   })
 })

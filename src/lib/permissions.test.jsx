@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
-import { canManage, usePermissions } from './permissions'
+import { canManage, canSeed, usePermissions } from './permissions'
 import { resetAuthState, authState } from '../test/authState'
 
 describe('frontend permissions', () => {
@@ -23,5 +23,17 @@ describe('frontend permissions', () => {
     authState.membership = { role: 'org:admin' }
     const { result } = renderHook(() => usePermissions())
     expect(result.current.canManage('suppliers')).toBe(true)
+  })
+
+  it('canSeed allows both admins and members but not a roleless user', () => {
+    expect(canSeed('org:admin')).toBe(true)
+    expect(canSeed('org:member')).toBe(true)
+    expect(canSeed(null)).toBe(false)
+  })
+
+  it('usePermissions binds canSeed to the current role', () => {
+    authState.membership = { role: 'org:member' }
+    const { result } = renderHook(() => usePermissions())
+    expect(result.current.canSeed()).toBe(true)
   })
 })
