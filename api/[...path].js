@@ -38,7 +38,11 @@ function listOrId(mod, sub, req, res) {
 }
 
 export default requireAuth(async (req, res) => {
-  const segs = [].concat(req.query.path ?? [])
+  // `path` arrives either as the catch-all array (direct single-segment hit,
+  // e.g. /api/suppliers) or as a slash-joined string forwarded by the
+  // `/api/:path*` rewrite (multi-segment hits, e.g. /api/suppliers/sup_1).
+  const raw = req.query.path ?? []
+  const segs = (Array.isArray(raw) ? raw : String(raw).split('/')).filter(Boolean)
   const [resource, ...sub] = segs
 
   switch (resource) {
