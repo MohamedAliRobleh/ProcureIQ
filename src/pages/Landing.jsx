@@ -32,6 +32,30 @@ export default function Landing() {
             Open App
             <ArrowRight size={16} />
           </Link>
+
+          <div className="mt-4 w-full max-w-sm rounded-xl border border-border-accent bg-bg-card p-5 text-left shadow-lg">
+            <p className="text-sm font-semibold text-text-primary">🔑 Try the live demo — no signup</p>
+            <p className="mt-1 text-xs text-text-secondary">
+              Read-only account, pre-loaded with sample data. Free demo — no credit card.
+            </p>
+            <div className="mt-3 space-y-2 font-mono text-sm">
+              <div className="flex items-center justify-between gap-3 rounded-lg bg-bg-primary px-3 py-2">
+                <span className="text-text-muted">Email</span>
+                <span className="text-text-primary">demo@procureiq.app</span>
+              </div>
+              <div className="flex items-center justify-between gap-3 rounded-lg bg-bg-primary px-3 py-2">
+                <span className="text-text-muted">Password</span>
+                <span className="text-text-primary">ProcureIQ-demo</span>
+              </div>
+            </div>
+            <Link
+              to="/sign-in"
+              className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-accent-blue-light hover:underline"
+            >
+              Sign in to the demo
+              <ArrowRight size={14} />
+            </Link>
+          </div>
         </section>
 
         <section className="grid grid-cols-1 gap-4 pb-24 sm:grid-cols-2 lg:grid-cols-3">
