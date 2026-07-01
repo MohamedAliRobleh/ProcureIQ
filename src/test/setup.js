@@ -3,6 +3,20 @@ import { beforeEach, vi } from 'vitest'
 import { createMockFetch } from './mockApi'
 import { resetAuthState } from './authState'
 
+// Node 25 ships a built-in localStorage stub that lacks the Web Storage API
+// (no getItem/setItem/clear). Polyfill it so sandbox tests work under jsdom.
+if (typeof localStorage === 'undefined' || typeof localStorage.clear !== 'function') {
+  const store = new Map()
+  vi.stubGlobal('localStorage', {
+    getItem: (key) => store.get(key) ?? null,
+    setItem: (key, value) => store.set(key, String(value)),
+    removeItem: (key) => store.delete(key),
+    clear: () => store.clear(),
+    get length() { return store.size },
+    key: (i) => [...store.keys()][i] ?? null,
+  })
+}
+
 // Global Clerk-free mock of the auth seam. Tests simulate loading/signed-out
 // by mutating authState (reset before every test).
 vi.mock('../lib/auth.jsx', async () => {
