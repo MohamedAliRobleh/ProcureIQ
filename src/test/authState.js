@@ -12,9 +12,17 @@ const DEFAULT_USER = {
   publicMetadata: { role: 'org_admin' },
 }
 
+export const DEFAULT_ORG = {
+  id: 'org_default',
+  name: 'Northwind Trading',
+  slug: 'northwind-trading',
+  imageUrl: null,
+  membersCount: 12,
+}
+
 export const DEMO_ORG = {
   id: 'org_demo',
-  name: 'Procure IQ Demo Org',
+  name: 'ProcureIQ Demo',
   slug: 'procureiq-demo',
   imageUrl: null,
   membersCount: 12,
@@ -25,7 +33,7 @@ export const authState = {
   isSignedIn: true,
   user: DEFAULT_USER,
   orgLoaded: true,
-  organization: DEMO_ORG,
+  organization: DEFAULT_ORG,
   membership: { role: 'org:admin' },
 }
 
@@ -34,6 +42,6 @@ export function resetAuthState() {
   authState.isSignedIn = true
   authState.user = DEFAULT_USER
   authState.orgLoaded = true
-  authState.organization = DEMO_ORG
+  authState.organization = DEFAULT_ORG
   authState.membership = { role: 'org:admin' }
 }

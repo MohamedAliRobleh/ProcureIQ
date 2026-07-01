@@ -12,6 +12,8 @@ import {
 } from '@clerk/clerk-react'
 import { dark } from '@clerk/themes'
 import { setTokenGetter } from './apiClient'
+import { setSandboxActive } from './sandbox'
+import { DEMO_ORG_SLUG } from './demoConfig'
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
@@ -77,6 +79,11 @@ const CLERK_APPEARANCE = {
   },
 }
 
+export function useIsDemoOrg() {
+  const { organization } = useOrganization()
+  return organization?.slug === DEMO_ORG_SLUG
+}
+
 function TokenBridge({ children }) {
   const { getToken } = useAuth()
   useEffect(() => {
@@ -86,10 +93,21 @@ function TokenBridge({ children }) {
   return children
 }
 
+function DemoBridge({ children }) {
+  const { organization } = useOrganization()
+  useEffect(() => {
+    setSandboxActive(organization?.slug === DEMO_ORG_SLUG)
+    return () => setSandboxActive(false)
+  }, [organization?.slug])
+  return children
+}
+
 export function AuthProvider({ children }) {
   return (
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} appearance={CLERK_APPEARANCE}>
-      <TokenBridge>{children}</TokenBridge>
+      <TokenBridge>
+        <DemoBridge>{children}</DemoBridge>
+      </TokenBridge>
     </ClerkProvider>
   )
 }

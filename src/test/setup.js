@@ -22,6 +22,7 @@ if (typeof localStorage === 'undefined' || typeof localStorage.clear !== 'functi
 vi.mock('../lib/auth.jsx', async () => {
   const { createElement } = await import('react')
   const { authState } = await import('./authState')
+  const { DEMO_ORG_SLUG } = await import('../lib/demoConfig')
   return {
     AuthProvider: ({ children }) => children,
     useUser: () => ({
@@ -34,6 +35,7 @@ vi.mock('../lib/auth.jsx', async () => {
       organization: authState.organization,
       membership: authState.membership,
     }),
+    useIsDemoOrg: () => authState.organization?.slug === DEMO_ORG_SLUG,
     UserButton: () => createElement('div', { 'data-testid': 'user-button' }),
     OrganizationSwitcher: () => createElement('div', { 'data-testid': 'org-switcher' }),
     OrganizationProfile: () => createElement('div', { 'data-testid': 'org-profile' }),
