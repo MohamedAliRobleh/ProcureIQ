@@ -1,4 +1,5 @@
 import { useUser, UserButton, OrganizationSwitcher } from '../../lib/auth'
+import SandboxBadge from '../demo/SandboxBadge'
 
 export default function TopBar() {
   const { user } = useUser()
@@ -8,6 +9,7 @@ export default function TopBar() {
     <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-border bg-bg-primary/80 px-6 backdrop-blur">
       <OrganizationSwitcher />
       <div className="flex items-center gap-3">
+        <SandboxBadge />
         <div className="text-right">
           <p className="text-sm font-medium text-text-primary">{user?.fullName ?? ''}</p>
           <p className="text-xs capitalize text-text-secondary">{role.replace('_', ' ')}</p>
