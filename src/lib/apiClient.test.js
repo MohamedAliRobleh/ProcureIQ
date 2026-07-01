@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { api, setTokenGetter } from './apiClient'
+import { setSandboxActive } from './sandbox'
 
 afterEach(() => {
   setTokenGetter(null)
@@ -59,5 +60,46 @@ describe('apiClient', () => {
     expect(url).toBe('/api/portal-requests/preq_1')
     expect(options.method).toBe('DELETE')
     expect(result).toEqual({ deleted: true })
+  })
+})
+
+describe('apiClient sandbox mode', () => {
+  afterEach(() => {
+    setSandboxActive(false)
+    localStorage.clear()
+  })
+
+  it('POST to a managed resource hits the store, not fetch, when sandbox is active', async () => {
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    setSandboxActive(true)
+    const created = await api.post('/api/suppliers', { name: 'Local Co' })
+    expect(created.id).toMatch(/^sbx_suppliers_/)
+    expect(created.name).toBe('Local Co')
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('GET seeds from a real fetch once, then serves the local snapshot', async () => {
+    const fetchMock = vi.fn(async () => ({ ok: true, status: 200, json: async () => [{ id: 'a' }] }))
+    vi.stubGlobal('fetch', fetchMock)
+    setSandboxActive(true)
+    expect(await api.get('/api/suppliers')).toEqual([{ id: 'a' }])
+    expect(await api.get('/api/suppliers')).toEqual([{ id: 'a' }])
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('does NOT divert named sub-routes even when sandbox is active', async () => {
+    const fetchMock = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ ok: true }) }))
+    vi.stubGlobal('fetch', fetchMock)
+    setSandboxActive(true)
+    await api.post('/api/contracts/summarize', { id: 'con_1' })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('does nothing special when sandbox is inactive', async () => {
+    const fetchMock = vi.fn(async () => ({ ok: true, status: 201, json: async () => ({ id: 'x' }) }))
+    vi.stubGlobal('fetch', fetchMock)
+    await api.post('/api/suppliers', { name: 'A' })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 })

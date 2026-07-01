@@ -1,3 +1,7 @@
+import {
+  isSandboxActive, parsePath, sandboxGet, sandboxCreate, sandboxUpdate, sandboxDelete,
+} from './sandbox'
+
 let getToken = null
 
 // Registered by the auth provider's TokenBridge; null in tests and when
@@ -6,16 +10,13 @@ export function setTokenGetter(fn) {
   getToken = fn
 }
 
-async function request(path, options = {}) {
+async function realRequest(path, options = {}) {
   const headers = { 'Content-Type': 'application/json' }
   if (getToken) {
     const token = await getToken()
     if (token) headers.Authorization = `Bearer ${token}`
   }
-  const res = await fetch(path, {
-    headers,
-    ...options,
-  })
+  const res = await fetch(path, { headers, ...options })
   let body
   try {
     body = await res.json()
@@ -24,6 +25,30 @@ async function request(path, options = {}) {
   }
   if (!res.ok) throw new Error(body?.error ?? `Request failed: ${res.status}`)
   return body
+}
+
+async function request(path, options = {}) {
+  const method = options.method ?? 'GET'
+  if (isSandboxActive()) {
+    const parsed = parsePath(path)
+    if (parsed) {
+      const body = options.body ? JSON.parse(options.body) : undefined
+      if (method === 'GET' && parsed.id === null) {
+        return sandboxGet(parsed.resource, () => realRequest(path, options))
+      }
+      if (method === 'POST' && parsed.id === null) {
+        return sandboxCreate(parsed.resource, body)
+      }
+      if (method === 'PATCH' && parsed.id !== null) {
+        return sandboxUpdate(parsed.resource, parsed.id, body)
+      }
+      if (method === 'DELETE' && parsed.id !== null) {
+        return sandboxDelete(parsed.resource, parsed.id)
+      }
+      // POST/GET with an id segment (e.g. named sub-routes) → fall through
+    }
+  }
+  return realRequest(path, options)
 }
 
 export const api = {
