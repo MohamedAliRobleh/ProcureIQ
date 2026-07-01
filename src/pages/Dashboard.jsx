@@ -94,7 +94,7 @@ export default function Dashboard() {
       <PageHeader title="Dashboard" description="Your supplier portfolio at a glance" />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total Suppliers" value={suppliers.length} icon={Building2} />
+        <div data-tour="kpi"><StatCard label="Total Suppliers" value={suppliers.length} icon={Building2} /></div>
         <StatCard label="Active Contracts" value={activeContracts.length} icon={FileText} />
         <StatCard label="Avg Risk Score" value={avgRisk} icon={ShieldAlert} />
         <StatCard label="Total Spend YTD" value={formatCurrency(totalSpendYTD)} icon={Wallet} />

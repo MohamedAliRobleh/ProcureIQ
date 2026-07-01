@@ -17,11 +17,12 @@ export default function Sidebar() {
         )}
         <span className="truncate font-display text-xl font-semibold text-text-primary">{orgName}</span>
       </div>
-      <nav className="mt-8 flex flex-1 flex-col gap-1">
+      <nav data-tour="nav" className="mt-8 flex flex-1 flex-col gap-1">
         {items.map(({ label, path, icon: Icon }) => (
           <NavLink
             key={path}
             to={path}
+            data-tour={path === '/suppliers' ? 'nav-suppliers' : path === '/ai-assistant' ? 'nav-assistant' : undefined}
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary',

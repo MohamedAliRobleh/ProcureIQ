@@ -6,6 +6,7 @@ import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import PageHeader from './PageHeader'
 import ErrorBoundary from './ErrorBoundary'
+import { TourProvider } from '../tour/TourProvider'
 
 describe('Sidebar', () => {
   it('renders a nav link for every module', () => {
@@ -70,7 +71,11 @@ describe('Sidebar', () => {
 
 describe('TopBar', () => {
   it('renders the organization switcher, user info, and user menu', () => {
-    render(<TopBar />)
+    render(
+      <TourProvider>
+        <TopBar />
+      </TourProvider>
+    )
     expect(screen.getByTestId('org-switcher')).toBeInTheDocument()
     expect(screen.getByText('Amara Chen')).toBeInTheDocument()
     expect(screen.getByTestId('user-button')).toBeInTheDocument()
