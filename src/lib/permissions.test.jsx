@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import { canManage, canSeed, usePermissions } from './permissions'
-import { resetAuthState, authState } from '../test/authState'
+import { resetAuthState, authState, DEMO_ORG } from '../test/authState'
 
 describe('frontend permissions', () => {
   beforeEach(() => resetAuthState())
@@ -35,5 +35,13 @@ describe('frontend permissions', () => {
     authState.membership = { role: 'org:member' }
     const { result } = renderHook(() => usePermissions())
     expect(result.current.canSeed()).toBe(true)
+  })
+
+  it('unlocks canManage for a member in the demo org (sandbox)', () => {
+    authState.organization = DEMO_ORG
+    authState.membership = { role: 'org:member' }
+    const { result } = renderHook(() => usePermissions())
+    expect(result.current.canManage('suppliers')).toBe(true)
+    expect(result.current.canManage('contracts')).toBe(true)
   })
 })
