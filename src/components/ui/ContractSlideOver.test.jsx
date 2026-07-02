@@ -1,7 +1,12 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import ContractSlideOver from './ContractSlideOver'
+import { resetAuthState, authState, DEMO_ORG } from '../../test/authState'
+
+beforeEach(() => {
+  resetAuthState()
+})
 
 const mockContract = {
   id: 'con_1',
@@ -191,5 +196,47 @@ describe('ContractSlideOver', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Email reminder' }))
     expect(onNotify).toHaveBeenCalled()
     expect(await screen.findByText(/Reminder sent/)).toBeInTheDocument()
+  })
+})
+
+describe('ContractSlideOver — demo-org integration hiding', () => {
+  it('hides AI Summary, Document, and Email reminder sections in the demo org', () => {
+    authState.organization = DEMO_ORG
+    renderSlideOver({
+      isOpen: true,
+      onClose: () => {},
+      contract: mockContract,
+      supplier: mockSupplier,
+      onEdit: () => {},
+      onSummarize: vi.fn(),
+      onUpload: vi.fn(),
+      onNotify: vi.fn(),
+    })
+    expect(screen.queryByText('AI Summary')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Generate summary/i })).not.toBeInTheDocument()
+    expect(screen.queryByText('Document')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Upload document/i })).not.toBeInTheDocument()
+    expect(screen.queryByText('Notifications')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Email reminder/i })).not.toBeInTheDocument()
+  })
+
+  it('shows AI Summary, Document, and Email reminder sections in a normal org (non-demo)', () => {
+    // authState.organization is already DEFAULT_ORG (non-demo) from beforeEach / resetAuthState
+    renderSlideOver({
+      isOpen: true,
+      onClose: () => {},
+      contract: mockContract,
+      supplier: mockSupplier,
+      onEdit: () => {},
+      onSummarize: vi.fn(),
+      onUpload: vi.fn(),
+      onNotify: vi.fn(),
+    })
+    expect(screen.getByText('AI Summary')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Generate summary/i })).toBeInTheDocument()
+    expect(screen.getByText('Document')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Upload document/i })).toBeInTheDocument()
+    expect(screen.getByText('Notifications')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Email reminder/i })).toBeInTheDocument()
   })
 })

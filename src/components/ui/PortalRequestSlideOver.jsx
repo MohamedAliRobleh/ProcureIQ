@@ -7,8 +7,10 @@ import Button from './Button'
 import ConfirmDialog from './ConfirmDialog'
 import { PORTAL_STATUS_BADGE, PORTAL_TYPE_LABEL } from '../../utils/portalSelectors'
 import { formatDate } from '../../utils/formatters'
+import { useIsDemoOrg } from '../../lib/auth'
 
 export default function PortalRequestSlideOver({ isOpen, onClose, request, supplier, onUpdate, onNotify, onDelete }) {
+  const isDemo = useIsDemoOrg()
   useEffect(() => {
     if (!isOpen) return
     function handleKey(e) {
@@ -132,7 +134,7 @@ export default function PortalRequestSlideOver({ isOpen, onClose, request, suppl
                 </div>
               )}
 
-              {onNotify && (
+              {!isDemo && onNotify && (
                 <div>
                   <p className="mb-1 text-xs font-medium text-text-secondary">Notify supplier</p>
                   <Button variant="secondary" onClick={handleNotify} disabled={isSending}>

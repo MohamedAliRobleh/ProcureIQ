@@ -7,8 +7,10 @@ import Button from './Button'
 import { formatCurrency, formatDate, daysUntil } from '../../utils/formatters'
 import { CONTRACT_STATUS_BADGE } from '../../utils/contractSelectors'
 import { cn } from '../../utils/cn'
+import { useIsDemoOrg } from '../../lib/auth'
 
 export default function ContractSlideOver({ isOpen, onClose, contract, supplier, onEdit, onSummarize, onUpload, onNotify }) {
+  const isDemo = useIsDemoOrg()
   useEffect(() => {
     if (!isOpen) return
     function handleKey(e) {
@@ -168,7 +170,7 @@ export default function ContractSlideOver({ isOpen, onClose, contract, supplier,
                 </div>
               )}
 
-              {onSummarize && (
+              {!isDemo && onSummarize && (
                 <div>
                   <p className="mb-1 text-xs font-medium text-text-secondary">AI Summary</p>
                   {contract.aiSummary ? (
@@ -182,7 +184,7 @@ export default function ContractSlideOver({ isOpen, onClose, contract, supplier,
                 </div>
               )}
 
-              {onUpload && (
+              {!isDemo && onUpload && (
                 <div>
                   <p className="mb-1 text-xs font-medium text-text-secondary">Document</p>
                   <input
@@ -216,7 +218,7 @@ export default function ContractSlideOver({ isOpen, onClose, contract, supplier,
                 </div>
               )}
 
-              {onNotify && (
+              {!isDemo && onNotify && (
                 <div>
                   <p className="mb-1 text-xs font-medium text-text-secondary">Notifications</p>
                   <Button variant="secondary" onClick={handleNotify} disabled={isSending}>

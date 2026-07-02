@@ -22,6 +22,10 @@ Two complementary demo-experience features, active **only in the demo org**:
 - **Non-demo behaviour byte-identical.** Outside the demo org, `apiClient`, `usePermissions`, and the app render exactly as today.
 - Full test suite stays green (~467); new units are added.
 
+## Operational note
+
+In the demo org, **all roles (including admin) write to the client sandbox, not the DB** — there is no way to write real data to the demo org through the UI. The demo org's real seed data is curated out-of-band (the seed script / direct Prisma). Integration actions that can't work on local sandbox records (contract AI Summary, Document upload, Email reminder; portal Notify) are hidden in the demo org.
+
 ## Architecture
 
 ### 1. Sandbox store — `src/lib/sandbox.js` (new)

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { TourProvider, useTour } from './TourProvider'
 import Tour from './Tour'
 import { resetAuthState, authState, DEMO_ORG } from '../../test/authState'
@@ -38,7 +38,7 @@ describe('Tour', () => {
     expect(screen.getByText(/Every module, one click away/i)).toBeInTheDocument()
   })
 
-  it('closes on Skip', () => {
+  it('closes on Skip', async () => {
     render(
       <TourProvider>
         <StartButton />
@@ -47,6 +47,7 @@ describe('Tour', () => {
     )
     fireEvent.click(screen.getByText('go'))
     fireEvent.click(screen.getByRole('button', { name: /Skip/i }))
-    expect(screen.queryByText(/Welcome to the ProcureIQ demo/i)).not.toBeInTheDocument()
+    // AnimatePresence defers unmount for the exit fade, so wait for removal.
+    await waitFor(() => expect(screen.queryByText(/Welcome to the ProcureIQ demo/i)).not.toBeInTheDocument())
   })
 })

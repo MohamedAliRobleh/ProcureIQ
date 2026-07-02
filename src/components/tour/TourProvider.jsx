@@ -44,7 +44,9 @@ export function TourProvider({ children }) {
   }
 
   return (
-    <TourContext.Provider value={{ ...state, start, next, back, close }}>{children}</TourContext.Provider>
+    <TourContext.Provider value={{ isOpen: state.isOpen, stepIndex: state.stepIndex, start, next, back, close }}>
+      {children}
+    </TourContext.Provider>
   )
 }
 
