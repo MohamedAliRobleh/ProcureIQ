@@ -13,7 +13,7 @@ import {
 import { dark } from '@clerk/themes'
 import { setTokenGetter } from './apiClient'
 import { setSandboxActive } from './sandbox'
-import { DEMO_ORG_SLUG } from './demoConfig'
+import { isDemoSlug } from './demoConfig'
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
@@ -81,7 +81,7 @@ const CLERK_APPEARANCE = {
 
 export function useIsDemoOrg() {
   const { organization } = useOrganization()
-  return organization?.slug === DEMO_ORG_SLUG
+  return isDemoSlug(organization?.slug)
 }
 
 function TokenBridge({ children }) {
@@ -96,7 +96,7 @@ function TokenBridge({ children }) {
 function DemoBridge({ children }) {
   const { organization } = useOrganization()
   useEffect(() => {
-    setSandboxActive(organization?.slug === DEMO_ORG_SLUG)
+    setSandboxActive(isDemoSlug(organization?.slug))
     return () => setSandboxActive(false)
   }, [organization?.slug])
   return children

@@ -16,4 +16,16 @@ describe('useIsDemoOrg', () => {
     const { result } = renderHook(() => useIsDemoOrg())
     expect(result.current).toBe(true)
   })
+
+  it('is true when Clerk appends a uniqueness suffix to the demo slug', () => {
+    authState.organization = { ...DEMO_ORG, slug: 'procureiq-demo-1782787479860281484' }
+    const { result } = renderHook(() => useIsDemoOrg())
+    expect(result.current).toBe(true)
+  })
+
+  it('is false for an unrelated org whose slug merely contains the demo word', () => {
+    authState.organization = { ...DEMO_ORG, slug: 'acme-procureiq-demo' }
+    const { result } = renderHook(() => useIsDemoOrg())
+    expect(result.current).toBe(false)
+  })
 })
